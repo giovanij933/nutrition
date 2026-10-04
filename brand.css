@@ -1,0 +1,54 @@
+/* ISIONXXX // brand layer — load AFTER each app's own <style> block */
+:root{
+  --bg:#0a0a0a;--card:#0e0e0e;--cell:#131313;--line:#1f1f1f;
+  --tx:#e6e1d6;--mu:#8a8478;
+  --g:#ffb000;--r:#ff4d4d;--a:#ff7a33;--b:#7f9cb0;--blue:#ffb000
+}
+html,body{background:var(--bg)}
+body,button,select,input,textarea,pre,.ed,.rt,table{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important}
+body{font-size:12.5px;letter-spacing:.01em;color:var(--tx);font-variant-numeric:tabular-nums}
+svg text{font-family:'IBM Plex Mono',ui-monospace,monospace!important}
+.gauge text{font-weight:500!important;letter-spacing:-.02em}
+::selection{background:#ffb000;color:#0a0a0a}
+:focus-visible{outline:1px solid #ffb000!important;outline-offset:1px}
+*{scrollbar-width:thin;scrollbar-color:#2a2a2a transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#2a2a2a}::-webkit-scrollbar-thumb:hover{background:#ffb000}
+
+/* shape: square, hairline */
+.card,.box,.pbox,.exc,.task,.adet,.watch,.prev,pre,.ed,.fb,.opt,.aitem,.li,.wday,.pday,.cell,.sel,.btn,.rs,.chip,.pill,.hb,.hb i,.outw,.steps,.tip,.moment,.ns,.rest,.wres div,.vid,.toast,.sets input,.ok,.cin,.fg input,.fg select,.fg textarea{border-radius:2px!important}
+.card{background:var(--card);border-color:var(--line);transition:border-color .15s}
+.card:hover{border-color:#2a2a2a}
+.ft{border-top-color:var(--line);color:var(--mu);font-size:11px}
+
+/* type */
+h3{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tx)}
+h3::before{content:'// ';color:var(--g);font-weight:500}
+.lvb h2::before{content:'> ';color:var(--g)}
+.lbl,.ev h4,.dh,th,.ks div,.plbl,.codeh,.sec,.msg,.ptype,.wdn,.pdn{text-transform:uppercase;letter-spacing:.1em;font-size:10px!important;color:var(--mu)}
+.big{font-weight:500;letter-spacing:-.01em}
+.ks b,.lr b,.er b{font-weight:500}
+.ctx{color:var(--mu);letter-spacing:.06em;text-transform:uppercase;font-size:10px}
+.ctx::before{content:'$ ';color:var(--g)}
+.ctx::after{content:'_';color:var(--g);margin-left:2px;animation:isx-blink 1s steps(1) infinite}
+@keyframes isx-blink{50%{opacity:0}}
+
+/* controls */
+.btn{background:transparent;border-color:#2e2e2e;font-weight:500;text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+.btn:hover{border-color:var(--g);color:var(--g)}
+.btn.go,.btn.pri{background:var(--g);border-color:var(--g);color:#0a0a0a}
+.btn.go:hover,.btn.pri:hover{background:#ffc233;border-color:#ffc233;color:#0a0a0a}
+.btn.dng{color:var(--r)}.btn.dng:hover{border-color:var(--r);color:var(--r)}
+.btn.xs{font-size:10px}
+.sel,.rs{background-color:var(--card);border-color:#2a2a2a;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.chip{background:transparent;border-color:#2a2a2a;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.chip.on{background:#1f1600;border-color:var(--g);color:var(--g)}
+.fg input,.fg select,.fg textarea,.ed,.cin,.vpin input{background:#080808!important;border-color:#262626!important}
+.pill{text-transform:uppercase;letter-spacing:.06em;font-size:9.5px}
+
+/* tables, modals, toasts */
+th{border-bottom-color:#262626}
+td{border-bottom-color:#171717}
+.modal{background:#000000d9}
+.toast{background:#0e0e0e;border:1px solid #262626;border-left:2px solid var(--g);text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.cell.sel,.wday.today,.pday.today{border-color:var(--g)!important}
+.cell.wk{border-color:#262626}
