@@ -10,12 +10,12 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<title>ISIONXXX // NUTRITION</title>
+<title>ISIONXXX // FUEL</title>
 <style>
 :root{--bg:#121212;--card:#171717;--cell:#1c1c1c;--line:#2b2b2b;--tx:#ececec;--mu:#a3a3a3;--g:#1fae8f;--r:#f0304a;--a:#e8a33a;--b:#4a78ff;--blue:#3050ff}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg)}
-body{color:var(--tx);font:13px/1.35 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:60px 12px 40px;-webkit-font-smoothing:antialiased}
+body{color:var(--tx);font:13px/1.35 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:calc(6px + env(safe-area-inset-top)) 12px calc(40px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
 button,select,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0}
 .red{color:var(--r)}.grn{color:var(--g)}.amb{color:var(--a)}.mu{color:var(--mu)}
@@ -54,7 +54,6 @@ h3{font-size:13px;font-weight:700;margin-bottom:20px}
 .pdn{font-size:11px;font-weight:600}
 .pp{border:1px solid var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent);border-radius:999px;padding:4px 8px;font-size:10px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pst{font-size:10px;min-height:12px;display:flex;gap:3px;align-items:center}.pst i{width:7px;height:7px;border-radius:50%;display:inline-block}
-.bt{font-size:12px;color:#d6d6d6;margin-bottom:6px}
 /* calendar */
 .calhd{display:flex;justify-content:space-between;align-items:flex-end}
 .wl{font-size:12px;color:#d0d0d0}
@@ -108,7 +107,7 @@ td{padding:11px 12px;border-bottom:1px solid #232323;white-space:nowrap}
 .pg input{width:36px;text-align:center;background:#101010;border:1px solid var(--line);border-radius:3px;padding:2px}
 .rs{background:#101010;border:1px solid var(--line);border-radius:4px;padding:3px 6px}
 /* modal */
-.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:9;padding:16px}
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:9;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom))}
 .modal.hidden{display:none}
 .box{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px;width:100%;max-width:540px;max-height:92vh;overflow:auto}
 .box.wide{max-width:760px}
@@ -120,7 +119,7 @@ td{padding:11px 12px;border-bottom:1px solid #232323;white-space:nowrap}
 .full{grid-column:1/-1}
 .mact{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:12px}.kv span{color:var(--mu)}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#262626;border:1px solid #3a3a3a;padding:9px 14px;border-radius:6px;font-size:12px;z-index:30}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#262626;border:1px solid #3a3a3a;padding:9px 14px;border-radius:6px;font-size:12px;z-index:30}
 /* cook mode */
 .chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .chip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;background:#1a1a1a}
@@ -139,12 +138,11 @@ td{padding:11px 12px;border-bottom:1px solid #232323;white-space:nowrap}
 .tip{font-size:11px;color:#aaa;background:#141c1a;border:1px solid #233;border-radius:6px;padding:10px 12px;margin-top:14px;line-height:1.5}
 pre.gl{white-space:pre-wrap;font:12px/1.6 Inter,system-ui;background:#101010;border:1px solid var(--line);border-radius:6px;padding:12px;margin-top:12px}
 @media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.gm,.g3{grid-template-columns:1fr}}
-@media(max-width:620px){.g4{grid-template-columns:1fr}.sel{min-width:0;flex:1}.cell{height:54px}.cal{gap:4px}.ctx{width:100%}.fg,.ing{grid-template-columns:1fr}.pdays{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.g4{grid-template-columns:1fr}.sel{min-width:0;flex:1}.cell{height:54px}.cal{gap:4px}.ctx{width:100%}.fg,.ing{grid-template-columns:1fr}.pdays{grid-template-columns:repeat(4,1fr)}
+  .fg input,.fg select,.fg textarea{font-size:16px}}
 </style>
-
 <script src="brand.js"></script>
 <link rel="stylesheet" href="brand.css">
-
 </head>
 <body>
 <div class="bar">
@@ -162,6 +160,8 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 Inter,system-ui;background:#101010;bor
 
 <script>
 const $=s=>document.querySelector(s);
+const ACC='var(--acc,#ffb000)';                       // brand amber (measurement)
+const AMBER=s=>s.split('#1fae8f').join('#ffb000');    // force a chart to brand amber
 /* ---------- nutrition data (approx. USDA FoodData Central values) ---------- */
 const FD={
   rice_dry:{kcal:675,p:13.2,c:148,f:1.2,fib:2.4,na:9,k:213,ca:52,fe:4.4,mg:46,fol:350,zn:2},          // per cup uncooked, enriched white
@@ -188,7 +188,7 @@ const FD={
 // recipe as written = 3 servings
 const BASE=[['rice',1.5,'cup'],['beans',2.25,'cup'],['avocado',3,''],['spinach',4.5,'cup'],['tomato',3,''],['seed',3,'tbsp'],['oil',3,'tsp'],['garlic',3,'clove'],['lime',1.5,''],['salt',.75,'tsp'],['pepper',.375,'tsp']];
 const OMIT=[['rice','Rice'],['beans','Beans'],['avocado','Avocado'],['spinach','Spinach'],['tomato','Tomato'],['seed','Seeds'],['oil','Olive oil']];
-const PROT={egg:{n:'Eggs',col:'#e8a33a',fish:0},salmon:{n:'Salmon',col:'#ff8a65',fish:1},sardines:{n:'Sardines',col:'#4a78ff',fish:1},chicken:{n:'Chicken',col:'#b06cf0',fish:0},steak:{n:'Steak',col:'#f0304a',fish:0}};
+const PROT={egg:{n:'Eggs',col:'#ffb000',fish:0},salmon:{n:'Salmon',col:'#e0607e',fish:1},sardines:{n:'Sardines',col:'#4fb3a9',fish:1},chicken:{n:'Chicken',col:'#c8b38a',fish:0},steak:{n:'Steak',col:'#9c8aa5',fish:0}};
 const PKEYS=Object.keys(PROT);
 const NUT=[ // key,label,unit,DV,limit?
   ['fib','Fiber','g',28],['na','Sodium','mg',2300,1],['k','Potassium','mg',4700],['ca','Calcium','mg',1300],['fe','Iron','mg',18],['mg','Magnesium','mg',420],['zn','Zinc','mg',11],
@@ -295,7 +295,7 @@ function gauge(segs,text){
   const cx=100,cy=92,r=72,id='g'+uid();
   const P=f=>{const a=Math.PI*(1-f);return(cx+r*Math.cos(a)).toFixed(2)+' '+(cy-r*Math.sin(a)).toFixed(2)};
   const arc=(a,b)=>`M${P(a)}A${r} ${r} 0 0 1 ${P(b)}`;
-  const col={g:`url(#${id}g)`,r:`url(#${id}r)`,a:'#e8a33a',b:'#4a78ff',n:'#4a4a4a'};
+  const col={g:`url(#${id}g)`,r:`url(#${id}r)`,a:'#e8a33a',b:'#4a78ff',n:'#4a4a4a',v:'#33e07a'};
   let s=0,p='';
   for(const[f,c]of segs){if(!(f>0))continue;const e=Math.min(1,s+f);p+=`<path d="${arc(s,e)}" stroke="${col[c]}" stroke-width="17" fill="none"/>`;s=e}
   return`<svg class="gauge" viewBox="0 0 200 104"><defs>
@@ -304,7 +304,7 @@ function gauge(segs,text){
     <path d="${arc(0,1)}" stroke="#252525" stroke-width="17" fill="none"/>${p}
     <text x="100" y="${cy-2}" text-anchor="middle" font-size="21" font-weight="700" fill="#ececec" font-family="Inter,system-ui">${text}</text></svg>`;
 }
-// fill = target share; over target shows amber overflow
+// fill = progress toward target (amber); over target shows orange overflow
 const tgtGauge=(v,t)=>{const f=t?v/t:0;return gauge(f<=1?[[f,'g']]:[[1/f,'g'],[1-1/f,'a']],Math.round(f*100)+'%')};
 function smooth(pts){
   let d=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
@@ -378,16 +378,16 @@ function topCards(st,F){
   return`<div class="grid g4">
   <div class="card"><div class="bd"><h3>Calories</h3><div class="lbl">Avg / logged day</div><div class="big">${fi(kc)}</div>
     ${tgtGauge(kc,settings.kcal)}
-    ${lr('var(--g)','Bowls',fi(st.avS('base','kcal')+st.avS('prot','kcal')))}${lr('var(--b)','Milk',fi(st.avS('milk','kcal')))}${lr('#555','Other foods',fi(st.avS('quick','kcal')))}</div>${F}</div>
-  <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Avg g / logged day</div><div class="big">${fi(pr)} g</div>
+    ${lr(ACC,'Bowls',fi(st.avS('base','kcal')+st.avS('prot','kcal')))}${lr('var(--b)','Milk',fi(st.avS('milk','kcal')))}${lr('#555','Other foods',fi(st.avS('quick','kcal')))}</div>${F}</div>
+  <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Avg g / logged day</div><div class="big ${pr>=settings.protein?'grn':''}">${fi(pr)} g</div>
     ${tgtGauge(pr,settings.protein)}
-    ${lr('var(--g)','Bowl base',fi(st.avS('base','p'))+' g')}${lr('var(--a)','Rotation protein',fi(st.avS('prot','p'))+' g')}${lr('var(--b)','Milk & other',fi(st.avS('milk','p')+st.avS('quick','p'))+' g')}</div>${F}</div>
+    ${lr(ACC,'Bowl base',fi(st.avS('base','p'))+' g')}${lr('#c8b38a','Rotation protein',fi(st.avS('prot','p'))+' g')}${lr('var(--b)','Milk & other',fi(st.avS('milk','p')+st.avS('quick','p'))+' g')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Omega-3</h3><div class="lbl">EPA + DHA, last 7 days</div><div class="big ${e>=EPA_WK?'grn':e>=EPA_WK/2?'amb':'red'}">${fnum(r1(e))} g</div>
     ${gauge([[Math.min(1,e/EPA_WK),'g']],Math.round(e/EPA_WK*100)+'%')}
     ${lr(st.fish7>=settings.fishTarget?'var(--g)':'var(--a)','Fish meals (7d)',`${st.fish7} / ${settings.fishTarget}`)}${lr('#4a4a4a','Weekly target',EPA_WK+' g')}${lr('var(--b)','Plant ALA / day',fnum(r1(st.av('ala')))+' g')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Macro split</h3><div class="lbl">% of calories</div><div class="big">${Math.round(st.mac.p*100)} / ${Math.round(st.mac.c*100)} / ${Math.round(st.mac.f*100)}</div>
-    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'linear-gradient(90deg,#e8a33a,#6b4a14)')}
-    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'linear-gradient(90deg,#22b597,#15604f)')}
+    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'linear-gradient(90deg,#ffb000,#5c3f00)')}
+    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'linear-gradient(90deg,#c8b38a,#4a4030)')}
     ${hbar('Fat',`${fi(st.av('f'))} g · ${pct(st.mac.f,1)}`,st.mac.f/.5,'linear-gradient(90deg,#4a78ff,#1d2f6b)')}</div></div>${F}</div>
   </div>`;
 }
@@ -406,10 +406,10 @@ function calendarHTML(){
       h+=`<div class="cell${v?' on':''}${k>tk?' fut':''}${S.sel===k?' sel':''}" data-day="${k}"${v?` style="background:rgba(31,174,143,${(.08+.3*Math.min(1,v.kcal/settings.kcal)).toFixed(2)})"`:''}>
         <span>${d.getDate()}</span>${v?`<b>${fi(v.kcal)}</b><small>${fi(v.p)}g P</small><div class="cdots">${v.dots.slice(0,5).map(c=>`<i style="background:${c}"></i>`).join('')}</div>`:''}</div>`;
     }
-    h+=`<div class="cell wk">${wd?`<b class="grn">${fi(wk/wd)}</b><small>avg · ${wf} fish</small>`:'—'}</div>`;
+    h+=`<div class="cell wk">${wd?`<b style="color:var(--acc,#ffb000)">${fi(wk/wd)}</b><small>avg · <span class="${wf?'grn':''}">${wf} fish</span></small>`:'—'}</div>`;
   }
   return`<div class="card"><div class="bd"><h3 style="margin-bottom:10px">Meal Calendar</h3><div class="lbl">Avg calories / logged day</div>
-    <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl">Logged days: <b class="grn" style="font-weight:500">${md}</b> &nbsp;&nbsp; Fish meals: <b style="font-weight:500;color:#4a78ff">${mf}</b></div></div>
+    <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl">Logged days: <b style="font-weight:500;color:var(--acc,#ffb000)">${md}</b> &nbsp;&nbsp; Fish meals: <b class="${mf?'grn':''}" style="font-weight:500">${mf}</b></div></div>
     <div class="cal">${h}</div></div>
     <div class="ft calft"><div class="nav"><button data-act="mprev">‹</button><span>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span><button data-act="mnext">›</button><button class="tb" data-act="mtoday">Today</button></div>
     <span>${md} days &nbsp;&nbsp; ${mb} meals</span></div></div>`;
@@ -432,14 +432,14 @@ function chartsHTML(st,F){
   const rt=`${fdate(st.from)} - ${fdate(st.to)}`,kc=st.ds.map(d=>d.t.kcal||0),pr=st.ds.map(d=>d.t.p||0),fb=st.ds.map(d=>d.t.fib||0);
   return`<div class="grid gm">
     <div class="card"><div class="bd"><div class="eqh"><div><div class="lbl">Calories trend</div><div class="big" style="font-size:20px">${fi(st.av('kcal'))} <span class="mu" style="font-size:12px;font-weight:500">/ ${fi(settings.kcal)} target</span></div><div class="lbl" style="margin-top:4px">${rt}</div></div>
-      <div class="ks"><div>BOWLS<b>${fnum(st.bowls)}</b></div><div>AVG PROTEIN<b>${fi(st.av('p'))} g</b></div><div>FIBER<b>${fi(st.av('fib'))} g</b></div><div>FISH MEALS<b style="color:#4a78ff">${st.fish}</b></div><div>WITH MILK<b>${st.milk}</b></div></div></div>
+      <div class="ks"><div>BOWLS<b>${fnum(st.bowls)}</b></div><div>AVG PROTEIN<b>${fi(st.av('p'))} g</b></div><div>FIBER<b class="${st.av('fib')>=28?'grn':''}">${fi(st.av('fib'))} g</b></div><div>FISH MEALS<b class="${st.fish?'grn':''}">${st.fish}</b></div><div>WITH MILK<b>${st.milk}</b></div></div></div>
       ${kc.length>1?area(kc,'#1fae8f',settings.kcal):bars(kc,{tgt:settings.kcal})}</div>${F}</div>
     <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Grams / day</div><div class="big">${fi(st.av('p'))} g</div>${bars(pr,{tgt:settings.protein})}</div>${F}</div>
   </div>
   <div class="grid g3">
     <div class="card"><div class="bd"><h3>Rotation mix</h3><div class="lbl">Bowls by protein</div><div class="big">${st.bowls?PROT[PKEYS.slice().sort((x,y)=>st.rot[y]-st.rot[x])[0]].n:'—'}</div>
       ${st.bowls?radar(PKEYS.map(p=>PROT[p].n),PKEYS.map(p=>st.rot[p])):'<div class="empty">No bowls logged</div>'}</div>${F}</div>
-    <div class="card"><div class="bd"><h3>Omega-3 by week</h3><div class="lbl">EPA + DHA grams · dashed = ${EPA_WK} g target</div><div class="big">${fnum(r1(st.wk.at(-1).s))} g <span class="mu" style="font-size:12px;font-weight:500">this week</span></div>
+    <div class="card"><div class="bd"><h3>Omega-3 by week</h3><div class="lbl">EPA + DHA grams · dashed = ${EPA_WK} g target</div><div class="big ${st.wk.at(-1).s>=EPA_WK?'grn':''}">${fnum(r1(st.wk.at(-1).s))} g <span class="mu" style="font-size:12px;font-weight:500">this week</span></div>
       ${bars(st.wk.map(w=>r1(w.s)),{labels:st.wk.map(w=>fsd(w.ws)),tgt:EPA_WK})}</div>${F}</div>
     <div class="card"><div class="bd"><h3>Fiber</h3><div class="lbl">Grams / day · dashed = 28 g</div><div class="big">${fi(st.av('fib'))} g</div>${bars(fb,{tgt:28})}</div>${F}</div>
   </div>`;
