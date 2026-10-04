@@ -1,12 +1,12 @@
 {
-  "name": "Bowl Journal",
-  "short_name": "Bowl",
+  "name": "ISIONXXX // NUTRITION",
+  "short_name": "NUTRITION",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#121212",
-  "theme_color": "#121212",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "icons": [
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
