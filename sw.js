@@ -1,4 +1,4 @@
-const CACHE = 'nj-v2';
+const CACHE = 'nj-v4';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './brand.css', './brand.js'];
 
 self.addEventListener('install', e => {
@@ -13,8 +13,9 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  const nav = e.request.mode === 'navigate';
   e.respondWith(
-    caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
+    caches.match(e.request, { ignoreSearch: nav }).then(hit => hit || fetch(e.request).then(res => {
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy));
       return res;
