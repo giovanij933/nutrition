@@ -1,6 +1,6 @@
 // Bump the version string whenever you change index.html so clients pick up the new shell.
-const CACHE = 'isx-fuel-v6';
-const SHELL = ['./', './index.html', './manifest.json', './icon.svg', './sync.js'];
+const CACHE = 'isx-fuel-v7';
+const SHELL = ['./', './index.html', './manifest.json', './icon.svg', './sync.js', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
