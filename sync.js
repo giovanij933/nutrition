@@ -62,6 +62,29 @@
     return l === undefined ? r : l;   // a real conflict on one value: this device wins
   }
 
+  // the same entry made on two devices (a CSV imported twice, a sample loaded on both) gets two ids:
+  // records equal in everything but id and note collapse into one. The lowest id wins everywhere, keeps
+  // any note the other copy had, and the other id is deleted on every device.
+  const SOFT = new Set(['id', 'note', 'notes', 'comment']);
+  const fp = r => JSON.stringify(r, (k, v) => SOFT.has(k) ? undefined : v);
+  function dedupe(x, del) {
+    if (Array.isArray(x)) {
+      const a = x.map(v => dedupe(v, del));
+      if (!isRecArr(a)) return a;
+      const win = new Map(), drop = new Set();
+      a.forEach(r => {
+        const k = fp(r), w = win.get(k);
+        if (!w) return win.set(k, r);
+        const [keep, lose] = w.id <= r.id ? [w, r] : [r, w];
+        SOFT.forEach(f => { if (f !== 'id' && !keep[f] && lose[f]) keep[f] = lose[f] });
+        drop.add(lose.id); del.add(lose.id); win.set(k, keep);
+      });
+      return drop.size ? a.filter(r => !drop.has(r.id)) : a;
+    }
+    if (isObj(x)) { const o = {}; for (const k in x) o[k] = dedupe(x[k], del); return o }
+    return x;
+  }
+
   /* ---------- crypto ---------- */
   const enc = new TextEncoder(), dec = new TextDecoder();
   const b64 = u => btoa(String.fromCharCode(...new Uint8Array(u)));
@@ -121,7 +144,7 @@
         const gone = [...ids(base)].filter(i => !ids(local).has(i));
         const del = new Set([...baseDel, ...gone, ...(remote?.del || [])]);
         const rData = remote ? remote.data : null;
-        const merged = local == null ? rData : rData == null ? local : merge(base, local, rData, del);
+        const merged = dedupe(local == null ? rData : rData == null ? local : merge(base, local, rData, del), del);
         if (merged == null) continue;
         if (!eq(merged, local)) { if (!(k in pre)) pre[k] = local; put(k, merged); changedHere = true }
         const doc = { data: merged, del: [...del] };
@@ -261,5 +284,5 @@
     setInterval(paint, 30e3);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
-  window.ISXSync = { sync, merge, get state() { return state } };   // for debugging and tests
+  window.ISXSync = { sync, merge, dedupe, get state() { return state } };   // for debugging and tests
 })();
