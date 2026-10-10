@@ -1,6 +1,6 @@
 // Bump the version string whenever you change index.html so clients pick up the new shell.
-const CACHE = 'isx-fuel-v5';
-const SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
+const CACHE = 'isx-fuel-v6';
+const SHELL = ['./', './index.html', './manifest.json', './icon.svg', './sync.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
@@ -19,6 +19,7 @@ self.addEventListener('activate', e => {
 // Also caches the IBM Plex Mono font files on first load so the app works offline.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (/api\.github\.com|githubusercontent\.com/.test(e.request.url)) return;   // sync talks to GitHub live, never from cache
   e.respondWith(
     caches.open(CACHE).then(async cache => {
       const hit = await cache.match(e.request);
