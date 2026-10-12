@@ -524,6 +524,16 @@ function render(){
   const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load demo data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">${I.bowl}Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load demo</button></div></div>`;
   $('#app').innerHTML=ban+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`+topCards(st,F)+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
+  publish();
+}
+// daily totals for ISIONXXX's TODAY tab, which can't work out bowl nutrition itself.
+// sig = size of the saved data, so TODAY can tell when this summary is out of date.
+function publish(){
+  try{
+    const D={},from=addDays(today(),-13);
+    meals.forEach(m=>{const d=dayOf(m);if(d<from)return;const t=NM(m).t,o=D[d]??={kcal:0,p:0,n:0};o.kcal+=t.kcal||0;o.p+=t.p||0;o.n++});
+    localStorage.setItem('nj.daily.v1',JSON.stringify({sig:(localStorage.getItem(K.m)||'').length+':'+(localStorage.getItem(K.s)||'').length,kcal:settings.kcal,protein:settings.protein,days:D}));
+  }catch(e){}
 }
 
 /* ---------- modals ---------- */
