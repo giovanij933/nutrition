@@ -104,7 +104,7 @@ button{cursor:pointer;background:none;border:0}
 .cdots{display:flex;gap:2px}.cdots i{width:5px;height:5px}
 .calft{padding:10px 16px}
 .nav{display:flex;gap:8px;align-items:center}
-.nav button{border:1px solid var(--line2);min-width:24px;height:24px;padding:0 6px;font-size:12px}
+.nav button{border:1px solid var(--line2);min-width:33px;height:33px;padding:0 10px;font-size:12px}
 .nav button:hover{border-color:var(--acc);color:var(--acc)}
 .nav .tb{font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 
@@ -142,7 +142,7 @@ td .acts button:hover{border-color:var(--acc);color:var(--acc)}
 .th h3{margin:0;flex:1}
 .tf{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;color:var(--mu);gap:10px;flex-wrap:wrap}
 .pg{display:flex;align-items:center;gap:6px}
-.pg button{border:1px solid var(--line2);min-width:24px;height:24px}
+.pg button{border:1px solid var(--line2);min-width:33px;height:33px}
 .pg button:hover{border-color:var(--acc);color:var(--acc)}
 .pg input{width:40px;text-align:center;background:var(--bg);border:1px solid var(--line2);padding:3px}
 .rs{background:var(--bg);border:1px solid var(--line2);padding:3px 6px}
@@ -293,7 +293,7 @@ const I={
   plus:`<svg ${SV}><path d="M12 5v14M5 12h14"/></svg>`,
   cart:`<svg ${SV}><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l2.5 11h11L21 7H6.5"/></svg>`,
   bowl:`<svg ${SV}><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-1.5 1-2 1-3M12 7c0-1.5 1-2 1-3M16 7c0-1.5 1-2 1-3"/></svg>`};
-$('#barBtns').innerHTML=`<button class="btn go" data-act="cook">&#9654; COOK</button><button class="btn" data-act="addbowl">+ BOWL</button><button class="btn" data-act="quick">+ FOOD</button><button class="btn" data-act="grocery">GROCERY</button><button class="btn" data-act="data">DATA</button>`;
+$('#barBtns').innerHTML=`<button class="btn go" data-act="cook">&#9654; COOK</button><button class="btn" data-act="addbowl">+ BOWL</button><button class="btn" data-act="quick">+ FOOD</button><button class="btn" data-act="grocery">GROCERY</button><button class="btn" data-act="data">SETTINGS</button>`;
 
 /* ---------- nutrition math ---------- */
 const fk=k=>k==='rice'?(settings.riceAs==='cooked'?'rice_ckd':'rice_dry'):k==='seed'?settings.seed:k;
@@ -484,7 +484,7 @@ function coverageHTML(st){
 function chartsHTML(st,F){
   const rt=`${fdate(st.from)} - ${fdate(st.to)}`,kc=st.ds.map(d=>d.t.kcal||0),pr=st.ds.map(d=>d.t.p||0),fb=st.ds.map(d=>d.t.fib||0);
   return`<div class="grid gm">
-    <div class="card"><div class="bd"><div class="eqh"><div><div class="lbl">Calories trend</div><div class="big" style="font-size:20px">${fi(st.av('kcal'))} <span class="mu" style="font-size:12px;font-weight:500">/ ${fi(settings.kcal)} target</span></div><div class="lbl" style="margin-top:4px">${rt}</div></div>
+    <div class="card"><div class="bd"><div class="eqh"><div><h3>Calories trend</h3><div class="big" style="font-size:20px">${fi(st.av('kcal'))} <span class="mu" style="font-size:12px;font-weight:500">/ ${fi(settings.kcal)} target</span></div><div class="lbl" style="margin-top:4px">${rt}</div></div>
       <div class="ks"><div>BOWLS<b>${fnum(st.bowls)}</b></div><div>AVG PROTEIN<b>${fi(st.av('p'))} g</b></div><div>FIBER<b class="${st.av('fib')>=28?'grn':''}">${fi(st.av('fib'))} g</b></div><div>FISH MEALS<b class="${st.fish?'grn':''}">${st.fish}</b></div><div>WITH MILK<b>${st.milk}</b></div></div></div>
       ${kc.length>1?area(kc,'#ffb000',settings.kcal):bars(kc,{tgt:settings.kcal})}</div>${F}</div>
     <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Grams / day</div><div class="big">${fi(st.av('p'))} g</div>${bars(pr,{tgt:settings.protein})}</div>${F}</div>
@@ -519,8 +519,8 @@ function tableHTML(f){
 function render(){
   NMC.clear();
   $('#fKind').value=S.kind;$('#fRange').value=S.range;
-  const rg=range(),f=filtered(),st=stats(f,rg),F=foot(fdate(st.from),fdate(st.to));
-  $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} - ${S.sel?fdate(S.sel):RL[S.range]}`;
+  const rg=range(),f=filtered(),st=stats(f,rg),F='';   // the date range is shown once, under the filters, like the other apps
+  $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
   const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load demo data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">${I.bowl}Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load demo</button></div></div>`;
   $('#app').innerHTML=ban+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`+topCards(st,F)+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
