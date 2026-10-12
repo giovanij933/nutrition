@@ -772,6 +772,10 @@ document.addEventListener('click',e=>{
 });
 
 render();
+// another ISIONXXX app can send you straight to an action here (REWIRE's LOG buttons): #do=<action> or a message
+function doAct(a){if(!/^\w+$/.test(a||''))return;const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
+addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.isx==='do')doAct(e.data.act)});
+{const m=/do=(\w+)/.exec(location.hash);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>doAct(m[1]),0)}}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
