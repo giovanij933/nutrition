@@ -204,11 +204,28 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
 @keyframes ssIn{from{opacity:0;transform:translateY(32px)}}
 .box.ss>*{max-width:560px;margin-left:auto;margin-right:auto}
 .box.ss .ckh h3{font-size:11px!important;font-weight:600;letter-spacing:.22em;color:var(--mu)}
+.box.ss .ckh>div{flex:1 1 100%}.box.ss .ckh .vl{margin-bottom:6px}
 .box.ss .chip{transition:background-color .18s,border-color .18s,color .18s}
 .box.ss .mact{position:sticky;bottom:0;z-index:2;margin:18px -20px 0;max-width:none;padding:22px 20px calc(env(safe-area-inset-bottom) + 18px);background:linear-gradient(rgba(7,7,7,0),var(--bg) 40%)}
 .box.ss .mact .sp{display:none}.box.ss .mact .btn{flex:1;justify-content:center;padding:14px 8px}
 @media(min-width:700px){.modal:has(>.box.ss){padding:24px}.box.ss{width:min(640px,100%);height:min(900px,100%);border:1px solid var(--line2)}}
 @media(prefers-reduced-motion:reduce){.box.ss{animation:none}}
+/* choices in a session read as a list, like the live workout's exercises: a dot (a box when you can pick several),
+   the name, a detail on the right. Short sets of options are one segmented bar. */
+.box.ss .vl{display:flex;flex-direction:column;gap:0;margin:6px 0 20px;border-top:1px solid var(--line)}
+.box.ss .vl button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 4px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font-size:13px;letter-spacing:0;color:var(--tx);transition:background-color .18s,color .18s}
+.box.ss .vl button::before{content:'';flex:none;width:8px;height:8px;border-radius:50%;border:1px solid var(--line2);transition:background-color .18s,border-color .18s,box-shadow .18s}
+.box.ss .vl button.on{color:var(--amber);background:rgba(255,176,0,.06)}
+.box.ss .vl button.on::before{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px rgba(255,176,0,.6)}
+.box.ss .vl.multi button::before{width:14px;height:14px;border-radius:2px;display:grid;place-items:center;font-size:10px;font-weight:600;line-height:1;color:#000}
+.box.ss .vl.multi button.on::before{content:'✓';box-shadow:none}
+.box.ss .vl button:hover{color:var(--amber)}
+.box.ss .vl em{margin-left:auto;font-style:normal;font-size:11px;color:var(--mu);text-align:right}
+.box.ss .vl button.on em{color:var(--amber)}
+.box.ss .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;margin:6px 0 20px;border:1px solid var(--line2)}
+.box.ss .seg button{border:0;border-right:1px solid var(--line2);padding:11px 2px;text-align:center;background:none;font-size:12px;transition:background-color .18s,color .18s}
+.box.ss .seg button:last-child{border-right:0}
+.box.ss .seg button.on{background:var(--amber);color:#000}
 </style>
 </head>
 <body>
@@ -587,8 +604,8 @@ function drawCook(){
   const was=$('#mbox').classList.contains('ss');   // already open: redraw in place, don't slide up again
   openModal(`<div class="ckh"><h3 style="margin:0;font-size:15px">Complete Balanced Bowl</h3><button class="btn" data-act="close">Close</button></div>
     <div class="ckh"><div><div class="lbl" style="margin-bottom:6px">Servings</div><div class="step"><button data-act="cks" data-v="-1">−</button><b>${s}</b><button data-act="cks" data-v="1">+</button></div></div>
-    <div><div class="lbl" style="margin-bottom:6px">Protein ${p===todayPlan()?'<span class="grn">(today\'s plan)</span>':''}</div><div class="chips">${PKEYS.map(k=>`<button class="chip${k===p?' on':''}" data-act="ckp" data-v="${k}">${PROT[k].n}</button>`).join('')}</div></div>
-    <div><div class="lbl" style="margin-bottom:6px">Side</div><button class="chip${CK.milk?' on':''}" data-act="ckm">Glass of milk</button></div></div>
+    <div><div class="lbl" style="margin-bottom:6px">Protein ${p===todayPlan()?'<span class="grn">(today\'s plan)</span>':''}</div><div class="vl">${PKEYS.map(k=>`<button class="chip${k===p?' on':''}" data-act="ckp" data-v="${k}">${PROT[k].n}${k===todayPlan()?'<em>today\'s plan</em>':k==='salmon'||k==='sardines'?'<em>omega-3</em>':''}</button>`).join('')}</div></div>
+    <div><div class="lbl" style="margin-bottom:6px">Side</div><div class="vl multi"><button class="chip${CK.milk?' on':''}" data-act="ckm">Glass of milk<em>calcium · vitamin D</em></button></div></div></div>
     <div class="ns"><div>Per bowl<b>${fi(t.kcal)} kcal</b></div><div>Protein<b>${fi(t.p)} g</b></div><div>Carbs<b>${fi(t.c)} g</b></div><div>Fat<b>${fi(t.f)} g</b></div><div>Fiber<b>${fi(t.fib)} g</b></div><div>EPA+DHA<b class="${t.epa>=.5?'grn':''}">${fi(t.epa*1000)} mg</b></div></div>
     <div class="sec">INGREDIENTS · ${s} SERVING${s>1?'S':''}</div>
     <div class="ing">${ings.map(x=>`<label><input type="checkbox"><span>${x}</span></label>`).join('')}</div>
