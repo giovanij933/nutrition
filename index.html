@@ -195,6 +195,20 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
   .pdays{grid-template-columns:repeat(4,1fr)}
   .fg input,.fg select,.fg textarea{font-size:16px}
 }
+/* ---------- cook mode as a session sheet (same as MIND / TRAINING / REWIRE sessions) ----------
+   full screen on a phone, a centred sheet on wide screens, soft amber glow, slides up once, actions pinned to the bottom */
+.modal:has(>.box.ss){padding:0;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.box.ss{max-width:none;width:100%;height:100%;max-height:none;border:0;padding:calc(env(safe-area-inset-top) + 18px) 20px 0;overscroll-behavior:contain;
+  background:radial-gradient(90% 42% at 50% 18%,rgba(255,176,0,.06),transparent 72%),var(--bg);animation:ssIn .4s cubic-bezier(.2,.8,.2,1)}
+.box.ss.ss-on{animation:none}
+@keyframes ssIn{from{opacity:0;transform:translateY(32px)}}
+.box.ss>*{max-width:560px;margin-left:auto;margin-right:auto}
+.box.ss .ckh h3{font-size:11px!important;font-weight:600;letter-spacing:.22em;color:var(--mu)}
+.box.ss .chip{transition:background-color .18s,border-color .18s,color .18s}
+.box.ss .mact{position:sticky;bottom:0;z-index:2;margin:18px -20px 0;max-width:none;padding:22px 20px calc(env(safe-area-inset-bottom) + 18px);background:linear-gradient(rgba(7,7,7,0),var(--bg) 40%)}
+.box.ss .mact .sp{display:none}.box.ss .mact .btn{flex:1;justify-content:center;padding:14px 8px}
+@media(min-width:700px){.modal:has(>.box.ss){padding:24px}.box.ss{width:min(640px,100%);height:min(900px,100%);border:1px solid var(--line2)}}
+@media(prefers-reduced-motion:reduce){.box.ss{animation:none}}
 </style>
 </head>
 <body>
@@ -538,7 +552,7 @@ function publish(){
 
 /* ---------- modals ---------- */
 const openModal=(h,wide)=>{$('#mbox').className='box'+(wide?' wide':'');$('#mbox').innerHTML=h;$('#modal').classList.remove('hidden')};
-const closeModal=()=>{$('#modal').classList.add('hidden');CK=null};
+const closeModal=()=>{$('#modal').classList.add('hidden');$('#mbox').classList.remove('ss','ss-on');CK=null};
 const todayPlan=()=>settings.plan[(new Date().getDay()+6)%7];
 
 /* cook mode */
@@ -570,6 +584,7 @@ function drawCook(){
     [`Sprinkle ${q('seed')} ${seedN} on top just before eating — adding them last preserves the omega-3s.`,0]];
   if(CK.milk)steps.push([`Pour an 8 oz glass of milk on the side for calcium and vitamin D.`,0]);
   const t=nutMeal({kind:'bowl',servings:1,protein:p,milk:CK.milk}).t;
+  const was=$('#mbox').classList.contains('ss');   // already open: redraw in place, don't slide up again
   openModal(`<div class="ckh"><h3 style="margin:0;font-size:15px">Complete Balanced Bowl</h3><button class="btn" data-act="close">Close</button></div>
     <div class="ckh"><div><div class="lbl" style="margin-bottom:6px">Servings</div><div class="step"><button data-act="cks" data-v="-1">−</button><b>${s}</b><button data-act="cks" data-v="1">+</button></div></div>
     <div><div class="lbl" style="margin-bottom:6px">Protein ${p===todayPlan()?'<span class="grn">(today\'s plan)</span>':''}</div><div class="chips">${PKEYS.map(k=>`<button class="chip${k===p?' on':''}" data-act="ckp" data-v="${k}">${PROT[k].n}</button>`).join('')}</div></div>
@@ -581,6 +596,7 @@ function drawCook(){
     ${steps.map(([txt,sec],i)=>`<div class="stp"><b>${i+1}</b><div>${txt}</div>${sec?`<button class="tmr" data-act="tmr" data-v="${i}|${sec}" data-tmr="${i}">${CT[i]?'⏱ '+mmss((CT[i].end-Date.now())/1000):'⏱ '+mmss(sec)}</button>`:''}</div>`).join('')}
     <div class="tip"><b>Rotation tip:</b> 2–3× a week swap eggs for salmon or sardines for EPA/DHA. Chicken and steak add protein, iron and zinc but almost no omega-3. Rice &amp; beans keep 4–5 days in the fridge.</div>
     <div class="mact"><div class="sp"></div><button class="btn go" data-act="cklog">Log my bowl (${PROT[p].n}${CK.milk?' + milk':''})</button></div>`,true);
+  $('#mbox').classList.add('ss');if(was)$('#mbox').classList.add('ss-on');
 }
 setInterval(()=>{for(const i in CT){const b=document.querySelector(`[data-tmr="${i}"]`),left=(CT[i].end-Date.now())/1000;
   if(left<=0){delete CT[i];beep();navigator.vibrate?.([200,100,200]);toast(`Step ${+i+1} timer done`);if(b)b.textContent='✓ Done';continue}
