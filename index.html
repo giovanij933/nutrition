@@ -457,6 +457,29 @@ function batchHTML(){
     <div class="ft"><span class="mu">${left<1||dl<=0?'Time to cook a new batch':'Rice + beans ready'}</span><button class="btn ${left<1||dl<=0?'go':''}" data-act="batch">New batch</button></div></div>`;
 }
 
+/* body weight from ISIONXXX's morning check-in (logged on TODAY; read-only here), next to what you ate:
+   the weekly rate of change at your average intake, the way MacroFactor-style apps judge a calorie target */
+function weightHTML(){
+  let C=[];try{C=JSON.parse(localStorage.getItem('isx.checkin.v1'))?.log}catch(e){}
+  if(!Array.isArray(C))return'';
+  const U=(()=>{try{return JSON.parse(localStorage.getItem('isx.training.v1'))?.wu}catch(e){}})()||(/-US$/.test(navigator.language||'')?'lb':'kg');
+  const W=C.filter(e=>e.w>0).sort((a,b)=>a.day<b.day?-1:1).map(e=>({d:e.day,w:!e.u||e.u===U?e.w:U==='kg'?e.w/2.20462:e.w*2.20462}));
+  if(!W.length)return'';
+  const av=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null,t=today(),since=n=>addDays(t,-n);
+  const w7=av(W.filter(x=>x.d>since(7)).map(x=>x.w)),p7=av(W.filter(x=>x.d<=since(7)&&x.d>since(14)).map(x=>x.w)),rate=w7!=null&&p7!=null?w7-p7:null;
+  // average calories over the same two weeks, on days with meals logged
+  const K={};meals.forEach(m=>{const d=dayOf(m);if(d>since(14)&&d<=t)K[d]=(K[d]||0)+(NM(m).t.kcal||0)});
+  const kv=Object.values(K),k14=av(kv),last=W.at(-1),W30=W.filter(x=>x.d>since(30)).map(x=>x.w),lo=W30.length?Math.min(...W30)*.99:0;
+  const say=rate==null?'Weigh in on TODAY for two weeks to see your trend.':Math.abs(rate)<(U==='kg'?.1:.2)?'Holding steady':`${rate<0?'Losing':'Gaining'} about ${fnum(r1(Math.abs(rate)))} ${U} / week`;
+  return`<div class="grid gm">
+  <div class="card"><div class="bd"><div class="eqh"><div><h3>Body weight</h3><div class="big" style="font-size:20px">${fnum(r1(last.w))} <span class="mu" style="font-size:12px;font-weight:500">${U} · ${fdate(last.d)}</span></div><div class="lbl" style="margin-top:4px">From your morning check-in · last 30 days</div></div>
+    <div class="ks"><div>7-DAY AVG<b>${w7!=null?fnum(r1(w7)):'—'}</b></div><div>WEEK CHANGE<b class="${rate==null?'':rate<0?'grn':''}">${rate==null?'—':(rate>0?'+':'')+fnum(r1(rate))}</b></div><div>WEIGH-INS<b>${W30.length}</b></div></div>
+    ${W30.length>1?area(W30.map(w=>r1(w-lo)),'#7f9cb0'):'<div class="empty">Add your weight at check-in on TODAY</div>'}</div></div>
+  <div class="card"><div class="bd"><h3>Weight vs calories</h3><div class="lbl">Last 2 weeks</div><div class="big" style="font-size:20px">${say}</div>
+    ${lr(ACC,'Average intake',k14!=null?`${fi(k14)} kcal`:'—')}${lr('#555','Your target',`${fi(settings.kcal)} kcal`)}${lr('var(--b)','Days with meals logged',`${kv.length} / 14`)}
+    <div class="lbl" style="margin-top:10px">${rate==null||k14==null?'Needs two weeks of weigh-ins and logged meals.':Math.abs(rate)<(U==='kg'?.1:.2)?`About ${fi(k14)} kcal a day keeps you at this weight.`:`Each ${U==='kg'?'0.5 kg':'1 lb'} a week is roughly ${U==='kg'?'550':'500'} kcal a day ${rate<0?'below':'above'} what you burn.`}</div></div></div>
+  </div>`;
+}
 function topCards(st,F){
   const kc=st.av('kcal'),pr=st.av('p'),e=st.epa7;
   return`<div class="grid g4">
@@ -554,7 +577,7 @@ function render(){
   $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
   const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load demo data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">${I.bowl}Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load demo</button></div></div>`;
-  $('#app').innerHTML=ban+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`+topCards(st,F)+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
+  $('#app').innerHTML=ban+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`+topCards(st,F)+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
   publish();
 }
 // daily totals for ISIONXXX's TODAY tab, which can't work out bowl nutrition itself.
@@ -772,6 +795,7 @@ document.addEventListener('change',e=>{
   if(id==='q_name'){const l=meals.filter(m=>m.kind==='quick'&&m.name.toLowerCase()===e.target.value.trim().toLowerCase()).sort((a,b)=>new Date(b.time)-new Date(a.time))[0];
     if(l)['kcal','p','c','f','fib'].forEach(k=>$('#q_'+k).value=l[k]??'')}
 });
+addEventListener('storage',e=>{if(e.key==='isx.checkin.v1')render()});
 document.addEventListener('input',e=>{if(e.target.id==='g_days'||e.target.id==='g_per'){const nd=Math.max(1,Math.min(28,+$('#g_days').value||7)),per=Math.max(1,Math.min(4,+$('#g_per').value||1));$('#g_out').textContent=groceryText(nd,per)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 document.addEventListener('click',e=>{
