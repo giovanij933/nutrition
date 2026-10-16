@@ -299,11 +299,15 @@ const addDays=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ymd(d)};
 const diffDays=(a,b)=>Math.round((pd(b)-pd(a))/864e5);
 const monday=s=>{const d=pd(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return ymd(d)};
 const today=()=>ymd(new Date());
-const dayOf=m=>ymd(new Date(m.time));
-const fdate=s=>pd(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+// a meal's day, worked out once per timestamp (it's asked for many times per render)
+const DOC=new Map(),dayOf=m=>{let d=DOC.get(m.time);if(d===undefined){d=ymd(new Date(m.time));DOC.set(m.time,d)}return d};
+// formatters made once: toLocaleString builds a new one on every call, which adds up over long tables and charts
+const FMT={dmy:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}),dt:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}),
+  n0:new Intl.NumberFormat('en-US',{maximumFractionDigits:0}),n1:new Intl.NumberFormat('en-US',{maximumFractionDigits:1}),n2:new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
+const fdate=s=>FMT.dmy.format(pd(s));
 const fsd=s=>pd(s).toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
-const fnum=v=>(+v).toLocaleString('en-US',{maximumFractionDigits:1});
-const fi=v=>Math.round(v||0).toLocaleString('en-US');
+const fnum=v=>FMT.n1.format(+v);
+const fi=v=>FMT.n0.format(Math.round(v||0));
 const mmss=s=>{s=Math.max(0,Math.ceil(s));return`${Math.floor(s/60)}:${pad(s%60)}`};
 const pct=(a,b)=>b?Math.round(a/b*100)+'%':'0%';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -342,7 +346,12 @@ function nutMeal(m){
   parts(m).forEach(([tag,key,q])=>{const d=FD[key];for(const k in d){t[k]=(t[k]||0)+d[k]*q;src[tag][k]=(src[tag][k]||0)+d[k]*q}});
   return{t,src};
 }
-const NMC=new Map(),NM=m=>{let v=NMC.get(m.id);if(!v){v=nutMeal(m);NMC.set(m.id,v)}return v};
+// nutrition per meal, kept between renders: keyed by the meal object (an edit saves a new object) and dropped only when
+// a setting that changes the maths does (portion, milk, rice, seed). Recomputing all meals on every render was the
+// biggest cost here.
+let NMC=new WeakMap(),NMsig='';
+const nmSync=()=>{const g=JSON.stringify([settings.portion,settings.milk,settings.riceAs,settings.seed]);if(g!==NMsig){NMsig=g;NMC=new WeakMap()}};
+const NM=m=>{let v=NMC.get(m);if(!v){v=nutMeal(m);NMC.set(m,v)}return v};
 
 /* ---------- state & filters ---------- */
 const S={kind:'all',range:'7d',sel:null,month:null,page:1,rows:20};
@@ -370,7 +379,10 @@ function stats(ms,rg){
   const end=rg[1]==='9999-99-99'?today():rg[1];let epa7=0,fish7=0;
   meals.forEach(m=>{const d=dayOf(m);if(d<=end&&d>addDays(end,-7)){epa7+=NM(m).t.epa||0;if(m.kind==='bowl'&&PROT[m.protein]?.fish)fish7++}});
   const wk=[],m0=monday(end);
-  for(let i=7;i>=0;i--){const ws=addDays(m0,-7*i),we=addDays(ws,6);let s=0;meals.forEach(m=>{const d=dayOf(m);if(d>=ws&&d<=we)s+=NM(m).t.epa||0});wk.push({ws,s})}
+  // 8 weeks of EPA+DHA in one pass over the meals (was one pass per week)
+  const w0=addDays(m0,-49),wEnd=addDays(m0,6),ws8=Array.from({length:8},(_,i)=>addDays(m0,-7*(7-i))),S8=new Array(8).fill(0);
+  meals.forEach(m=>{const d=dayOf(m);if(d<w0||d>wEnd)return;let i=7;while(i>0&&d<ws8[i])i--;S8[i]+=NM(m).t.epa||0});
+  ws8.forEach((ws,i)=>wk.push({ws,s:S8[i]}));
   const av=k=>D?(T[k]||0)/D:0,avS=(tag,k)=>D?(SRC[tag][k]||0)/D:0;
   const pk=av('p')*4,ck=av('c')*4,fk2=av('f')*9,mk=pk+ck+fk2;
   return{a,D,ds,T,from,to,av,avS,bowls,fish,milk,rot,epa7,fish7,wk,mac:{p:mk?pk/mk:0,c:mk?ck/mk:0,f:mk?fk2/mk:0}};
@@ -571,7 +583,7 @@ function tableHTML(f){
 
 /* ---------- render ---------- */
 function render(){
-  NMC.clear();
+  nmSync();
   $('#fKind').value=S.kind;$('#fRange').value=S.range;
   const rg=range(),f=filtered(),st=stats(f,rg),F='';   // the date range is shown once, under the filters, like the other apps
   $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
