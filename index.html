@@ -860,7 +860,7 @@ function heroToday(){
   const sum=k=>T.reduce((a,m)=>a+(NM(m).t[k]||0),0),kc=sum('kcal'),p=sum('p'),fib=sum('fib'),left=settings.kcal-kc;
   // calories are 'done' on target (±10%), not for going over: past 110% the ring stays full but amber
   return UI.hero({key:'fuel',title:'Today',sub:T.length?`${T.length} meal${T.length>1?'s':''} · ${left>=0?fi(left)+' kcal left':fi(-left)+' kcal over'}`:'Nothing logged yet today',
-    big:{value:fi(kc),label:`of ${fi(settings.kcal)} kcal`},
+    big:{value:fi(kc),label:`of ${fi(settings.kcal)} kcal`,tone:kc>settings.kcal*1.1?'neg':kc>=settings.kcal*.9?'pos':''},   // green on target (±10%) · red when well over
     rings:[{key:'kcal',label:'Calories',value:Math.round(kc),max:settings.kcal,display:`${fi(kc)}/${fi(settings.kcal)}`,done:kc>=settings.kcal*.9&&kc<=settings.kcal*1.1},{key:'p',label:'Protein',value:Math.round(p),max:settings.protein,display:`${fi(p)}/${fi(settings.protein)} g`},{key:'fib',label:'Fiber',value:Math.round(fib),max:28,display:`${fi(fib)}/28 g`}],
     action:{label:'+ Food',act:'quick'},
     log:T.map(m=>({at:Date.parse(m.time),tag:m.kind==='bowl'?'Bowl':'Food',text:`${m.kind==='bowl'?(PROT[m.protein]?.n||'Bowl')+(m.servings>1?' ×'+m.servings:''):m.name||'Food'} · ${fi(NM(m).t.kcal)} kcal · ${fi(NM(m).t.p)} g protein`}))});
