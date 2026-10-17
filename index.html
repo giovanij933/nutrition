@@ -288,7 +288,7 @@ const EPA_WK=3.5; // g EPA+DHA per week (~500 mg/day)
 /* ---------- storage ---------- */
 const K={m:'nj.meals.v1',s:'nj.settings.v1'};
 const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}};
-const save=()=>{localStorage.setItem(K.m,JSON.stringify(meals));localStorage.setItem(K.s,JSON.stringify(settings))};
+const save=()=>{try{localStorage.setItem(K.m,JSON.stringify(meals));localStorage.setItem(K.s,JSON.stringify(settings))}catch(e){toast('Storage write failed — take a backup')}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 let meals=load(K.m,[]);if(!Array.isArray(meals))meals=[];
 let settings=Object.assign({kcal:2000,protein:100,riceAs:'dry',seed:'flax',milk:'whole',portion:4.5,fishTarget:2,
