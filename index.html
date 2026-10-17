@@ -236,6 +236,7 @@ h1.brand{margin:0}
   <h1 class="brand">ISIONXXX <b>//</b> NUTRITION<i class="cur"></i></h1>
   <div class="acts" id="barBtns"></div>
 </header>
+<div id="top"></div>
 <div class="bar">
   <select id="fKind" aria-label="Meal type" class="sel"><option value="all">All meals</option><option value="bowl">Bowls only</option><option value="quick">Other foods</option></select>
   <select id="fRange" aria-label="Date range" class="sel">
@@ -593,7 +594,9 @@ function render(){
   $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
   const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load demo data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">${I.bowl}Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load demo</button></div></div>`;
-  $('#app').innerHTML=ban+heroToday()+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`+topCards(st,F)+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
+  // today and this week's plan don't depend on the filters, so they sit above them
+  $('#top').innerHTML=ban+heroToday()+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`;
+  $('#app').innerHTML=topCards(st,F)+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
   publish();
 }
 // daily totals for ISIONXXX's TODAY tab, which can't work out bowl nutrition itself.
@@ -861,7 +864,7 @@ function heroToday(){
     action:{label:'+ Food',act:'quick'},
     log:T.map(m=>({at:Date.parse(m.time),tag:m.kind==='bowl'?'Bowl':'Food',text:`${m.kind==='bowl'?(PROT[m.protein]?.n||'Bowl')+(m.servings>1?' ×'+m.servings:''):m.name||'Food'} · ${fi(NM(m).t.kcal)} kcal · ${fi(NM(m).t.p)} g protein`}))});
 }
-{const r0=render;render=function(...a){r0.apply(this,a);UI.animate($('#app'),{onDone:l=>toast(`${l.join(' + ')} target hit ✓`)})};UI.animate($('#app'))}
+{const r0=render;render=function(...a){r0.apply(this,a);UI.animate($('#app'));UI.animate($('#top'),{onDone:l=>toast(`${l.join(' + ')} target hit ✓`)})};UI.animate($('#top'));UI.animate($('#app'))}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
