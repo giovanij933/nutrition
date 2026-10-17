@@ -20,7 +20,7 @@
 :root{
   color-scheme:dark;
   --bg:#070707;--card:#0c0c0c;--cell:#0a0a0a;--line:#1c1c1c;--line2:#2c2c2c;
-  --tx:#d9d5c8;--mu:#78746a;--acc:#ffb000;--amber:#ffb000;
+  --tx:#d9d5c8;--mu:#8f8a7e;--acc:#ffb000;--amber:#ffb000;
   --g:#33ff66;--r:#ff4545;--a:#ff7a33;--b:#7f9cb0;--blue:#ffb000;
   --f:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
@@ -95,7 +95,7 @@ button{cursor:pointer;background:none;border:0}
 .cell{min-height:66px;background:var(--cell);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:11px;color:var(--mu);cursor:pointer;position:relative;overflow:hidden}
 .cell.hatch{background:repeating-linear-gradient(135deg,#0a0a0a 0 6px,#111 6px 7px)}
 .cell.out{cursor:default;border-color:transparent;opacity:.5}
-.cell.fut span{color:#3a3a3a}
+.cell.fut span{color:#827d72}
 .cell.on{border-color:rgba(255,176,0,.3)}
 .cell.on b{font-size:12px;color:var(--tx)}
 .cell.sel{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
@@ -129,7 +129,7 @@ hr{border:0;border-top:1px solid var(--line);margin:4px 0 8px}
 svg text{font-family:var(--f)}
 
 /* table */
-.tw{overflow-x:auto}
+.tw{overflow-x:auto;position:relative}
 table{width:100%;border-collapse:collapse}
 th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
 th{font-size:11px;font-weight:500;color:var(--mu);letter-spacing:.08em;text-transform:uppercase}
@@ -227,22 +227,24 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
 .box.ss .seg button{border:0;border-right:1px solid var(--line2);padding:11px 2px;text-align:center;background:none;font-size:12px;transition:background-color .18s,color .18s}
 .box.ss .seg button:last-child{border-right:0}
 .box.ss .seg button.on{background:var(--amber);color:#000}
+h1.brand{margin:0}
+.cell span{color:#a9a498}
 </style>
 </head>
 <body>
 <header class="top">
-  <div class="brand">ISIONXXX <b>//</b> NUTRITION<i class="cur"></i></div>
+  <h1 class="brand">ISIONXXX <b>//</b> NUTRITION<i class="cur"></i></h1>
   <div class="acts" id="barBtns"></div>
 </header>
 <div class="bar">
-  <select id="fKind" class="sel"><option value="all">All meals</option><option value="bowl">Bowls only</option><option value="quick">Other foods</option></select>
-  <select id="fRange" class="sel">
+  <select id="fKind" aria-label="Meal type" class="sel"><option value="all">All meals</option><option value="bowl">Bowls only</option><option value="quick">Other foods</option></select>
+  <select id="fRange" aria-label="Date range" class="sel">
     <option value="today">Today</option><option value="week">This week</option><option value="7d">Last 7 days</option>
     <option value="30d">Last 30 days</option><option value="90d">Last 90 days</option><option value="all">All time</option>
   </select>
   <span id="ctx" class="ctx"></span>
 </div>
-<div id="app"></div>
+<div id="app" role="main"></div>
 <div id="modal" class="modal hidden"><div class="box" id="mbox"></div></div>
 
 <script src="sync.js" data-keys="nj.meals.v1 nj.settings.v1"></script>
@@ -395,7 +397,7 @@ function gauge(segs,text){
   const cx=100,cy=92,r=72,id='g'+uid();
   const P=f=>{const a=Math.PI*(1-f);return(cx+r*Math.cos(a)).toFixed(2)+' '+(cy-r*Math.sin(a)).toFixed(2)};
   const arc=(a,b)=>`M${P(a)}A${r} ${r} 0 0 1 ${P(b)}`;
-  const col={g:'#ffb000',r:'#ff4545',a:'#ff7a33',b:'#7f9cb0',n:'#78746a',v:'#33ff66'};
+  const col={g:'#ffb000',r:'#ff4545',a:'#ff7a33',b:'#7f9cb0',n:'#8f8a7e',v:'#33ff66'};
   let s=0,p='';
   for(const[f,c]of segs){if(!(f>0))continue;const e=Math.min(1,s+f);p+=`<path d="${arc(s,e)}" stroke="${col[c]}" stroke-width="12" fill="none"/>`;s=e}
   return`<svg class="gauge" viewBox="0 0 200 104">
@@ -425,16 +427,16 @@ function bars(vals,{labels,tgt}={}){
   if(!vals.length||!Math.max(...vals))return'<div class="empty">No data in range</div>';
   const W=400,H=200,p=labels?28:16,mx=Math.max(1,...vals,(tgt||0)*1.1),n=vals.length,slot=(W-20)/n,bw=Math.min(slot*.7,300),id='b'+uid(),Y=v=>H-p-v/mx*(H-p-12);
   const rects=vals.map((v,i)=>{const x=10+i*slot+(slot-bw)/2,y=Y(v);
-    return`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,H-p-y).toFixed(1)}" fill="#ffb000"/>${labels?`<text x="${(x+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#78746a">${labels[i]}</text>`:''}`}).join('');
+    return`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,H-p-y).toFixed(1)}" fill="#ffb000"/>${labels?`<text x="${(x+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#8f8a7e">${labels[i]}</text>`:''}`}).join('');
   return`<svg class="chart" viewBox="0 0 ${W} ${H}" ${labels?'':'preserveAspectRatio="none"'}>${rects}
-    ${tgt?`<line x1="6" x2="${W-6}" y1="${Y(tgt).toFixed(1)}" y2="${Y(tgt).toFixed(1)}" stroke="#78746a" stroke-dasharray="4 4" ${labels?'':'vector-effect="non-scaling-stroke"'}/>`:''}</svg>`;
+    ${tgt?`<line x1="6" x2="${W-6}" y1="${Y(tgt).toFixed(1)}" y2="${Y(tgt).toFixed(1)}" stroke="#8f8a7e" stroke-dasharray="4 4" ${labels?'':'vector-effect="non-scaling-stroke"'}/>`:''}</svg>`;
 }
 function radar(labels,raw){
   const n=labels.length,cx=150,cy=122,R=76,A=labels.map((_,i)=>(-90+i*360/n)*Math.PI/180),mx=Math.max(...raw)||1;
   const pt=(i,v)=>[cx+R*v*Math.cos(A[i]),cy+R*v*Math.sin(A[i])];
   const poly=f=>A.map((_,i)=>pt(i,f(i)).map(x=>x.toFixed(1)).join(',')).join(' ');
   const lab=labels.map((l,i)=>{const[x,y]=pt(i,1.2),c=Math.cos(A[i]);return`<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${Math.abs(c)<.2?'middle':c>0?'start':'end'}">${l}</text>`}).join('');
-  return`<svg class="radar" viewBox="0 0 300 240" font-size="10" letter-spacing=".08em" fill="#78746a">
+  return`<svg class="radar" viewBox="0 0 300 240" font-size="10" letter-spacing=".08em" fill="#8f8a7e">
     ${[1,.75,.5,.25].map(v=>`<polygon points="${poly(()=>v)}" fill="none" stroke="#2c2c2c"/>`).join('')}
     ${A.map((_,i)=>{const[x,y]=pt(i,1);return`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#2c2c2c"/>`}).join('')}
     <polygon points="${poly(i=>Math.max(.04,raw[i]/mx))}"  fill="#ffb000" fill-opacity=".16" stroke="#ffb000" stroke-width="1.5"/>${lab}</svg>`;
@@ -571,16 +573,16 @@ function tableHTML(f){
   const pages=Math.max(1,Math.ceil(f.length/S.rows));S.page=Math.max(1,Math.min(S.page,pages));
   const rows=f.slice((S.page-1)*S.rows,S.page*S.rows),tf=d=>new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
   return`<div class="th"><h3>Meal log</h3><button class="btn" data-act="export">${I.dl}Export CSV</button></div>
-  <div class="tw"><table><thead><tr><th>Date (local)</th><th>Meal</th><th class="num">Servings</th><th class="num">kcal</th><th class="num">Protein</th><th class="num">Carbs</th><th class="num">Fat</th><th class="num">Fiber</th><th class="num">EPA+DHA</th><th class="num">Milk</th><th></th></tr></thead><tbody>
+  <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>Date (local)</th><th>Meal</th><th class="num">Servings</th><th class="num">kcal</th><th class="num">Protein</th><th class="num">Carbs</th><th class="num">Fat</th><th class="num">Fiber</th><th class="num">EPA+DHA</th><th class="num">Milk</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
   ${rows.map(m=>{const t=NM(m).t,P=PROT[m.protein];return`<tr><td class="mu2">${tf(m.time)}</td>
     <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:${P.col};border-color:${P.col}55;background:${P.col}1a">${P.n}</span>${(m.omit||[]).length?` <span class="mu">− ${m.omit.join(', ')}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
     <td class="num">${m.kind==='bowl'?fnum(m.servings||1):'—'}</td><td class="num">${fi(t.kcal)}</td><td class="num">${fi(t.p)} g</td><td class="num">${fi(t.c)} g</td><td class="num">${fi(t.f)} g</td><td class="num">${fi(t.fib)} g</td>
     <td class="num ${t.epa>=.5?'grn':''}">${t.epa?fi(t.epa*1000)+' mg':'—'}</td><td class="num">${m.milk?'<span class="grn">✓</span>':'—'}</td>
     <td><div class="acts"><button data-act="info" data-id="${m.id}" title="Nutrition">${I.info}</button><button data-act="edit" data-id="${m.id}" title="Edit">${I.note}</button></div></td></tr>`}).join('')
-  ||'<tr><td colspan="11" style="text-align:center;color:#555;padding:30px">Nothing logged in this range</td></tr>'}
+  ||'<tr><td colspan="11" style="text-align:center;color:#8f8a7e;padding:30px">Nothing logged in this range</td></tr>'}
   </tbody></table></div>
-  <div class="tf"><div class="pg"><button data-act="pprev">‹</button>Page <input id="pgIn" type="number" min="1" value="${S.page}"> of ${pages}<button data-act="pnext">›</button></div>
-  <div class="pg"><select id="rowsSel" class="rs">${[10,20,50,100].map(n=>`<option value="${n}" ${n===S.rows?'selected':''}>${n} rows</option>`).join('')}</select><span style="margin-left:8px">${f.length} records</span></div></div>`;
+  <div class="tf"><div class="pg"><button data-act="pprev">‹</button>Page <input id="pgIn" aria-label="Page" type="number" min="1" value="${S.page}"> of ${pages}<button data-act="pnext">›</button></div>
+  <div class="pg"><select id="rowsSel" aria-label="Rows per page" class="rs">${[10,20,50,100].map(n=>`<option value="${n}" ${n===S.rows?'selected':''}>${n} rows</option>`).join('')}</select><span style="margin-left:8px">${f.length} records</span></div></div>`;
 }
 
 /* ---------- render ---------- */
