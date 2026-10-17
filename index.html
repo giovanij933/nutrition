@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <title>ISIONXXX // NUTRITION</title>
+<link rel="stylesheet" href="ui.css">
 <style>
 :root{
   color-scheme:dark;
@@ -245,6 +246,7 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
 <div id="modal" class="modal hidden"><div class="box" id="mbox"></div></div>
 
 <script src="sync.js" data-keys="nj.meals.v1 nj.settings.v1"></script>
+<script src="ui.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const ACC='var(--acc,#ffb000)';                       // brand amber (measurement)
@@ -589,7 +591,7 @@ function render(){
   $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
   const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load demo data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">${I.bowl}Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load demo</button></div></div>`;
-  $('#app').innerHTML=ban+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`+topCards(st,F)+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
+  $('#app').innerHTML=ban+heroToday()+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`+topCards(st,F)+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
   publish();
 }
 // daily totals for ISIONXXX's TODAY tab, which can't work out bowl nutrition itself.
@@ -845,6 +847,19 @@ render();
 function doAct(a){if(!/^\w+$/.test(a||''))return;const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
 addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.isx==='do')doAct(e.data.act)});
 {const m=/do=(\w+)/.exec(location.hash);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>doAct(m[1]),0)}}
+/* ---------- today at a glance (shared hero, timeline and motion from ui.js) ---------- */
+function heroToday(){
+  if(!meals.length)return '';
+  const t=today(),T=meals.filter(m=>dayOf(m)===t).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time));
+  const sum=k=>T.reduce((a,m)=>a+(NM(m).t[k]||0),0),kc=sum('kcal'),p=sum('p'),fib=sum('fib'),left=settings.kcal-kc;
+  // calories are 'done' on target (±10%), not for going over: past 110% the ring stays full but amber
+  return UI.hero({key:'fuel',title:'Today',sub:T.length?`${T.length} meal${T.length>1?'s':''} · ${left>=0?fi(left)+' kcal left':fi(-left)+' kcal over'}`:'Nothing logged yet today',
+    big:{value:fi(kc),label:`of ${fi(settings.kcal)} kcal`},
+    rings:[{key:'kcal',label:'Calories',value:Math.round(kc),max:settings.kcal,display:fi(kc),done:kc>=settings.kcal*.9&&kc<=settings.kcal*1.1},{key:'p',label:'Protein',value:Math.round(p),max:settings.protein,display:`${fi(p)}/${fi(settings.protein)} g`},{key:'fib',label:'Fiber',value:Math.round(fib),max:28,display:`${fi(fib)}/28 g`}],
+    action:{label:'+ Food',act:'quick'}})
+  +UI.timeline({items:T.map(m=>({at:Date.parse(m.time),tag:m.kind==='bowl'?'Bowl':'Food',text:`${m.kind==='bowl'?(PROT[m.protein]?.n||'Bowl')+(m.servings>1?' ×'+m.servings:''):m.name||'Food'} · ${fi(NM(m).t.kcal)} kcal · ${fi(NM(m).t.p)} g protein`})),empty:'No meals yet today. Log one and it shows up here.'});
+}
+{const r0=render;render=function(...a){r0.apply(this,a);UI.animate($('#app'),{onDone:l=>toast(`${l.join(' + ')} target hit ✓`)})};UI.animate($('#app'))}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
