@@ -490,7 +490,7 @@ function weightHTML(){
   const say=rate==null?'Weigh in on TODAY for two weeks to see your trend.':Math.abs(rate)<(U==='kg'?.1:.2)?'Holding steady':`${rate<0?'Losing':'Gaining'} about ${fnum(r1(Math.abs(rate)))} ${U} / week`;
   return`<div class="grid gm">
   <div class="card"><div class="bd"><div class="eqh"><div><h3>Body weight</h3><div class="big" style="font-size:20px">${fnum(r1(last.w))} <span class="mu" style="font-size:12px;font-weight:500">${U} · ${fdate(last.d)}</span></div><div class="lbl" style="margin-top:4px">From your morning check-in · last 30 days</div></div>
-    <div class="ks"><div>7-DAY AVG<b>${w7!=null?fnum(r1(w7)):'—'}</b></div><div>WEEK CHANGE<b class="${rate==null?'':rate<0?'grn':''}">${rate==null?'—':(rate>0?'+':'')+fnum(r1(rate))}</b></div><div>WEIGH-INS<b>${W30.length}</b></div></div>
+    <div class="ks"><div>7-DAY AVG<b>${w7!=null?fnum(r1(w7)):'—'}</b></div><div>WEEK CHANGE<b class="${rate==null?'':rate<0?'grn':''}">${rate==null?'—':(rate>0?'+':'')+fnum(r1(rate))}</b></div><div>WEIGH-INS<b>${W30.length}</b></div></div></div>
     ${W30.length>1?area(W30.map(w=>r1(w-lo)),'#7f9cb0'):'<div class="empty">Add your weight at check-in on TODAY</div>'}</div></div>
   <div class="card"><div class="bd"><h3>Weight vs calories</h3><div class="lbl">Last 2 weeks</div><div class="big" style="font-size:20px">${say}</div>
     ${lr(ACC,'Average intake',k14!=null?`${fi(k14)} kcal`:'—')}${lr('#555','Your target',`${fi(settings.kcal)} kcal`)}${lr('var(--b)','Days with meals logged',`${kv.length} / 14`)}
@@ -523,6 +523,7 @@ function calendarHTML(){
   const tk=today();let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat','Week'].map(d=>`<div class="dh">${d}</div>`).join(''),mk=0,md=0,mb=0,mf=0;
   for(let w=0;w<6;w++){
     let wk=0,wd=0,wf=0;
+    {const d0=new Date(start);d0.setDate(start.getDate()+w*7);if(w&&d0.getMonth()!==mo)break}   // no row that's all next month
     for(let i=0;i<7;i++){
       const d=new Date(start);d.setDate(start.getDate()+w*7+i);const k=ymd(d),v=dm[k];
       if(d.getMonth()!==mo){h+='<div class="cell hatch out"></div>';continue}
