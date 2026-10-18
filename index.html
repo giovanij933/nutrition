@@ -42,7 +42,6 @@ button{cursor:pointer;background:none;border:0}
 @keyframes bl{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.cur{animation:none}}
 .top .acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.top .btn svg{display:none}
 .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:14px 0}
 .sel{background:var(--bg);border:1px solid var(--line2);border-radius:0;padding:7px 10px;min-width:150px}
 .sel:hover{border-color:var(--acc);color:var(--acc)}
@@ -144,12 +143,12 @@ td .acts button:hover{border-color:var(--acc);color:var(--acc)}
 .acts svg{width:13px;height:13px}
 .th{display:flex;align-items:center;gap:12px;padding:16px 16px 4px}
 .th h3{margin:0;flex:1}
-.tf{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;color:var(--mu);gap:10px;flex-wrap:wrap}
-.pg{display:flex;align-items:center;gap:6px}
-.pg button{border:1px solid var(--line2);min-width:33px;height:33px}
-.pg button:hover{border-color:var(--acc);color:var(--acc)}
-.pg input{width:40px;text-align:center;background:var(--bg);border:1px solid var(--line2);padding:3px}
-.rs{background:var(--bg);border:1px solid var(--line2);padding:3px 6px}
+/* pager: same as the other apps (MIND's .calf) */
+.calf{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.card>.calf{margin:0;padding:12px 16px 16px}
+.calf button{border:1px solid var(--line2);background:var(--bg);padding:7px 10px;font-size:12px;letter-spacing:.06em}
+.calf button:hover{border-color:var(--acc);color:var(--acc)}
+.dim{color:var(--mu)}
 
 /* modal (matches the dialogs in MIND / TRAINING) */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:9;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
@@ -166,6 +165,8 @@ td .acts button:hover{border-color:var(--acc);color:var(--acc)}
 .ck input{width:auto;accent-color:var(--acc)}
 .full{grid-column:1/-1}
 .mact{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.box .ui-set input,.box .ui-set select{flex:none;width:110px;background:var(--bg);border:1px solid var(--line2);padding:7px 10px;font-size:13px;color:var(--tx)}
+.box .ui-set input:focus,.box .ui-set select:focus{border-color:var(--acc);outline:0}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px}.kv span{color:var(--mu)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:90vw;background:var(--card);border:1px solid var(--acc);color:var(--acc);padding:8px 14px;z-index:30}
 
@@ -243,8 +244,7 @@ h1.brand{margin:0}
 <div class="bar">
   <select id="fKind" aria-label="Meal type" class="sel"><option value="all">All meals</option><option value="bowl">Bowls only</option><option value="quick">Other foods</option></select>
   <select id="fRange" aria-label="Date range" class="sel">
-    <option value="today">Today</option><option value="week">This week</option><option value="7d">Last 7 days</option>
-    <option value="30d">Last 30 days</option><option value="90d">Last 90 days</option><option value="all">All time</option>
+    <option value="today">Today</option><option value="week">This week</option><option value="month">This month</option><option value="all" selected>All time</option>
   </select>
   <span id="ctx" class="ctx"></span>
 </div>
@@ -329,13 +329,7 @@ function fq(v){const w=Math.floor(v+1e-9),fr=v-w;let b=FR[0];FR.forEach(x=>{if(M
 const SV='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
 const I={
   info:`<svg ${SV}><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>`,
-  note:`<svg ${SV}><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>`,
-  copy:`<svg ${SV}><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>`,
-  dl:`<svg ${SV}><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg>`,
-  data:`<svg ${SV}><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg>`,
-  plus:`<svg ${SV}><path d="M12 5v14M5 12h14"/></svg>`,
-  cart:`<svg ${SV}><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l2.5 11h11L21 7H6.5"/></svg>`,
-  bowl:`<svg ${SV}><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-1.5 1-2 1-3M12 7c0-1.5 1-2 1-3M16 7c0-1.5 1-2 1-3"/></svg>`};
+  note:`<svg ${SV}><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>`};
 $('#barBtns').innerHTML=`<button class="btn go" data-act="cook">&#9654; COOK</button><button class="btn" data-act="addbowl">+ BOWL</button><button class="btn" data-act="quick">+ FOOD</button><button class="btn" data-act="grocery">GROCERY</button><button class="btn" data-act="data">SETTINGS</button>`;
 
 /* ---------- nutrition math ---------- */
@@ -362,16 +356,16 @@ const nmSync=()=>{const g=JSON.stringify([settings.portion,settings.milk,setting
 const NM=m=>{let v=NMC.get(m);if(!v){v=nutMeal(m);NMC.set(m,v)}return v};
 
 /* ---------- state & filters ---------- */
-const S={kind:'all',range:'7d',sel:null,month:null,page:1,rows:20};
+const S={kind:'all',range:'all',sel:null,month:null,page:1},PER=20;   // fixed 20 rows a page, like the other apps
 {const t=new Date();S.month=new Date(t.getFullYear(),t.getMonth(),1)}
-const RL={today:'Today',week:'This week','7d':'Last 7 days','30d':'Last 30 days','90d':'Last 90 days',all:'All time'};
+const RL={today:'Today',week:'This week',month:'This month',all:'All time'};
 const kindOk=m=>S.kind==='all'||m.kind===S.kind;
 function range(){
   if(S.sel)return[S.sel,S.sel];
   const t=today();
   switch(S.range){
-    case'today':return[t,t];case'week':return[monday(t),t];case'7d':return[addDays(t,-6),t];
-    case'30d':return[addDays(t,-29),t];case'90d':return[addDays(t,-89),t];default:return['0000-00-00','9999-99-99'];
+    case'today':return[t,t];case'week':return[monday(t),t];case'month':return[t.slice(0,8)+'01',t];   // current calendar month, like the other apps
+    default:return['0000-00-00','9999-99-99'];
   }
 }
 function filtered(){const[a,b]=range();return meals.filter(m=>{const d=dayOf(m);return kindOk(m)&&d>=a&&d<=b})}
@@ -462,7 +456,7 @@ function planHTML(){
   return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">This week's rotation</h3><div class="lbl" style="margin-bottom:16px">Tap a day to change its planned protein. Dots show what you actually logged.</div>
     <div class="pdays">${cells}</div></div>
     <div class="ft"><span>Fish meals planned: <b class="${fc}">${fp}</b> / ${settings.fishTarget} target <span class="mu">· only salmon &amp; sardines add EPA/DHA</span></span>
-    <span style="display:flex;gap:8px"><button class="btn" data-act="grocery">${I.cart}Grocery list</button><button class="btn go" data-act="cook">${I.bowl}Cook today's bowl</button></span></div></div>`;
+    <span style="display:flex;gap:8px"><button class="btn" data-act="grocery">Grocery list</button><button class="btn go" data-act="cook">&#9654; Cook today's bowl</button></span></div></div>`;
 }
 function batchHTML(){
   const b=settings.batch,t=today();
@@ -539,10 +533,10 @@ function calendarHTML(){
     }
     h+=`<div class="cell wk">${wd?`<b class="${{ok:'grn',over:'red'}[kc(wk/wd)]||''}">${fi(wk/wd)}</b><small>avg · <span class="${wf?'grn':''}">${wf} fish</span></small>`:'—'}</div>`;
   }
-  return`<div class="card"><div class="bd"><h3 style="margin-bottom:10px">Meal Calendar</h3><div class="lbl">Avg calories / logged day</div>
+  return`<div class="card"><div class="bd"><h3 style="margin-bottom:10px">Meal calendar</h3><div class="lbl">Avg calories / logged day</div>
     <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl">Logged days: <b style="font-weight:500;color:var(--acc,#ffb000)">${md}</b> &nbsp;&nbsp; On target: <b class="${nOk?'grn':''}" style="font-weight:500">${nOk}</b> &nbsp;&nbsp; Fish meals: <b class="${mf?'grn':''}" style="font-weight:500">${mf}</b></div></div>
     <div class="cal">${h}</div></div>
-    <div class="ft calft"><div class="nav"><button data-act="mprev">‹</button><span>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span><button data-act="mnext">›</button><button class="tb" data-act="mtoday">Today</button></div>
+    <div class="ft calft"><div class="nav"><button data-act="mprev" aria-label="Previous month">‹</button><span>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span><button data-act="mnext" aria-label="Next month">›</button><button class="tb" data-act="mtoday">Today</button></div>
     <span>${md} days &nbsp;&nbsp; ${mb} meals</span></div></div>`;
 }
 
@@ -578,29 +572,29 @@ function chartsHTML(st,F){
 
 function tableHTML(f){
   f=[...f].sort((a,b)=>new Date(b.time)-new Date(a.time));
-  const pages=Math.max(1,Math.ceil(f.length/S.rows));S.page=Math.max(1,Math.min(S.page,pages));
-  const rows=f.slice((S.page-1)*S.rows,S.page*S.rows),tf=d=>new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
-  return`<div class="th"><h3>Meal log</h3><button class="btn" data-act="export">${I.dl}Export CSV</button></div>
-  <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>Date (local)</th><th>Meal</th><th class="num">Servings</th><th class="num">kcal</th><th class="num">Protein</th><th class="num">Carbs</th><th class="num">Fat</th><th class="num">Fiber</th><th class="num">EPA+DHA</th><th class="num">Milk</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
+  const n=f.length,pages=Math.max(1,Math.ceil(n/PER));S.page=Math.max(1,Math.min(S.page,pages));
+  const rows=f.slice((S.page-1)*PER,S.page*PER),tf=d=>new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  return`<div class="th"><h3>Log</h3><button class="btn" data-act="export">Export CSV</button></div>
+  <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>Time (local)</th><th>Meal</th><th class="num">Servings</th><th class="num">kcal</th><th class="num">Protein</th><th class="num">Carbs</th><th class="num">Fat</th><th class="num">Fiber</th><th class="num">EPA+DHA</th><th class="num">Milk</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
   ${rows.map(m=>{const t=NM(m).t,P=PROT[m.protein];return`<tr><td class="mu2">${tf(m.time)}</td>
     <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:${P.col};border-color:${P.col}55;background:${P.col}1a">${P.n}</span>${(m.omit||[]).length?` <span class="mu">− ${m.omit.join(', ')}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
     <td class="num">${m.kind==='bowl'?fnum(m.servings||1):'—'}</td><td class="num">${fi(t.kcal)}</td><td class="num">${fi(t.p)} g</td><td class="num">${fi(t.c)} g</td><td class="num">${fi(t.f)} g</td><td class="num">${fi(t.fib)} g</td>
     <td class="num ${t.epa>=.5?'grn':''}">${t.epa?fi(t.epa*1000)+' mg':'—'}</td><td class="num">${m.milk?'<span class="grn">✓</span>':'—'}</td>
-    <td><div class="acts"><button data-act="info" data-id="${m.id}" title="Nutrition">${I.info}</button><button data-act="edit" data-id="${m.id}" title="Edit">${I.note}</button></div></td></tr>`}).join('')
+    <td><div class="acts"><button data-act="info" data-id="${m.id}" title="Nutrition" aria-label="Nutrition">${I.info}</button><button data-act="edit" data-id="${m.id}" title="Edit" aria-label="Edit">${I.note}</button></div></td></tr>`}).join('')
   ||'<tr><td colspan="11" style="text-align:center;color:#8f8a7e;padding:30px">Nothing logged in this range</td></tr>'}
   </tbody></table></div>
-  <div class="tf"><div class="pg"><button data-act="pprev">‹</button>Page <input id="pgIn" aria-label="Page" type="number" min="1" value="${S.page}"> of ${pages}<button data-act="pnext">›</button></div>
-  <div class="pg"><select id="rowsSel" aria-label="Rows per page" class="rs">${[10,20,50,100].map(n=>`<option value="${n}" ${n===S.rows?'selected':''}>${n} rows</option>`).join('')}</select><span style="margin-left:8px">${f.length} records</span></div></div>`;
+  <div class="calf"><div><button data-act="pp" aria-label="Previous page">&lt;</button> Page <b>${S.page}</b> of ${pages} <button data-act="pn" aria-label="Next page">&gt;</button></div><span class="dim">${n} record${n===1?'':'s'}</span></div>`;
 }
 
 /* ---------- render ---------- */
 function render(){
   nmSync();
+  if(!RL[S.range])S.range='all';   // an old key ('7d','30d','90d') reads as All time
   $('#fKind').value=S.kind;$('#fRange').value=S.range;
   const rg=range(),f=filtered(),st=stats(f,rg),F='';   // the date range is shown once, under the filters, like the other apps
   $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
-  const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load demo data to explore.</div></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">${I.bowl}Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load demo</button></div></div>`;
+  const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load sample data to explore.</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">&#9654; Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load sample</button></div></div>`;
   // today and this week's plan don't depend on the filters, so they sit above them
   $('#top').innerHTML=ban+heroToday()+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`;
   $('#app').innerHTML=topCards(st,F)+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
@@ -652,7 +646,7 @@ function drawCook(){
   const t=nutMeal({kind:'bowl',servings:1,protein:p,milk:CK.milk}).t;
   const was=$('#mbox').classList.contains('ss');   // already open: redraw in place, don't slide up again
   openModal(`<div class="ckh"><h3 style="margin:0;font-size:15px">Complete Balanced Bowl</h3><button class="btn" data-act="close">Close</button></div>
-    <div class="ckh"><div><div class="lbl" style="margin-bottom:6px">Servings</div><div class="step"><button data-act="cks" data-v="-1">−</button><b>${s}</b><button data-act="cks" data-v="1">+</button></div></div>
+    <div class="ckh"><div><div class="lbl" style="margin-bottom:6px">Servings</div><div class="step"><button data-act="cks" data-v="-1" aria-label="Fewer servings">−</button><b>${s}</b><button data-act="cks" data-v="1" aria-label="More servings">+</button></div></div>
     <div><div class="lbl" style="margin-bottom:6px">Protein ${p===todayPlan()?'<span class="grn">(today\'s plan)</span>':''}</div><div class="vl">${PKEYS.map(k=>`<button class="chip${k===p?' on':''}" data-act="ckp" data-v="${k}">${PROT[k].n}${k===todayPlan()?'<em>today\'s plan</em>':k==='salmon'||k==='sardines'?'<em>omega-3</em>':''}</button>`).join('')}</div></div>
     <div><div class="lbl" style="margin-bottom:6px">Side</div><div class="vl multi"><button class="chip${CK.milk?' on':''}" data-act="ckm">Glass of milk<em>calcium · vitamin D</em></button></div></div></div>
     <div class="ns"><div>Per bowl<b>${fi(t.kcal)} kcal</b></div><div>Protein<b>${fi(t.p)} g</b></div><div>Carbs<b>${fi(t.c)} g</b></div><div>Fat<b>${fi(t.f)} g</b></div><div>Fiber<b>${fi(t.fib)} g</b></div><div>EPA+DHA<b class="${t.epa>=.5?'grn':''}">${fi(t.epa*1000)} mg</b></div></div>
@@ -749,22 +743,26 @@ function groceryForm(nd=7,per=1){
     <p class="mu">Built from your weekly rotation starting today.</p><div class="fg">
     <label>Days<input id="g_days" type="number" min="1" max="28" value="${nd}"></label><label>Bowls per day<input id="g_per" type="number" min="1" max="4" value="${per}"></label></div>
     <pre class="gl" id="g_out">${esc(groceryText(nd,per))}</pre>
-    <div class="mact"><div class="sp"></div><button class="btn pri" data-act="gcopy">${I.copy}Copy / share</button></div>`);
+    <div class="mact"><div class="sp"></div><button class="btn pri" data-act="gcopy">Copy / share</button></div>`);
 }
 function dataForm(){
-  const s=settings;
-  openModal(`<h3>Settings &amp; data</h3><div class="fg">
-    <label>Calorie target / day<input id="s_kcal" type="number" min="800" step="50" value="${s.kcal}"></label>
-    <label>Protein target / day (g)<input id="s_protein" type="number" min="20" step="5" value="${s.protein}"></label>
-    <label>Recipe rice amount is…<select id="s_rice"><option value="dry" ${s.riceAs==='dry'?'selected':''}>Uncooked (as written)</option><option value="cooked" ${s.riceAs==='cooked'?'selected':''}>Cooked</option></select></label>
-    <label>Seeds<select id="s_seed"><option value="flax" ${s.seed==='flax'?'selected':''}>Ground flaxseed</option><option value="chia" ${s.seed==='chia'?'selected':''}>Chia seeds</option></select></label>
-    <label>Milk<select id="s_milk"><option value="whole" ${s.milk==='whole'?'selected':''}>Whole</option><option value="2" ${s.milk==='2'?'selected':''}>2%</option><option value="skim" ${s.milk==='skim'?'selected':''}>Skim</option></select></label>
-    <label>Salmon/chicken/steak portion (oz cooked)<input id="s_portion" type="number" min="2" max="12" step="0.5" value="${s.portion}"></label>
-    <label>Fish meals / week target<input id="s_fish" type="number" min="0" max="7" value="${s.fishTarget}"></label><div></div>
-    <label class="full">Import CSV (this app's export)<input id="i_file" type="file" accept=".csv,text/csv"></label></div>
-    <p class="mu" style="margin-top:10px">Changing rice, seed, milk or portion settings recalculates all past bowls.</p>
-    <div class="mact"><button class="btn dng" data-act="clear">Clear all</button><button class="btn" data-act="demo">Load demo</button><div class="sp"></div>
-    <button class="btn" data-act="export">Export CSV</button><button class="btn pri" data-act="savedata">Save</button></div>`);
+  const s=settings,o=(v,l,c)=>`<option value="${v}"${c===v?' selected':''}>${l}</option>`,row=(l,h,c)=>`<div><span><b>${l}</b><small>${h}</small></span>${c}</div>`;
+  openModal(`<h3>SETTINGS</h3>
+  <div class="ui-set">
+    ${row('Calorie target','kcal a day',`<input id="s_kcal" type="number" min="800" step="50" value="${s.kcal}" aria-label="Calorie target">`)}
+    ${row('Protein target','Grams a day',`<input id="s_protein" type="number" min="20" step="5" value="${s.protein}" aria-label="Protein target">`)}
+    ${row('Recipe rice','The recipe as written measures it uncooked',`<select id="s_rice" aria-label="Recipe rice">${o('dry','Uncooked',s.riceAs)}${o('cooked','Cooked',s.riceAs)}</select>`)}
+    ${row('Seeds','Ground flax or chia · plant omega-3',`<select id="s_seed" aria-label="Seeds">${o('flax','Flax',s.seed)}${o('chia','Chia',s.seed)}</select>`)}
+    ${row('Milk','The glass on the side',`<select id="s_milk" aria-label="Milk">${o('whole','Whole',s.milk)}${o('2','2%',s.milk)}${o('skim','Skim',s.milk)}</select>`)}
+    ${row('Portion','Salmon, chicken, steak · oz cooked',`<input id="s_portion" type="number" min="2" max="12" step="0.5" value="${s.portion}" aria-label="Portion">`)}
+    ${row('Fish meals target','Per week',`<input id="s_fish" type="number" min="0" max="7" value="${s.fishTarget}" aria-label="Fish meals target">`)}
+    ${row('Sync',window.ISXSync?.state==='ok'?'On · this app syncs across your devices':'Keep every app the same on all your devices','<span class="ui-set-btns"><button type="button" class="btn" data-act="sync">SYNC…</button></span>')}
+    ${row('CSV','Import this app\'s export, or export the current filter','<span class="ui-set-btns"><button type="button" class="btn" data-act="icsv">IMPORT CSV</button><button type="button" class="btn" data-act="export">EXPORT CSV</button></span><input id="i_file" type="file" accept=".csv,text/csv" hidden>')}
+    ${row('Sample data','Five weeks of example meals to explore','<span class="ui-set-btns"><button type="button" class="btn" data-act="demo">LOAD SAMPLE</button></span>')}
+    ${row('Delete everything','Removes all meals and the batch record on this device.','<span class="ui-set-btns"><button type="button" class="btn ui-danger" data-act="clear">CLEAR ALL</button></span>')}
+  </div>
+  <p class="mu" style="font-size:11px;margin:8px 0 0">Changing rice, seed, milk or portion recalculates all past bowls.</p>
+  <div class="mact"><button class="btn pri" data-act="savedata">SAVE</button></div>`);
 }
 
 /* ---------- csv ---------- */
@@ -823,8 +821,7 @@ $('#fKind').onchange=e=>{S.kind=e.target.value;S.page=1;render()};
 $('#fRange').onchange=e=>{S.range=e.target.value;S.sel=null;S.page=1;render()};
 document.addEventListener('change',e=>{
   const id=e.target.id;
-  if(id==='rowsSel'){S.rows=+e.target.value;S.page=1;render()}
-  if(id==='pgIn'){S.page=+e.target.value||1;render()}
+  if(id==='i_file'){const file=e.target.files[0];e.target.value='';if(file)importFile(file)}
   if(id==='q_name'){const l=meals.filter(m=>m.kind==='quick'&&m.name.toLowerCase()===e.target.value.trim().toLowerCase()).sort((a,b)=>new Date(b.time)-new Date(a.time))[0];
     if(l)['kcal','p','c','f','fib'].forEach(k=>$('#q_'+k).value=l[k]??'')}
 });
@@ -840,7 +837,7 @@ document.addEventListener('click',e=>{
     mprev:()=>{S.month=new Date(S.month.getFullYear(),S.month.getMonth()-1,1);render()},
     mnext:()=>{S.month=new Date(S.month.getFullYear(),S.month.getMonth()+1,1);render()},
     mtoday:()=>{const t=new Date();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.sel=null;render()},
-    pprev:()=>{S.page--;render()},pnext:()=>{S.page++;render()},
+    pp:()=>{if(S.page>1){S.page--;render()}},pn:()=>{S.page++;render()},   // tableHTML clamps to the last page
     cook:()=>cookMode(),addbowl:()=>bowlForm(),quick:()=>quickForm(),info:()=>info(id),
     edit:()=>{const m=meals.find(x=>x.id===id);m?.kind==='bowl'?bowlForm(m):quickForm(m)},
     savebowl:()=>saveBowl(id),savequick:()=>saveQuick(id),close:closeModal,export:exportCSV,data:dataForm,grocery:()=>groceryForm(),batch:batchForm,
@@ -852,10 +849,10 @@ document.addEventListener('click',e=>{
     gcopy:async()=>{const t=$('#g_out').textContent;try{if(navigator.share)await navigator.share({text:t});else{await navigator.clipboard.writeText(t);toast('Copied to clipboard')}}catch{}},
     savebatch:()=>{const d=$('#b_date').value;if(!d)return toast('Pick a date');settings.batch={date:d,made:Math.max(1,+$('#b_made').value||5)};save();closeModal();render()},
     clearbatch:()=>{settings.batch=null;save();closeModal();render()},
-    savedata:async()=>{Object.assign(settings,{kcal:Math.max(800,+$('#s_kcal').value||2000),protein:Math.max(20,+$('#s_protein').value||100),riceAs:$('#s_rice').value,seed:$('#s_seed').value,
-      milk:$('#s_milk').value,portion:Math.max(2,+$('#s_portion').value||4.5),fishTarget:Math.max(0,+$('#s_fish').value||0)});save();
-      const file=$('#i_file').files[0];closeModal();if(file)await importFile(file);else render()},
-    demo:()=>{demoData();save();closeModal();S.range='7d';S.sel=null;render();toast('Demo data loaded')},
+    savedata:()=>{Object.assign(settings,{kcal:Math.max(800,+$('#s_kcal').value||2000),protein:Math.max(20,+$('#s_protein').value||100),riceAs:$('#s_rice').value,seed:$('#s_seed').value,
+      milk:$('#s_milk').value,portion:Math.max(2,+$('#s_portion').value||4.5),fishTarget:Math.max(0,+$('#s_fish').value||0)});save();closeModal();render();toast('Settings saved')},
+    icsv:()=>$('#i_file').click(),sync:()=>{closeModal();document.getElementById('isx-sync')?.click()},
+    demo:()=>{demoData();save();closeModal();S.range='all';S.sel=null;S.page=1;render();toast('Sample data loaded')},
     clear:()=>{if(confirm('Delete ALL meals and the batch record? Export a CSV first if you want a backup.')){meals=[];settings.batch=null;save();closeModal();render()}}
   };
   A[b.dataset.act]?.();
