@@ -463,10 +463,10 @@ function batchHTML(){
     <div class="empty" style="height:auto;padding:24px 0">No batch logged yet</div></div><div class="ft"><span class="mu">Cook once, assemble daily</span><button class="btn go" data-act="batch">I batch-cooked</button></div></div>`;
   const used=meals.filter(m=>m.kind==='bowl'&&dayOf(m)>=b.date&&!(m.omit||[]).includes('rice')).reduce((s,m)=>s+(m.servings||1),0);
   const left=Math.max(0,b.made-used),age=diffDays(b.date,t),dl=4-age;
-  const [cls,msg]=dl<0?['red',`Past the 4-day window — discard leftovers`]:dl===0?['amb','Last safe day — use today']:['grn',`${dl} day${dl>1?'s':''} left (use by ${pd(addDays(b.date,4)).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})})`];
-  return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:18px">Cooked ${fdate(b.date)}</div>
-    ${hbar('Servings left',`<b>${fnum(left)}</b> / ${b.made}`,b.made?left/b.made:0,'#ffbe1a')}
-    ${hbar('Freshness',`<span class="${cls}">${msg}</span>`,Math.max(0,dl)/4,dl<=0?'#ff4545':'#7f9cb0')}</div>
+  const [cls,msg]=dl<0?['red',`Past the 4-day window — discard leftovers`]:dl===0?['amb','Last safe day — use today']:['grn',`${dl} day${dl>1?'s':''} left`];
+  return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:18px">Cooked ${fdate(b.date)} · use by ${pd(addDays(b.date,4)).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+    ${hbar('Servings left',`<b>${fnum(left)}</b> / ${b.made}`,b.made?left/b.made:0,'#ffb000')}
+    ${hbar('Freshness',`<span class="${cls}">${msg}</span>`,Math.max(0,dl)/4,`var(--${cls==='grn'?'g':cls==='red'?'r':'acc'})`)}</div>
     <div class="ft"><span class="mu">${left<1||dl<=0?'Time to cook a new batch':'Rice + beans ready'}</span><button class="btn ${left<1||dl<=0?'go':''}" data-act="batch">New batch</button></div></div>`;
 }
 
@@ -506,9 +506,9 @@ function topCards(st,F){
     ${gauge([[Math.min(1,e/EPA_WK),'v']],Math.round(e/EPA_WK*100)+'%')}
     ${lr(st.fish7>=settings.fishTarget?'var(--g)':'#2c2c2c','Fish meals (7d)',`${st.fish7} / ${settings.fishTarget}`)}${lr('#2c2c2c','Weekly target',EPA_WK+' g')}${lr('#2c2c2c','Plant ALA / day',fnum(r1(st.av('ala')))+' g')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Macro split</h3><div class="lbl">% of calories</div><div class="big">${Math.round(st.mac.p*100)} / ${Math.round(st.mac.c*100)} / ${Math.round(st.mac.f*100)}</div>
-    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'#ffb000')}
-    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'#c8b38a')}
-    ${hbar('Fat',`${fi(st.av('f'))} g · ${pct(st.mac.f,1)}`,st.mac.f/.5,'#7f9cb0')}</div></div>${F}</div>
+    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'var(--g)')}
+    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'#ffb000')}
+    ${hbar('Fat',`${fi(st.av('f'))} g · ${pct(st.mac.f,1)}`,st.mac.f/.5,'var(--r)')}</div></div>${F}</div>
   </div>`;
 }
 
