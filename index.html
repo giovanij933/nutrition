@@ -803,9 +803,11 @@ function demoData(){
   for(let k=35;k>=1;k--){
     const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-k);if(rnd()<.1)continue;
     const plan=settings.plan[(d.getDay()+6)%7],prot=rnd()<.2?PKEYS[Math.floor(rnd()*PKEYS.length)]:plan;
-    const at=new Date(d);at.setHours(12,15+Math.floor(rnd()*40));
-    meals.push({id:uid(),time:at.toISOString(),kind:'bowl',servings:1,protein:prot,milk:rnd()<.85,omit:rnd()<.1?['avocado']:[],note:''});
-    if(rnd()<.35){const ev=new Date(d);ev.setHours(19,0);meals.push({id:uid(),time:ev.toISOString(),kind:'bowl',servings:1,protein:'egg',milk:rnd()<.5,omit:[],note:''})}
+    // egg bowls are breakfast (7:00–8:30), every other protein is lunch
+    const breakfast=()=>{const t=new Date(d);t.setHours(7,Math.floor(rnd()*90));return t},lunch=()=>{const t=new Date(d);t.setHours(12,15+Math.floor(rnd()*40));return t};
+    meals.push({id:uid(),time:(prot==='egg'?breakfast():lunch()).toISOString(),kind:'bowl',servings:1,protein:prot,milk:rnd()<.85,omit:rnd()<.1?['avocado']:[],note:''});
+    // some days add an egg bowl for breakfast too (not when the day's bowl already is eggs)
+    if(rnd()<.35&&prot!=='egg')meals.push({id:uid(),time:breakfast().toISOString(),kind:'bowl',servings:1,protein:'egg',milk:rnd()<.5,omit:[],note:''});
     const sn=Math.floor(rnd()*3);for(let i=0;i<sn;i++){const[s,kc,p,c,f,fib]=snacks[Math.floor(rnd()*snacks.length)],t=new Date(d);t.setHours(15+i*3,0);meals.push({id:uid(),time:t.toISOString(),kind:'quick',name:s,kcal:kc,p,c,f,fib,note:''})}
   }
   if(!settings.batch)settings.batch={date:addDays(today(),-2),made:5};
