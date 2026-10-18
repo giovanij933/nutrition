@@ -241,6 +241,16 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
 .box.ss .seg button{border:0;border-right:1px solid var(--line2);padding:11px 2px;text-align:center;background:none;font-size:12px;transition:background-color .18s,color .18s}
 .box.ss .seg button:last-child{border-right:0}
 .box.ss .seg button.on{background:var(--amber);color:#000}
+/* cross-filters: anything with .pick narrows every card and the log; the filters show as chips under the bar */
+.pick{cursor:pointer}.pick:focus-visible{outline:1px solid var(--acc);outline-offset:2px}
+.lr.pick{margin:0 -6px;padding-left:6px;padding-right:6px}.lr.pick:hover{background:#121212}
+.lr.on{background:#1a1406;box-shadow:inset 2px 0 0 var(--acc)}
+.ks .pick:hover,.ks .pick.on,.ks .pick.on b,.wl .pick:hover{color:var(--acc)}.wl .pick{border-bottom:1px dotted var(--line2)}.wl .pick.on{color:var(--acc);border-color:var(--acc)}
+.chart .off,.cell.off{opacity:.25}.chart .hit{fill:transparent}.chart .hit.pick:hover{fill:rgba(255,176,0,.08)}.chart .hit.on{fill:rgba(255,176,0,.12)}
+.radar text.pick:hover,.radar text.on{fill:var(--acc)}.radar text.off{opacity:.4}
+.xf{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 12px}
+.xf span{color:var(--mu);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-right:2px}
+.xf button{border:1px solid var(--acc);color:var(--acc);padding:5px 8px;font-size:12px}.xf button b{font-weight:600}.xf .clr{border-color:var(--line2);color:var(--mu)}
 h1.brand{margin:0}
 .cell span{color:#a9a498}
 </style>
@@ -258,6 +268,7 @@ h1.brand{margin:0}
   </select>
   <span id="ctx" class="ctx"></span>
 </div>
+<div id="xf" class="xf" hidden></div>
 <div id="app" role="main"></div>
 <div id="modal" class="modal hidden"><div class="box" id="mbox"></div></div>
 
@@ -320,7 +331,7 @@ const today=()=>ymd(new Date());
 // a meal's day, worked out once per timestamp (it's asked for many times per render)
 const DOC=new Map(),dayOf=m=>{let d=DOC.get(m.time);if(d===undefined){d=ymd(new Date(m.time));DOC.set(m.time,d)}return d};
 // formatters made once: toLocaleString builds a new one on every call, which adds up over long tables and charts
-const FMT={dmy:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}),dt:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}),
+const FMT={md:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric'}),dmy:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}),dt:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}),
   n0:new Intl.NumberFormat('en-US',{maximumFractionDigits:0}),n1:new Intl.NumberFormat('en-US',{maximumFractionDigits:1}),n2:new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
 const fdate=s=>FMT.dmy.format(pd(s));
 const fsd=s=>pd(s).toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
@@ -366,19 +377,30 @@ const nmSync=()=>{const g=JSON.stringify([settings.portion,settings.milk,setting
 const NM=m=>{let v=NMC.get(m);if(!v){v=nutMeal(m);NMC.set(m,v)}return v};
 
 /* ---------- state & filters ---------- */
-const S={kind:'all',range:'all',sel:null,month:null,page:1},PER=20;   // fixed 20 rows a page, like the other apps
+const S={kind:'all',range:'all',sel:null,month:null,page:1,x:{}},PER=20;   // fixed 20 rows a page, like the other apps; x: cross-filters set by clicking a card (prot, fish, milk, cres)
 {const t=new Date();S.month=new Date(t.getFullYear(),t.getMonth(),1)}
 const RL={today:'Today',week:'This week',month:'This month',all:'All time'};
 const kindOk=m=>S.kind==='all'||m.kind===S.kind;
-function range(){
-  if(S.sel)return[S.sel,S.sel];
+// a day's calorie result: on target within 10%, more than 10% over, or under (the calendar's rule)
+const kres=v=>v>settings.kcal*1.1?'over':v>=settings.kcal*.9?'ok':'under';
+function range(sel=S.sel){
+  if(sel)return[sel,sel];
   const t=today();
   switch(S.range){
     case'today':return[t,t];case'week':return[monday(t),t];case'month':return[t.slice(0,8)+'01',t];   // current calendar month, like the other apps
     default:return['0000-00-00','9999-99-99'];
   }
 }
-function filtered(){const[a,b]=range();return meals.filter(m=>{const d=dayOf(m);return kindOk(m)&&d>=a&&d<=b})}
+// skip leaves filters out ('kind milk'): a card that sets a filter shows everything else, with its own choice highlighted.
+// 'day' leaves out the selected calendar day but keeps the range
+function view(useRange=true,skip=''){
+  const sk=skip.split(' '),x=S.x,on=k=>!sk.includes(k)&&x[k]!=null,[a,b]=range(sk.includes('day')?null:S.sel);
+  let f=meals.filter(m=>{const d=dayOf(m),bw=m.kind==='bowl';return(sk.includes('kind')||kindOk(m))&&(!useRange||d>=a&&d<=b)
+    &&(!on('prot')||bw&&m.protein===x.prot)&&(!on('fish')||bw&&!!PROT[m.protein]?.fish===!!x.fish)&&(!on('milk')||bw&&!!m.milk)});
+  // on target / over / under days: decided by the day's calories over the meals the other filters leave
+  if(on('cres')){const D={};f.forEach(m=>{const d=dayOf(m);D[d]=(D[d]||0)+(NM(m).t.kcal||0)});f=f.filter(m=>kres(D[dayOf(m)])===x.cres)}
+  return f;
+}
 
 /* ---------- stats ---------- */
 function stats(ms,rg){
@@ -402,15 +424,16 @@ function stats(ms,rg){
 
 /* ---------- svg charts ---------- */
 const ARC='M12 62A50 50 0 0 1 112 62';
-function gauge(segs,text){
+// tip: the ring's tooltip (the rings here are ratios to a target, so they explain themselves rather than filter)
+function gauge(segs,text,tip){
   const col={g:'#ffb000',r:'#ff4545',a:'#ff7a33',b:'#7f9cb0',n:'#8f8a7e',v:'#33ff66'};
   let off=0;
   const arcs=segs.filter(([f])=>f>0).map(([f,c])=>{f=Math.min(f,1-off);const a=`<path d="${ARC}" stroke="${col[c]}" pathLength="100" stroke-dasharray="${(f*100).toFixed(2)} 100" stroke-dashoffset="${(-off*100).toFixed(2)}"/>`;off+=f;return a}).join('');
-  return`<svg class="gauge" viewBox="0 0 124 70"><path d="${ARC}" stroke="#2c2c2c"/>${arcs}<text x="62" y="60" text-anchor="middle">${text}</text></svg>`;
+  return`<svg class="gauge" viewBox="0 0 124 70">${tip?`<title>${esc(tip)}</title>`:''}<path d="${ARC}" stroke="#2c2c2c"/>${arcs}<text x="62" y="60" text-anchor="middle">${text}</text></svg>`;
 }
 // same colours as the other apps: progress toward a target fills green. A cap (calories) shows what runs more
 // than 10% over in red; a minimum (protein) just stays full
-const tgtGauge=(v,t,cap)=>{const f=t?v/t:0;return gauge(f<=1?[[f,'v']]:[[1/f,'v'],[1-1/f,cap&&f>1.1?'r':'v']],Math.round(f*100)+'%')};
+const tgtGauge=(v,t,cap,tip)=>{const f=t?v/t:0;return gauge(f<=1?[[f,'v']]:[[1/f,'v'],[1-1/f,cap&&f>1.1?'r':'v']],Math.round(f*100)+'%',tip)};
 const kcTone=v=>v>settings.kcal*1.1?'red':v>=settings.kcal*.9?'grn':'';
 function smooth(pts){
   let d=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
@@ -420,28 +443,39 @@ function smooth(pts){
   }
   return d;
 }
-function area(series,color,tgt){
+// long ranges: one click/hover column stands for a run of k neighbouring points, so each stays wide enough on a phone
+function cols(n,max){const k=Math.ceil(n/max)||1,r=[];for(let e=n;e>0;e-=k)r.unshift([Math.max(0,e-k),e]);return r}
+// at(i0,i1) → {a, title, on, off} for the points one column stands for: what clicking it does, what hovering says.
+// The click areas are paths, not rects, so UI.animate's bar growth leaves them alone
+const hit=m=>m?`<path class="hit${m.a?' pick':''}${m.on?' on':''}"${m.a?` ${m.a}`:''} d="${m.d}"><title>${esc(m.title)}</title></path>`:'';
+function area(series,color,tgt,at){
   if(series.length<2)return'<div class="empty">Not enough data yet</div>';
   const W=800,H=200,p=12,mx=Math.max(1,...series,(tgt||0)*1.1),X=i=>p+i*(W-2*p)/(series.length-1),Y=v=>p+(mx-v)/mx*(H-2*p);
-  const d=smooth(series.map((v,i)=>[X(i),Y(v)])),id='a'+uid();
+  const d=smooth(series.map((v,i)=>[X(i),Y(v)])),id='a'+uid(),cw=(W-2*p)/(series.length-1);
+  const hits=at?cols(series.length,120).map(([i0,i1])=>{const m=at(i0,i1),x0=Math.max(0,X(i0)-cw/2),x1=Math.min(W,X(i1-1)+cw/2);return m&&hit({...m,d:`M${x0.toFixed(1)} 0H${x1.toFixed(1)}V${H}H${x0.toFixed(1)}z`})}).join(''):'';
   return`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
     <path d="${d} L${X(series.length-1)},${Y(0)} L${X(0)},${Y(0)} Z" fill="${color}" fill-opacity=".1"/>
     ${tgt?`<line x1="${p}" x2="${W-p}" y1="${Y(tgt)}" y2="${Y(tgt)}" stroke="#2c2c2c" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`:''}
-    <path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>${hits}</svg>`;
 }
-function bars(vals,{labels,tgt}={}){
+// with at, each column gets a full-height area to click or hover, and its bars dim unless they're the chosen one (m.on)
+function bars(vals,{labels,tgt,at}={}){
   if(!vals.length||!Math.max(...vals))return'<div class="empty">No data in range</div>';
   const W=400,H=200,p=labels?28:16,mx=Math.max(1,...vals,(tgt||0)*1.1),n=vals.length,slot=(W-20)/n,bw=Math.min(slot*.7,300),id='b'+uid(),Y=v=>H-p-v/mx*(H-p-12);
-  const rects=vals.map((v,i)=>{const x=10+i*slot+(slot-bw)/2,y=Y(v);
-    return`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,H-p-y).toFixed(1)}" fill="#ffb000"/>${labels?`<text x="${(x+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#8f8a7e">${labels[i]}</text>`:''}`}).join('');
-  return`<svg class="chart" viewBox="0 0 ${W} ${H}" ${labels?'':'preserveAspectRatio="none"'}>${rects}
+  const M=at?cols(n,60).map(([i0,i1])=>({i0,i1,m:at(i0,i1)})):[],mOf=i=>M.find(c=>i>=c.i0&&i<c.i1)?.m;
+  const rects=vals.map((v,i)=>{const x=10+i*slot+(slot-bw)/2,y=Y(v),m=mOf(i);
+    return`<rect${m&&m.off?' class="off"':''} x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,H-p-y).toFixed(1)}" fill="#ffb000"/>${labels?`<text x="${(x+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#8f8a7e">${labels[i]}</text>`:''}`}).join('');
+  const hits=M.map(({i0,i1,m})=>m&&hit({...m,on:0,d:`M${(10+i0*slot).toFixed(1)} 0h${((i1-i0)*slot).toFixed(1)}v${H}h-${((i1-i0)*slot).toFixed(1)}z`})).join('');
+  return`<svg class="chart" viewBox="0 0 ${W} ${H}" ${labels?'':'preserveAspectRatio="none"'}>${rects}${hits}
     ${tgt?`<line x1="6" x2="${W-6}" y1="${Y(tgt).toFixed(1)}" y2="${Y(tgt).toFixed(1)}" stroke="#8f8a7e" stroke-dasharray="4 4" ${labels?'':'vector-effect="non-scaling-stroke"'}/>`:''}</svg>`;
 }
-function radar(labels,raw){
+// pick[i] = {f:'key:value', title}: the label becomes a cross-filter, bright when chosen, the others dim
+function radar(labels,raw,pick=[]){
   const n=labels.length,cx=150,cy=122,R=76,A=labels.map((_,i)=>(-90+i*360/n)*Math.PI/180),mx=Math.max(...raw)||1;
   const pt=(i,v)=>[cx+R*v*Math.cos(A[i]),cy+R*v*Math.sin(A[i])];
   const poly=f=>A.map((_,i)=>pt(i,f(i)).map(x=>x.toFixed(1)).join(',')).join(' ');
-  const lab=labels.map((l,i)=>{const[x,y]=pt(i,1.2),c=Math.cos(A[i]);return`<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${Math.abs(c)<.2?'middle':c>0?'start':'end'}">${l}</text>`}).join('');
+  const lab=labels.map((l,i)=>{const[x,y]=pt(i,1.2),c=Math.cos(A[i]),k=pick[i],f=k&&k.f;
+    return`<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${Math.abs(c)<.2?'middle':c>0?'start':'end'}"${f?` class="pick${xon(f)?' on':xoff(f)?' off':''}" role="button" tabindex="0" aria-pressed="${xon(f)}" data-act="xf" data-v="${f}"`:''}>${k?`<title>${esc(k.title)}</title>`:''}${l}</text>`}).join('');
   return`<svg class="radar" viewBox="0 0 300 240" font-size="10" letter-spacing=".08em" fill="#8f8a7e">
     ${[1,.75,.5,.25].map(v=>`<polygon points="${poly(()=>v)}" fill="none" stroke="#2c2c2c"/>`).join('')}
     ${A.map((_,i)=>{const[x,y]=pt(i,1);return`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#2c2c2c"/>`}).join('')}
@@ -450,9 +484,17 @@ function radar(labels,raw){
 
 /* ---------- sections ---------- */
 const foot=(a,b)=>`<div class="ft"><span>${a}</span><span>${b}</span></div>`;
-const lr=(col,label,v,p)=>`<div class="lr"><i class="dot" style="background:${col}"></i><span>${label}</span><b>${v}</b><em>${p??''}</em></div>`;
-const er=(col,label,val,tip='')=>`<div class="er"><i class="dot" style="background:${col}"></i><span>${label}</span><b>${val}</b><i class="q" title="${esc(tip)}">i</i></div>`;
-const hbar=(label,txt,f,grad)=>`<div class="row"><span>${label}</span><span>${txt}</span></div><div class="hb"><i style="width:${Math.min(1,f||0)*100}%;background:${grad}"></i></div>`;
+// f = 'key:value' makes a row a cross-filter: click (or Enter) to narrow everything to it, again to clear it
+const xval=k=>k==='kind'?(S.kind==='all'?null:S.kind):k==='day'?S.sel:S.x[k];
+const xon=f=>{const i=f.indexOf(':'),v=xval(f.slice(0,i));return v!=null&&String(v)===f.slice(i+1)},xoff=f=>xval(f.slice(0,f.indexOf(':')))!=null&&!xon(f);
+const pk=(f,tip)=>f?` class="pick${xon(f)?' on':''}" role="button" tabindex="0" aria-pressed="${xon(f)}" data-act="xf" data-v="${f}"${tip?` title="${esc(tip)}"`:''}`:tip?` title="${esc(tip)}"`:'';
+const lr=(col,label,v,p,f,tip)=>`<div class="lr${f?' pick'+(xon(f)?' on':''):''}"${f?` role="button" tabindex="0" aria-pressed="${xon(f)}" data-act="xf" data-v="${f}"`:''}${tip?` title="${esc(tip)}"`:''}><i class="dot" style="background:${col}"></i><span>${label}</span><b>${v}</b><em>${p??''}</em></div>`;
+const er=(col,label,val,tip='',row='')=>`<div class="er"${row?` title="${esc(row)}"`:''}><i class="dot" style="background:${col}"></i><span>${label}</span><b>${val}</b><i class="q" title="${esc(tip)}">i</i></div>`;
+const hbar=(label,txt,f,grad,tip)=>{const t=tip?` title="${esc(tip)}"`:'';return`<div class="row"${t}><span>${label}</span><span>${txt}</span></div><div class="hb"${t}><i style="width:${Math.min(1,f||0)*100}%;background:${grad}"></i></div>`};
+const fmd=s=>FMT.md.format(pd(s));
+// chart columns → their day ('Oct 14: 2,430 kcal — click to show this day'); a stretch of days is hover-only
+const dayAt=(ds,vals,fmt)=>(i0,i1)=>{const a=ds[i0].d,b=ds[i1-1].d,one=i1-i0===1;
+  return{a:one?`data-act="day" data-v="${a}"`:'',title:one?`${fmd(a)}: ${fmt(vals[i0])} — click to show this day`:`${fmd(a)} – ${fmd(b)}: avg ${fmt(vals.slice(i0,i1).reduce((x,y)=>x+y,0)/(i1-i0))}`,on:one&&S.sel===a,off:S.sel&&!(S.sel>=a&&S.sel<=b)}};
 
 function planHTML(){
   const mon=monday(today()),t=today(),N=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -496,53 +538,55 @@ function weightHTML(){
   return`<div class="grid gm">
   <div class="card"><div class="bd"><div class="eqh"><div><h3>Body weight</h3><div class="big" style="font-size:20px">${fnum(r1(last.w))} <span class="mu" style="font-size:12px;font-weight:500">${U} · ${fdate(last.d)}</span></div><div class="lbl" style="margin-top:4px">From your morning check-in · last 30 days</div></div>
     <div class="ks"><div>7-DAY AVG<b>${w7!=null?fnum(r1(w7)):'—'}</b></div><div>WEEK CHANGE<b class="${rate==null?'':rate<0?'grn':''}">${rate==null?'—':(rate>0?'+':'')+fnum(r1(rate))}</b></div><div>WEIGH-INS<b>${W30.length}</b></div></div></div>
-    ${W30.length>1?area(W30.map(w=>r1(w-lo)),'#7f9cb0'):'<div class="empty">Add your weight at check-in on TODAY</div>'}</div></div>
+    ${W30.length>1?area(W30.map(w=>r1(w-lo)),'#7f9cb0',0,(i0,i1)=>{const P=W.filter(x=>x.d>since(30)).slice(i0,i1);return{title:P.length>1?`${fmd(P[0].d)} – ${fmd(P.at(-1).d)}`:`${fmd(P[0].d)}: ${fnum(r1(P[0].w))} ${U}`}}):'<div class="empty">Add your weight at check-in on TODAY</div>'}</div></div>
   <div class="card"><div class="bd"><h3>Weight vs calories</h3><div class="lbl">Last 2 weeks</div><div class="big" style="font-size:20px">${say}</div>
     ${lr(ACC,'Average intake',k14!=null?`${fi(k14)} kcal`:'—')}${lr('#555','Your target',`${fi(settings.kcal)} kcal`)}${lr('var(--b)','Days with meals logged',`${kv.length} / 14`)}
     <div class="lbl" style="margin-top:10px">${rate==null||k14==null?'Needs two weeks of weigh-ins and logged meals.':Math.abs(rate)<(U==='kg'?.1:.2)?`About ${fi(k14)} kcal a day keeps you at this weight.`:`Each ${U==='kg'?'0.5 kg':'1 lb'} a week is roughly ${U==='kg'?'550':'500'} kcal a day ${rate<0?'below':'above'} what you burn.`}</div></div></div>
   </div>`;
 }
-function topCards(st,F){
-  const kc=st.av('kcal'),pr=st.av('p'),e=st.epa7;
+// the Calories card sets the meal kind and milk filters, so it leaves them out (stK)
+function topCards(st,F,stK){
+  const kc=stK.av('kcal'),pr=st.av('p'),e=st.epa7,kb=stK.avS('base','kcal')+stK.avS('prot','kcal'),km=stK.avS('milk','kcal'),kq=stK.avS('quick','kcal'),of=v=>kc?pct(v,kc)+' of the day':'';
   return`<div class="grid g4">
   <div class="card"><div class="bd"><h3>Calories</h3><div class="lbl">Avg / logged day</div><div class="big ${kcTone(kc)}">${fi(kc)}</div>
-    ${tgtGauge(kc,settings.kcal,1)}
-    ${lr('#2c2c2c','Bowls',fi(st.avS('base','kcal')+st.avS('prot','kcal')))}${lr('#2c2c2c','Milk',fi(st.avS('milk','kcal')))}${lr('#2c2c2c','Other foods',fi(st.avS('quick','kcal')))}</div>${F}</div>
+    ${tgtGauge(kc,settings.kcal,1,`${fi(kc)} of ${fi(settings.kcal)} kcal target a day (${pct(kc,settings.kcal)})`)}
+    ${lr('#2c2c2c','Bowls',fi(kb),'','kind:bowl',`Bowls: ${fi(kb)} kcal a day, ${of(kb)} — click to show only bowls`)}${lr('#2c2c2c','Milk',fi(km),'','milk:1',`Milk: ${fi(km)} kcal a day — click to show only bowls with milk`)}${lr('#2c2c2c','Other foods',fi(kq),'','kind:quick',`Other foods: ${fi(kq)} kcal a day, ${of(kq)} — click to show only other foods`)}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Avg g / logged day</div><div class="big ${pr>=settings.protein?'grn':''}">${fi(pr)} g</div>
-    ${tgtGauge(pr,settings.protein)}
-    ${lr('#2c2c2c','Bowl base',fi(st.avS('base','p'))+' g')}${lr('#2c2c2c','Rotation protein',fi(st.avS('prot','p'))+' g')}${lr('#2c2c2c','Milk & other',fi(st.avS('milk','p')+st.avS('quick','p'))+' g')}</div>${F}</div>
+    ${tgtGauge(pr,settings.protein,0,`${fi(pr)} of ${fi(settings.protein)} g target a day (${pct(pr,settings.protein)})`)}
+    ${lr('#2c2c2c','Bowl base',fi(st.avS('base','p'))+' g','','','Rice, beans, vegetables and seeds')}${lr('#2c2c2c','Rotation protein',fi(st.avS('prot','p'))+' g','','','The bowl\'s eggs, fish or meat')}${lr('#2c2c2c','Milk & other',fi(st.avS('milk','p')+st.avS('quick','p'))+' g','','','Milk on the side plus other foods')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Omega-3</h3><div class="lbl">EPA + DHA, last 7 days</div><div class="big ${e>=EPA_WK?'grn':''}">${fnum(r1(e))} g</div>
-    ${gauge([[Math.min(1,e/EPA_WK),'v']],Math.round(e/EPA_WK*100)+'%')}
-    ${lr(st.fish7>=settings.fishTarget?'var(--g)':'#2c2c2c','Fish meals (7d)',`${st.fish7} / ${settings.fishTarget}`)}${lr('#2c2c2c','Weekly target',EPA_WK+' g')}${lr('#2c2c2c','Plant ALA / day',fnum(r1(st.av('ala')))+' g')}</div>${F}</div>
+    ${gauge([[Math.min(1,e/EPA_WK),'v']],Math.round(e/EPA_WK*100)+'%',`${fnum(r1(e))} of ${EPA_WK} g weekly target (${Math.round(e/EPA_WK*100)}%)`)}
+    ${lr(st.fish7>=settings.fishTarget?'var(--g)':'#2c2c2c','Fish meals (7d)',`${st.fish7} / ${settings.fishTarget}`,'','fish:1','Salmon and sardine bowls — click to show only fish bowls')}${lr('#2c2c2c','Weekly target',EPA_WK+' g')}${lr('#2c2c2c','Plant ALA / day',fnum(r1(st.av('ala')))+' g')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Macro split</h3><div class="lbl">% of calories</div><div class="big">${Math.round(st.mac.p*100)} / ${Math.round(st.mac.c*100)} / ${Math.round(st.mac.f*100)}</div>
-    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'var(--g)')}
-    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'#ffb000')}
-    ${hbar('Fat',`${fi(st.av('f'))} g · ${pct(st.mac.f,1)}`,st.mac.f/.5,'var(--r)')}</div></div>${F}</div>
+    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'var(--g)',`Protein: ${fi(pr)} g × 4 = ${fi(pr*4)} kcal, ${pct(st.mac.p,1)} of calories (bar full at 50%)`)}
+    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'#ffb000',`Carbs: ${fi(st.av('c'))} g × 4 = ${fi(st.av('c')*4)} kcal, ${pct(st.mac.c,1)} of calories (bar full at 70%)`)}
+    ${hbar('Fat',`${fi(st.av('f'))} g · ${pct(st.mac.f,1)}`,st.mac.f/.5,'var(--r)',`Fat: ${fi(st.av('f'))} g × 9 = ${fi(st.av('f')*9)} kcal, ${pct(st.mac.f,1)} of calories (bar full at 50%)`)}</div></div>${F}</div>
   </div>`;
 }
 
 function calendarHTML(){
   // same rule as the calories ring and the Today number: on target (within 10%) green, more than 10% over red,
   // under target faint amber
-  const kc=v=>v>settings.kcal*1.1?'over':v>=settings.kcal*.9?'ok':'under';
-  const dm={};meals.filter(kindOk).forEach(m=>{const d=dayOf(m),o=(dm[d]??={kcal:0,p:0,dots:[],fish:0});const t=NM(m).t;o.kcal+=t.kcal||0;o.p+=t.p||0;
+  // it sets the calorie-result filter, so it leaves it out and dims the days that don't match
+  const kc=kres,cr=S.x.cres;
+  const dm={};view(false,'cres').forEach(m=>{const d=dayOf(m),o=(dm[d]??={kcal:0,p:0,dots:[],fish:0});const t=NM(m).t;o.kcal+=t.kcal||0;o.p+=t.p||0;
     if(m.kind==='bowl'){o.dots.push(PROT[m.protein].col);if(PROT[m.protein].fish)o.fish++}else o.dots.push('#666')});
   const y=S.month.getFullYear(),mo=S.month.getMonth(),first=new Date(y,mo,1),start=new Date(first);start.setDate(1-first.getDay());
-  const tk=today();let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat','Week'].map(d=>`<div class="dh">${d}</div>`).join(''),mk=0,md=0,mb=0,mf=0,nOk=0;
+  const tk=today();let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat','Week'].map(d=>`<div class="dh">${d}</div>`).join(''),mk=0,md=0,mb=0,mf=0;const nr={ok:0,over:0,under:0};
   for(let w=0;w<6;w++){
     let wk=0,wd=0,wf=0;
     {const d0=new Date(start);d0.setDate(start.getDate()+w*7);if(w&&d0.getMonth()!==mo)break}   // no row that's all next month
     for(let i=0;i<7;i++){
       const d=new Date(start);d.setDate(start.getDate()+w*7+i);const k=ymd(d),v=dm[k];
       if(d.getMonth()!==mo){h+='<div class="cell hatch out"></div>';continue}
-      if(v){wk+=v.kcal;wd++;wf+=v.fish;mk+=v.kcal;md++;mf+=v.fish;mb+=v.dots.length;if(kc(v.kcal)==='ok')nOk++}
-      h+=`<div class="cell${v?' on '+kc(v.kcal):''}${k>tk?' fut':''}${S.sel===k?' sel':''}" data-day="${k}">
+      if(v){wk+=v.kcal;wd++;wf+=v.fish;mk+=v.kcal;md++;mf+=v.fish;mb+=v.dots.length;nr[kc(v.kcal)]++}
+      h+=`<div class="cell${v?' on '+kc(v.kcal):''}${v&&cr&&kc(v.kcal)!==cr?' off':''}${k>tk?' fut':''}${S.sel===k?' sel':''}" role="button" tabindex="0" aria-pressed="${S.sel===k}" data-act="day" data-v="${k}"${v?` title="${esc(`${fmd(k)}: ${fi(v.kcal)} kcal · ${fi(v.p)} g protein — click to show this day`)}"`:''}>
         <span>${d.getDate()}</span>${v?`<b>${fi(v.kcal)}</b><small>${fi(v.p)}g P</small><div class="cdots">${v.dots.slice(0,5).map(c=>`<i style="background:${c}"></i>`).join('')}</div>`:''}</div>`;
     }
     h+=`<div class="cell wk">${wd?`<b class="${{ok:'grn',over:'red'}[kc(wk/wd)]||''}">${fi(wk/wd)}</b><small>avg · <span class="${wf?'grn':''}">${wf} fish</span></small>`:'—'}</div>`;
   }
   return`<div class="card"><div class="bd"><h3 style="margin-bottom:10px">Meal calendar</h3><div class="lbl">Avg calories / logged day</div>
-    <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl">Logged days: <b style="font-weight:500;color:var(--acc,#ffb000)">${md}</b> &nbsp;&nbsp; On target: <b class="${nOk?'grn':''}" style="font-weight:500">${nOk}</b> &nbsp;&nbsp; Fish meals: <b class="${mf?'grn':''}" style="font-weight:500">${mf}</b></div></div>
+    <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl">Logged days: <b style="font-weight:500;color:var(--acc,#ffb000)">${md}</b> &nbsp;&nbsp; <span${pk('cres:ok','Days within 10% of your calorie target — click to show only these')}>On target: <b class="${nr.ok?'grn':''}" style="font-weight:500">${nr.ok}</b></span> &nbsp;&nbsp; <span${pk('cres:over','Days more than 10% over target — click to show only these')}>Over: <b class="${nr.over?'red':''}" style="font-weight:500">${nr.over}</b></span> &nbsp;&nbsp; <span${pk('cres:under','Days more than 10% under target — click to show only these')}>Under: <b style="font-weight:500">${nr.under}</b></span> &nbsp;&nbsp; Fish meals: <b class="${mf?'grn':''}" style="font-weight:500">${mf}</b></div></div>
     <div class="cal">${h}</div></div>
     <div class="ft calft"><div class="nav"><button data-act="mprev" aria-label="Previous month">‹</button><span>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span><button data-act="mnext" aria-label="Next month">›</button><button class="tb" data-act="mtoday">Today</button></div>
     <span>${md} days &nbsp;&nbsp; ${mb} meals</span></div></div>`;
@@ -550,31 +594,36 @@ function calendarHTML(){
 
 function coverageHTML(st){
   const row=([k,l,u,dv,lim])=>{const v=st.av(k),p=Math.round(v/dv*100),c=st.D?covCls(p,lim):'';
-    return er(CV[c],l,st.D?`${fnum(r1(v))} ${u} · <span class="${c}">${p}%</span>`:'—',lim?`Limit: ${dv} ${u}/day`:`Daily value: ${dv} ${u}`)};
+    return er(CV[c],l,st.D?`${fnum(r1(v))} ${u} · <span class="${c}">${p}%</span>`:'—',lim?`Limit: ${dv} ${u}/day`:`Daily value: ${dv} ${u}`,st.D?`${l}: ${fnum(r1(v))} ${u} a day, ${p}% of the ${dv} ${u} ${lim?'limit':'daily value'}`:'')};
   const grp=keys=>NUT.filter(n=>keys.includes(n[0])).map(row).join('');
   const e=st.epa7,ec=e>=EPA_WK?'grn':e>=EPA_WK/2?'amb':'red';
   return`<div class="card"><div class="bd ev"><h3>Nutrient coverage</h3><div class="lbl" style="margin-top:-12px">Avg per logged day vs daily value</div>
     <h4>MINERALS</h4>${grp(['k','ca','fe','mg','zn','na'])}
     <hr><h4>VITAMINS</h4>${grp(['fol','vc','vd','vk','b12'])}
     <hr><h4>FIBER &amp; FATS</h4>${grp(['fib','ala'])}
-    ${er(CV[ec],'EPA + DHA (7 days)',`${fnum(r1(e))} g · <span class="${ec}">${Math.round(e/EPA_WK*100)}%</span>`,`Target ~${EPA_WK} g/week (≈500 mg/day). Only fish provides meaningful amounts.`)}
+    ${er(CV[ec],'EPA + DHA (7 days)',`${fnum(r1(e))} g · <span class="${ec}">${Math.round(e/EPA_WK*100)}%</span>`,`Target ~${EPA_WK} g/week (≈500 mg/day). Only fish provides meaningful amounts.`,`EPA + DHA: ${fnum(r1(e))} g over the last 7 days, ${Math.round(e/EPA_WK*100)}% of ${EPA_WK} g`)}
   </div></div>`;
 }
 
-function chartsHTML(st,F){
-  const rt=`${fdate(st.from)} - ${fdate(st.to)}`,kc=st.ds.map(d=>d.t.kcal||0),pr=st.ds.map(d=>d.t.p||0),fb=st.ds.map(d=>d.t.fib||0);
+// the daily charts leave out the selected day (stD), so every day stays clickable and the chosen one stays bright;
+// their big numbers follow the selection. The Rotation mix sets protein and fish, so it leaves those out (stR)
+function chartsHTML(st,F,stD,stR){
+  const rt=`${fdate(st.from)} - ${fdate(st.to)}`,kc=stD.ds.map(d=>d.t.kcal||0),pr=stD.ds.map(d=>d.t.p||0),fb=stD.ds.map(d=>d.t.fib||0);
+  const res={ok:'on target',over:'over target',under:'under target'},nb=PKEYS.reduce((a,p)=>a+stR.rot[p],0),pl=(n,w)=>`${n} ${w}${n===1?'':'s'}`;
+  const ks=(f,label,v,cls='',tip)=>`<div${pk(f,tip)}>${label}<b class="${cls}">${v}</b></div>`;
   return`<div class="grid gm">
     <div class="card"><div class="bd"><div class="eqh"><div><h3>Calories trend</h3><div class="big" style="font-size:20px">${fi(st.av('kcal'))} <span class="mu" style="font-size:12px;font-weight:500">/ ${fi(settings.kcal)} target</span></div><div class="lbl" style="margin-top:4px">${rt}</div></div>
-      <div class="ks"><div>BOWLS<b>${fnum(st.bowls)}</b></div><div>AVG PROTEIN<b>${fi(st.av('p'))} g</b></div><div>FIBER<b class="${st.av('fib')>=28?'grn':''}">${fi(st.av('fib'))} g</b></div><div>FISH MEALS<b class="${st.fish?'grn':''}">${st.fish}</b></div><div>WITH MILK<b>${st.milk}</b></div></div></div>
-      ${kc.length>1?area(kc,'#ffb000',settings.kcal):bars(kc,{tgt:settings.kcal})}</div>${F}</div>
-    <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Grams / day</div><div class="big">${fi(st.av('p'))} g</div>${bars(pr,{tgt:settings.protein})}</div>${F}</div>
+      <div class="ks">${ks('kind:bowl','BOWLS',fnum(st.bowls),'','Click to show only bowls')}<div>AVG PROTEIN<b>${fi(st.av('p'))} g</b></div><div>FIBER<b class="${st.av('fib')>=28?'grn':''}">${fi(st.av('fib'))} g</b></div>${ks('fish:1','FISH MEALS',st.fish,st.fish?'grn':'','Salmon and sardine bowls — click to show only these')}${ks('milk:1','WITH MILK',st.milk,'','Bowls with a glass of milk — click to show only these')}</div></div>
+      ${(kc.length>1?area:(v,c,t,at)=>bars(v,{tgt:t,at}))(kc,'#ffb000',settings.kcal,dayAt(stD.ds,kc,v=>`${fi(v)} kcal · ${res[kres(v)]}`))}</div>${F}</div>
+    <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Grams / day</div><div class="big">${fi(st.av('p'))} g</div>${bars(pr,{tgt:settings.protein,at:dayAt(stD.ds,pr,v=>`${fi(v)} g protein`)})}</div>${F}</div>
   </div>
   <div class="grid g3">
-    <div class="card"><div class="bd"><h3>Rotation mix</h3><div class="lbl">Bowls by protein</div><div class="big">${st.bowls?PROT[PKEYS.slice().sort((x,y)=>st.rot[y]-st.rot[x])[0]].n:'—'}</div>
-      ${st.bowls?radar(PKEYS.map(p=>PROT[p].n),PKEYS.map(p=>st.rot[p])):'<div class="empty">No bowls logged</div>'}</div>${F}</div>
+    <div class="card"><div class="bd"><h3>Rotation mix</h3><div class="lbl">Bowls by protein</div><div class="big">${stR.bowls?PROT[PKEYS.slice().sort((x,y)=>stR.rot[y]-stR.rot[x])[0]].n:'—'}</div>
+      ${stR.bowls?radar(PKEYS.map(p=>PROT[p].n),PKEYS.map(p=>stR.rot[p]),PKEYS.map(p=>({f:'prot:'+p,title:`${PROT[p].n}: ${pl(stR.rot[p],'bowl')}, ${pct(stR.rot[p],nb)} — click to show only these`}))):'<div class="empty">No bowls logged</div>'}
+      ${stR.bowls?lr('#e0607e','Fish',pl(stR.fish,'bowl'),pct(stR.fish,nb),'fish:1','Salmon and sardines — click to show only fish bowls')+lr('#2c2c2c','No fish',pl(nb-stR.fish,'bowl'),pct(nb-stR.fish,nb),'fish:0','Eggs, chicken and steak — click to show only these bowls'):''}</div>${F}</div>
     <div class="card"><div class="bd"><h3>Omega-3 by week</h3><div class="lbl">EPA + DHA grams · dashed = ${EPA_WK} g target</div><div class="big ${st.wk.at(-1).s>=EPA_WK?'grn':''}">${fnum(r1(st.wk.at(-1).s))} g <span class="mu" style="font-size:12px;font-weight:500">this week</span></div>
-      ${bars(st.wk.map(w=>r1(w.s)),{labels:st.wk.map(w=>fsd(w.ws)),tgt:EPA_WK})}</div>${F}</div>
-    <div class="card"><div class="bd"><h3>Fiber</h3><div class="lbl">Grams / day · dashed = 28 g</div><div class="big">${fi(st.av('fib'))} g</div>${bars(fb,{tgt:28})}</div>${F}</div>
+      ${bars(st.wk.map(w=>r1(w.s)),{labels:st.wk.map(w=>fsd(w.ws)),tgt:EPA_WK,at:i=>({title:`Week of ${fmd(st.wk[i].ws)}: ${fnum(r1(st.wk[i].s))} g EPA + DHA (${Math.round(st.wk[i].s/EPA_WK*100)}% of ${EPA_WK} g)`})})}</div>${F}</div>
+    <div class="card"><div class="bd"><h3>Fiber</h3><div class="lbl">Grams / day · dashed = 28 g</div><div class="big">${fi(st.av('fib'))} g</div>${bars(fb,{tgt:28,at:dayAt(stD.ds,fb,v=>`${fi(v)} g fiber`)})}</div>${F}</div>
   </div>`;
 }
 
@@ -600,17 +649,25 @@ function tableHTML(f){
 }
 
 /* ---------- render ---------- */
+// the active filters, as chips under the bar: click one to drop it
+function xfBar(){
+  const R={ok:'On-target days',over:'Over days',under:'Under days'},x=S.x;
+  const c=[S.kind!=='all'&&['kind',S.kind==='bowl'?'Bowls':'Other foods'],x.prot&&['prot',PROT[x.prot].n],x.fish!=null&&['fish',x.fish?'Fish bowls':'Bowls without fish'],
+    x.milk&&['milk','With milk'],x.cres&&['cres',R[x.cres]],S.sel&&['day',fdate(S.sel)]].filter(Boolean);
+  const el=$('#xf');el.hidden=!c.length;
+  el.innerHTML=c.length?`<span>Filtered</span>${c.map(([k,l])=>`<button data-act="xclr" data-v="${k}" aria-label="Remove filter: ${l}"><b>${l}</b> ×</button>`).join('')}${c.length>1?'<button class="clr" data-act="xall">Clear all</button>':''}`:'';
+}
 function render(){
   nmSync();
   if(!RL[S.range])S.range='all';   // an old key ('7d','30d','90d') reads as All time
   $('#fKind').value=S.kind;$('#fRange').value=S.range;
-  const rg=range(),f=filtered(),st=stats(f,rg),F='';   // the date range is shown once, under the filters, like the other apps
+  const rg=range(),f=view(),st=stats(f,rg),F='';xfBar();   // the date range is shown once, under the filters, like the other apps
   $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
   const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load sample data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">&#9654; Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load sample</button></div></div>`;
   // today and this week's plan don't depend on the filters, so they sit above them
   $('#top').innerHTML=ban+heroToday()+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`;
-  $('#app').innerHTML=topCards(st,F)+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F)+`<div class="card">${tableHTML(f)}</div>`;
+  $('#app').innerHTML=topCards(st,F,stats(view(true,'kind milk'),rg))+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F,S.sel?stats(view(true,'day'),range(null)):st,stats(view(true,'prot fish'),rg))+`<div class="card">${tableHTML(f)}</div>`;
   publish();
 }
 // daily totals for ISIONXXX's TODAY tab, which can't work out bowl nutrition itself.
@@ -806,7 +863,7 @@ async function importFile(file){
   meals.push(...addl);save();render();toast(`Imported ${addl.length} meal${addl.length===1?'':'s'}`);
 }
 function exportCSV(){
-  const f=filtered().sort((a,b)=>new Date(a.time)-new Date(b.time)),q=s=>/[",\n]/.test(s=String(s??''))?`"${s.replace(/"/g,'""')}"`:s;
+  const f=view().sort((a,b)=>new Date(a.time)-new Date(b.time)),q=s=>/[",\n]/.test(s=String(s??''))?`"${s.replace(/"/g,'""')}"`:s;
   const csv=['time,kind,name,servings,protein,milk,omit,kcal,protein_g,carbs_g,fat_g,fiber_g,epa_dha_mg,note',...f.map(m=>{const t=NM(m).t;
     return[m.time,m.kind,m.kind==='bowl'?'Bowl':m.name,m.servings??'',m.protein??'',m.milk??'',(m.omit||[]).join('|'),Math.round(t.kcal||0),r1(t.p||0),r1(t.c||0),r1(t.f||0),r1(t.fib||0),Math.round((t.epa||0)*1000),m.note].map(q).join(',')})].join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`meals-${ymd(new Date())}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
@@ -964,15 +1021,23 @@ document.addEventListener('change',e=>{
 addEventListener('storage',e=>{if(e.key==='isx.checkin.v1')render()});
 document.addEventListener('input',e=>{if(e.target.id==='g_days'||e.target.id==='g_per'){const nd=Math.max(1,Math.min(28,+$('#g_days').value||7)),per=Math.max(1,Math.min(4,+$('#g_per').value||1));$('#g_out').textContent=groceryText(nd,per)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+// rows that act as buttons (cross-filters, calendar days) answer Enter and Space too, and keep focus after the redraw
+document.addEventListener('keydown',e=>{const b=e.target.closest('[role=button][data-act]');if(!b||(e.key!=='Enter'&&e.key!==' '))return;e.preventDefault();
+  const sel=`[data-act="${b.dataset.act}"][data-v="${CSS.escape(b.dataset.v||'')}"]`,i=[...document.querySelectorAll(sel)].indexOf(b);b.dispatchEvent(new MouseEvent('click',{bubbles:true}));   // SVG labels have no .click()
+ document.querySelectorAll(sel)[i]?.focus()});
 document.addEventListener('click',e=>{
   if(e.target.id==='modal')return closeModal();
-  const day=e.target.closest('[data-day]');
-  if(day){S.sel=S.sel===day.dataset.day?null:day.dataset.day;S.page=1;render();return}
   const b=e.target.closest('[data-act]');if(!b)return;const id=b.dataset.id,v=b.dataset.v;
   const A={
     mprev:()=>{S.month=new Date(S.month.getFullYear(),S.month.getMonth()-1,1);render()},
     mnext:()=>{S.month=new Date(S.month.getFullYear(),S.month.getMonth()+1,1);render()},
     mtoday:()=>{const t=new Date();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.sel=null;render()},
+    day:()=>{S.sel=S.sel===v?null:v;S.page=1;render()},
+    // the meal kind is the Meal type select's own filter (S.kind), so the select follows it
+    xf:()=>{const i=v.indexOf(':'),k=v.slice(0,i);let x=v.slice(i+1);if(k==='fish'||k==='milk')x=+x;
+      if(k==='kind')S.kind=S.kind===x?'all':x;else if(S.x[k]===x)delete S.x[k];else S.x[k]=x;S.page=1;render()},
+    xclr:()=>{if(v==='kind')S.kind='all';else if(v==='day')S.sel=null;else delete S.x[v];S.page=1;render()},
+    xall:()=>{S.kind='all';S.x={};S.sel=null;S.page=1;render()},
     pp:()=>{if(S.page>1){S.page--;render()}},pn:()=>{S.page++;render()},   // tableHTML clamps to the last page
     cook:()=>cookMode(),addbowl:()=>bowlForm(),quick:()=>quickForm(),info:()=>info(id),
     edit:()=>{const m=meals.find(x=>x.id===id);m?.kind==='bowl'?bowlForm(m):quickForm(m)},
