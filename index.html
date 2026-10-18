@@ -569,12 +569,17 @@ function chartsHTML(st,F){
   </div>`;
 }
 
+// the log's columns, for sorting and filtering (UI.filter); the last column holds the row's buttons
+const LOGC=[{label:'Time (local)',get:m=>+new Date(m.time),type:'time'},{label:'Meal',get:m=>m.kind==='bowl'?'Bowl · '+PROT[m.protein].n:m.name},{label:'Servings',get:m=>m.kind==='bowl'?m.servings||1:null,type:'num'},
+  ...[['kcal','kcal',''],['Protein','p','g'],['Carbs','c','g'],['Fat','f','g'],['Fiber','fib','g']].map(([label,k,unit])=>({label,get:m=>NM(m).t[k],type:'num',unit})),
+  {label:'EPA+DHA',get:m=>NM(m).t.epa?NM(m).t.epa*1000:null,type:'num',unit:'mg'},{label:'Milk',get:m=>m.milk?'Yes':'No'},null];
 function tableHTML(f){
-  f=[...f].sort((a,b)=>new Date(b.time)-new Date(a.time));
+  const F=UI.filter('log',LOGC,()=>{S.page=1;render()});
+  f=F.apply([...f].sort((a,b)=>new Date(b.time)-new Date(a.time)));
   const n=f.length,pages=Math.max(1,Math.ceil(n/PER));S.page=Math.max(1,Math.min(S.page,pages));
   const rows=f.slice((S.page-1)*PER,S.page*PER),tf=d=>new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
   return`<div class="th"><h3>Log</h3><button class="btn" data-act="export">Export CSV</button></div>
-  <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>Time (local)</th><th>Meal</th><th class="num">Servings</th><th class="num">kcal</th><th class="num">Protein</th><th class="num">Carbs</th><th class="num">Fat</th><th class="num">Fiber</th><th class="num">EPA+DHA</th><th class="num">Milk</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
+  <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>${F.th(0)}</th><th>${F.th(1)}</th><th class="num">${F.th(2)}</th><th class="num">${F.th(3)}</th><th class="num">${F.th(4)}</th><th class="num">${F.th(5)}</th><th class="num">${F.th(6)}</th><th class="num">${F.th(7)}</th><th class="num">${F.th(8)}</th><th class="num">${F.th(9)}</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
   ${rows.map(m=>{const t=NM(m).t,P=PROT[m.protein];return`<tr><td class="mu2">${tf(m.time)}</td>
     <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:${P.col};border-color:${P.col}55;background:${P.col}1a">${P.n}</span>${(m.omit||[]).length?` <span class="mu">− ${m.omit.join(', ')}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
     <td class="num">${m.kind==='bowl'?fnum(m.servings||1):'—'}</td><td class="num">${fi(t.kcal)}</td><td class="num">${fi(t.p)} g</td><td class="num">${fi(t.c)} g</td><td class="num">${fi(t.f)} g</td><td class="num">${fi(t.fib)} g</td>
@@ -582,7 +587,7 @@ function tableHTML(f){
     <td><div class="acts"><button data-act="info" data-id="${m.id}" title="Nutrition" aria-label="Nutrition">${I.info}</button><button data-act="edit" data-id="${m.id}" title="Edit" aria-label="Edit">${I.note}</button></div></td></tr>`}).join('')
   ||'<tr><td colspan="11" style="text-align:center;color:#8f8a7e;padding:30px">Nothing logged in this range</td></tr>'}
   </tbody></table></div>
-  <div class="calf"><div><button data-act="pp" aria-label="Previous page">&lt;</button> Page <b>${S.page}</b> of ${pages} <button data-act="pn" aria-label="Next page">&gt;</button></div><span class="dim">${n} record${n===1?'':'s'}</span></div>`;
+  <div class="calf"><div><button data-act="pp" aria-label="Previous page">&lt;</button> Page <b>${S.page}</b> of ${pages} <button data-act="pn" aria-label="Next page">&gt;</button></div><span class="dim">${n} record${n===1?'':'s'}${F.clear()}</span></div>`;
 }
 
 /* ---------- render ---------- */
