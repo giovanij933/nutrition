@@ -402,8 +402,10 @@ function gauge(segs,text){
     <path d="${arc(0,1)}" stroke="#2c2c2c" stroke-width="12" fill="none"/>${p}
     <text x="100" y="${cy-2}" text-anchor="middle" font-size="22" font-weight="600" fill="#d9d5c8">${text}</text></svg>`;
 }
-// fill = progress toward target (amber); over target shows orange overflow
-const tgtGauge=(v,t)=>{const f=t?v/t:0;return gauge(f<=1?[[f,'g']]:[[1/f,'g'],[1-1/f,'a']],Math.round(f*100)+'%')};
+// same colours as the other apps: progress toward a target fills green. A cap (calories) shows what runs more
+// than 10% over in red; a minimum (protein) just stays full
+const tgtGauge=(v,t,cap)=>{const f=t?v/t:0;return gauge(f<=1?[[f,'v']]:[[1/f,'v'],[1-1/f,cap&&f>1.1?'r':'v']],Math.round(f*100)+'%')};
+const kcTone=v=>v>settings.kcal*1.1?'red':v>=settings.kcal*.9?'grn':'';
 function smooth(pts){
   let d=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
   for(let i=0;i<pts.length-1;i++){
@@ -497,14 +499,14 @@ function weightHTML(){
 function topCards(st,F){
   const kc=st.av('kcal'),pr=st.av('p'),e=st.epa7;
   return`<div class="grid g4">
-  <div class="card"><div class="bd"><h3>Calories</h3><div class="lbl">Avg / logged day</div><div class="big">${fi(kc)}</div>
-    ${tgtGauge(kc,settings.kcal)}
+  <div class="card"><div class="bd"><h3>Calories</h3><div class="lbl">Avg / logged day</div><div class="big ${kcTone(kc)}">${fi(kc)}</div>
+    ${tgtGauge(kc,settings.kcal,1)}
     ${lr(ACC,'Bowls',fi(st.avS('base','kcal')+st.avS('prot','kcal')))}${lr('var(--b)','Milk',fi(st.avS('milk','kcal')))}${lr('#555','Other foods',fi(st.avS('quick','kcal')))}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Avg g / logged day</div><div class="big ${pr>=settings.protein?'grn':''}">${fi(pr)} g</div>
     ${tgtGauge(pr,settings.protein)}
     ${lr(ACC,'Bowl base',fi(st.avS('base','p'))+' g')}${lr('#c8b38a','Rotation protein',fi(st.avS('prot','p'))+' g')}${lr('var(--b)','Milk & other',fi(st.avS('milk','p')+st.avS('quick','p'))+' g')}</div>${F}</div>
-  <div class="card"><div class="bd"><h3>Omega-3</h3><div class="lbl">EPA + DHA, last 7 days</div><div class="big ${e>=EPA_WK?'grn':e>=EPA_WK/2?'amb':'red'}">${fnum(r1(e))} g</div>
-    ${gauge([[Math.min(1,e/EPA_WK),'g']],Math.round(e/EPA_WK*100)+'%')}
+  <div class="card"><div class="bd"><h3>Omega-3</h3><div class="lbl">EPA + DHA, last 7 days</div><div class="big ${e>=EPA_WK?'grn':''}">${fnum(r1(e))} g</div>
+    ${gauge([[Math.min(1,e/EPA_WK),'v']],Math.round(e/EPA_WK*100)+'%')}
     ${lr(st.fish7>=settings.fishTarget?'var(--g)':'var(--a)','Fish meals (7d)',`${st.fish7} / ${settings.fishTarget}`)}${lr('#3a3a3a','Weekly target',EPA_WK+' g')}${lr('var(--b)','Plant ALA / day',fnum(r1(st.av('ala')))+' g')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Macro split</h3><div class="lbl">% of calories</div><div class="big">${Math.round(st.mac.p*100)} / ${Math.round(st.mac.c*100)} / ${Math.round(st.mac.f*100)}</div>
     <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'#ffb000')}
