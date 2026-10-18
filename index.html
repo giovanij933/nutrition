@@ -797,8 +797,9 @@ function exportCSV(){
 function demoData(){
   let sd=5;const rnd=()=>(sd=sd*16807%2147483647)/2147483647;
   const snacks=[['Greek yogurt',150,15,8,4,0],['Apple',95,.5,25,.3,4.4],['Protein shake',160,30,5,2,1],['Almonds (1 oz)',164,6,6,14,3.5],['Banana',105,1.3,27,.4,3.1]];
-  for(let k=35;k>=1;k--){
-    const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-k);if(rnd()<.1)continue;
+  const now=new Date(),n0=meals.length;
+  for(let k=35;k>=0;k--){
+    const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-k);if(rnd()<.1&&k)continue;
     // two bowls a day: breakfast (eggs) or lunch, then dinner with the day's planned protein. Eggs are always the
     // morning bowl, so on an egg day dinner takes another protein
     const at=(h,m,span)=>{const t=new Date(d);t.setHours(h,m+Math.floor(rnd()*span));return t.toISOString()};
@@ -809,6 +810,12 @@ function demoData(){
     bowl(at(18,30,60),dinner);
     const sn=Math.floor(rnd()*3);for(let i=0;i<sn;i++){const[s,kc,p,c,f,fib]=snacks[Math.floor(rnd()*snacks.length)],t=new Date(d);t.setHours(15+i*3,0);meals.push({id:uid(),time:t.toISOString(),kind:'quick',name:s,kcal:kc,p,c,f,fib,note:''})}
   }
+  // the sample runs up to now: drop what today hasn't reached yet
+  // (very early in the morning that's everything, so breakfast moves to just before now)
+  const t0=new Date(now);t0.setHours(0,0,0,0);
+  const fut=meals.slice(n0).filter(m=>new Date(m.time)>now),early=new Date(now-15*6e4);
+  meals.splice(n0,meals.length,...meals.slice(n0).filter(m=>new Date(m.time)<=now));
+  if(fut.length&&!meals.slice(n0).some(m=>new Date(m.time)>=t0)&&early>=t0)meals.push({...fut[0],time:early.toISOString()});
   if(!settings.batch)settings.batch={date:addDays(today(),-2),made:5};
   // two bowls a day come to ~2,450 kcal: if the target is still the untouched 2,000 default, set the one this plan is
   // built around, so the demo's calendar isn't all 'over'. A target you've set yourself is left alone
