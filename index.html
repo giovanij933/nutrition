@@ -831,34 +831,34 @@ function review(day){
   const ate=[B.length?`${pl(B.length,'bowl')} (${B.map(m=>PROT[m.protein]?.n.toLowerCase()+(m.servings>1?' ×'+m.servings:'')).join(', then ')}${nm===B.length?B.length>1?', each with milk':', with milk':nm?`, ${nm} with milk`:''})`:'',
     Q.length?`${pl(Q.length,'other food')} (${[...qn].map(([k,v])=>esc(k)+(v>1?' ×'+v:'')).join(', ')})`:''].filter(Boolean).join(' and ');
   const pk=p*4,ck=c*4,fk2=f*9,mk=pk+ck+fk2;
-  let out=sec('The day',`<p>On <b>${pd(day).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</b> you logged ${pl(n,'meal')}: ${ate}.</p>`+
-    `<p>You ate <b class="${tone}">${fi(kc)} kcal</b> against your ${fi(tg)} target (${kp}%). ${tone==='grn'?'That\'s on target, within 10%.':tone==='red'?`That's <b class="red">${fi(dk)} kcal over</b>, more than 10% above.`:`That's ${fi(-dk)} kcal under.`}</p>`+
-    `<p>Protein came to <b class="${p>=tp?'grn':''}">${fi(p)} g</b> of your ${fi(tp)} g target and fiber to <b class="${fib>=28?'grn':''}">${fi(fib)} g</b> of 28 g. `+
+  let out=sec('The day',`<p>On <b>${pd(day).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</b> I logged ${pl(n,'meal')}: ${ate}.</p>`+
+    `<p>I ate <b class="${tone}">${fi(kc)} kcal</b> against my ${fi(tg)} target (${kp}%). ${tone==='grn'?'That\'s on target, within 10%.':tone==='red'?`That's <b class="red">${fi(dk)} kcal over</b>, more than 10% above.`:`That's ${fi(-dk)} kcal under.`}</p>`+
+    `<p>Protein came to <b class="${p>=tp?'grn':''}">${fi(p)} g</b> of my ${fi(tp)} g target and fiber to <b class="${fib>=28?'grn':''}">${fi(fib)} g</b> of 28 g. `+
     `Carbs ${fi(c)} g, fat ${fi(f)} g${mk?`: the calories split ${pct(pk,mk)} protein, ${pct(ck,mk)} carbs, ${pct(fk2,mk)} fat`:''}.</p>`);
   // in context: the 14 logged days before, the week so far, omega-3 and fish over the 7 days to this one
   const DT={};meals.forEach(m=>{const d=dayOf(m),t=NM(m).t,o=DT[d]??={kcal:0,p:0};o.kcal+=t.kcal||0;o.p+=t.p||0});
   const prev=Object.keys(DT).filter(k=>k<day).sort().slice(-14),ak=avg(prev.map(k=>DT[k].kcal)),ap=avg(prev.map(k=>DT[k].p));
   const wk=Object.keys(DT).filter(k=>k>=monday(day)&&k<=day),wOk=wk.filter(k=>kcTone(DT[k].kcal)==='grn').length;
   const n7=Math.min(7,diffDays(rvDays()[0],day)+1),W7=meals.filter(m=>{const d=dayOf(m);return d<=day&&d>addDays(day,-7)}),epa=sum(W7,'epa'),f7=W7.filter(m=>m.kind==='bowl'&&PROT[m.protein]?.fish).length,ft=settings.fishTarget;
-  const vs=(v,a,w,u,more,less)=>Math.abs(v-a)<=a*.05?`about your usual ${w}`:`<b>${fi(Math.abs(v-a))} ${u} ${v>a?more:less}</b>${w==='protein'?' protein':''} than usual`;
-  out+=sec('In context',(prev.length?`<p>Over your previous ${pl(prev.length,'logged day')} you averaged ${fi(ak)} kcal and ${fi(ap)} g protein. You ate ${vs(kc,ak,'calories','kcal','more','fewer')}, with ${vs(p,ap,'protein','g','more','less')}.</p>`
+  const vs=(v,a,w,u,more,less)=>Math.abs(v-a)<=a*.05?`about my usual ${w}`:`<b>${fi(Math.abs(v-a))} ${u} ${v>a?more:less}</b>${w==='protein'?' protein':''} than usual`;
+  out+=sec('In context',(prev.length?`<p>Over my previous ${pl(prev.length,'logged day')} I averaged ${fi(ak)} kcal and ${fi(ap)} g protein. I ate ${vs(kc,ak,'calories','kcal','more','fewer')}, with ${vs(p,ap,'protein','g','more','less')}.</p>`
       :'<p>This is the first logged day, so there\'s nothing to compare it with yet.</p>')+
     (wk.length>1?`<p>This week since Monday: <b class="${wOk?'grn':''}">${wOk}</b> of ${pl(wk.length,'logged day')} on target.</p>`:'')+
-    `<p>${n7===1?'On this day':`In the ${n7} days to ${ds(day)}`} you had <b class="${epa>=EPA_WK?'grn':''}">${fnum(r1(epa))} g</b> of EPA + DHA against the ${EPA_WK} g weekly target (${pct(epa,EPA_WK)}), from ${f7?`<b class="${f7>=ft?'grn':''}">${pl(f7,'fish meal')}</b>`:'<b>no fish meals</b>'} against your target of ${ft}.</p>`);
+    `<p>${n7===1?'On this day':`In the ${n7} days to ${ds(day)}`} I had <b class="${epa>=EPA_WK?'grn':''}">${fnum(r1(epa))} g</b> of EPA + DHA against the ${EPA_WK} g weekly target (${pct(epa,EPA_WK)}), from ${f7?`<b class="${f7>=ft?'grn':''}">${pl(f7,'fish meal')}</b>`:'<b>no fish meals</b>'} against my target of ${ft}.</p>`);
   // the meals in order, with the running calories
   let run=0,hit=null,atHit=0;
   const rows=M.map((m,i)=>{const t=NM(m).t;run+=t.kcal||0;if(hit==null&&run>=tg*.9){hit=i;atHit=run}
     return `<li>${hm(Date.parse(m.time))} · <b>${what(m)}</b> · ${fi(t.kcal)} kcal · ${fi(t.p)} g protein<span class="tr"><span class="ui-sr"> · </span>running ${fi(run)} kcal (${pct(run,tg)})${m.note?` · <q>${esc(m.note)}</q>`:''}</span></li>`}).join('');
   const T=M.map(m=>Date.parse(m.time)),win=n>1?(T.at(-1)-T[0])/6e4:0;
-  out+=sec('How it unfolded',`<ol>${rows}</ol>`+(n>1?`<p>First meal at ${hm(T[0])}, last at ${hm(T.at(-1))}: ${an(dur(win))} eating window.${tone==='red'&&hit<n-1?` You'd reached your target by meal ${hit+1}; the ${n-1-hit===1?'meal':pl(n-1-hit,'meal')} after it added ${fi(kc-atHit)} kcal.`:''}</p>`:''));
+  out+=sec('How it unfolded',`<ol>${rows}</ol>`+(n>1?`<p>First meal at ${hm(T[0])}, last at ${hm(T.at(-1))}: ${an(dur(win))} eating window.${tone==='red'&&hit<n-1?` I'd reached my target by meal ${hit+1}; the ${n-1-hit===1?'meal':pl(n-1-hit,'meal')} after it added ${fi(kc-atHit)} kcal.`:''}</p>`:''));
   // what went well / what to look at
   const good=[],look=[],dv=k=>NUT.find(x=>x[0]===k)[3];
-  if(p>=tp)good.push(`You hit your protein target: ${fi(p)} g of ${fi(tp)} g.`);
+  if(p>=tp)good.push(`I hit my protein target: ${fi(p)} g of ${fi(tp)} g.`);
   if(tone==='grn')good.push(`Calories landed on target at ${kp}%.`);
   if(fishB.length){const e=sum(fishB,'epa');good.push(`A fish meal (${[...new Set(fishB.map(m=>PROT[m.protein].n.toLowerCase()))].join(' and ')}): about ${fi(e*1000)} mg of EPA + DHA, ${pct(e,EPA_WK)} of the week's target in one day.`)}
   if(fib>=28)good.push(`Fiber at ${fi(fib)} g, past the 28 g mark.`);
   if(nm){const mc=M.filter(m=>m.kind==='bowl'&&m.milk).reduce((a,m)=>a+(NM(m).src.milk.ca||0),0),ca=sum(M,'ca');good.push(`Milk with ${nm===1?'a bowl':pl(nm,'bowl')} added ${fi(mc)} mg of calcium (${pct(mc,dv('ca'))} of the daily value) on its own; the whole day came to ${pct(ca,dv('ca'))}.`)}
-  if(!fishB.length&&f7<ft&&sum(M,'ala')>=dv('ala'))good.push(`Fish is behind this week, but the seeds still gave you ${fnum(r1(sum(M,'ala')))} g of plant omega-3 (ALA), past the ${dv('ala')} g mark.`);
+  if(!fishB.length&&f7<ft&&sum(M,'ala')>=dv('ala'))good.push(`Fish is behind this week, but the seeds still gave me ${fnum(r1(sum(M,'ala')))} g of plant omega-3 (ALA), past the ${dv('ala')} g mark.`);
   if(tone==='red')look.push(`Calories ran <b class="red">${fi(dk)} kcal over</b> (${kp}% of target).${Q.length?` Other foods added ${fi(sum(Q,'kcal'))} of them.`:''}`);
   const short=tp-p;let fx=null;
   if(short>=5){
@@ -866,7 +866,7 @@ function review(day){
     const FX=[['a glass of milk',mk2.p,mk2.kcal],['a side of two eggs',FD.egg.p*2,FD.egg.kcal*2],...tone==='red'?[]:[['an extra egg bowl',eb.p,eb.kcal]]];
     fx=FX.find(x=>x[1]>=short)||FX.at(-1);
     const sh=meals.filter(m=>m.kind==='quick'&&+m.p>=10&&+m.kcal>0).sort((a,b)=>b.p/b.kcal-a.p/a.kcal)[0];
-    look.push(`Protein came up <b class="amb">${fi(short)} g short</b> of ${fi(tp)} g. ${fx[0][0].toUpperCase()+fx[0].slice(1)} adds ~${fi(fx[1])} g for ${fi(fx[2])} kcal${fx[1]<short?`, about ${pct(fx[1],short)} of the gap`:''}.${sh?` From your own log, ${esc(sh.name)} gives ${fi(sh.p)} g for ${fi(sh.kcal)} kcal.`:''}`);
+    look.push(`Protein came up <b class="amb">${fi(short)} g short</b> of ${fi(tp)} g. I could add ${fx[0]}: ~${fi(fx[1])} g for ${fi(fx[2])} kcal${fx[1]<short?`, about ${pct(fx[1],short)} of the gap`:''}.${sh?` From my own log, ${esc(sh.name)} gives ${fi(sh.p)} g for ${fi(sh.kcal)} kcal.`:''}`);
   }
   if(fib<28*.7)look.push(`Fiber was low at ${fi(fib)} g of 28 g. ${B.length?`Half a cup more beans adds ~${fi(FD.beans.fib/2)} g.`:`A bowl brings ~${fi(nutMeal({kind:'bowl',servings:1,protein:'egg',omit:[]}).t.fib)} g on its own.`}`);
   let gap=null;for(let i=1;i<n;i++){const g=(T[i]-T[i-1])/6e4;if(g>=7*60&&(!gap||g>gap.g))gap={g,a:T[i-1],b:T[i]}}
@@ -878,32 +878,32 @@ function review(day){
   const bt=settings.batch;
   if(bt&&day===rvDays().at(-1)&&day>=bt.date){
     const used=meals.filter(m=>m.kind==='bowl'&&dayOf(m)>=bt.date&&!(m.omit||[]).includes('rice')).reduce((s,m)=>s+(m.servings||1),0),left=Math.max(0,bt.made-used),dl=4-diffDays(bt.date,today());
-    if(dl<0)look.push(`Your rice and beans from ${ds(bt.date)} are past the 4-day window. Discard what's left and cook a new batch.`);
-    else if(left<1)look.push(`The rice and beans from ${ds(bt.date)} are used up. Plan the next cook.`);
-    else if(left<2||dl<=1)look.push(`The batch is running out: ${fnum(r1(left))} serving${left===1?'':'s'} left${dl<=1?`, and ${dl?'one more day':'only today'} to use it`:''}. Plan the next cook.`);
+    if(dl<0)look.push(`My rice and beans from ${ds(bt.date)} are past the 4-day window. I should discard what's left and cook a new batch.`);
+    else if(left<1)look.push(`The rice and beans from ${ds(bt.date)} are used up. Time to plan the next cook.`);
+    else if(left<2||dl<=1)look.push(`The batch is running out: ${fnum(r1(left))} serving${left===1?'':'s'} left${dl<=1?`, and ${dl?'one more day':'only today'} to use it`:''}. Time to plan the next cook.`);
   }
-  out+=sec('What went well',good.length?ul(good):'<p>Nothing stands out in the numbers. Look at how the meals felt instead.</p>');
+  out+=sec('What went well',good.length?ul(good):'<p>Nothing stands out in the numbers, so I\'ll look at how the meals felt instead.</p>');
   out+=sec('What to look at',look.length?ul(look):'<p>No warning signs in the numbers.</p>');
   // the morning check-in from TODAY, when there is one for this date
   let C=[];try{C=JSON.parse(localStorage.getItem('isx.checkin.v1'))?.log||[]}catch(e){}
   const ci=Array.isArray(C)?C.find(e=>e.day===day):null;
   if(ci){const SQ=['','poor','restless','OK','good','great'],EN=['','drained','low','steady','good','charged'],u=ci.u||'kg';
     const pw=ci.w>0&&C.filter(e=>e.w>0&&e.day<day).sort((a,b)=>a.day<b.day?-1:1).at(-1),pwv=pw&&((pw.u||'kg')===u?pw.w:u==='kg'?pw.w/2.20462:pw.w*2.20462),wd=pw?r1(ci.w-pwv):0;
-    const st=[];if(ci.sleep)st.push(`You slept <b>${fnum(ci.sleep)} h</b>${SQ[ci.q]?` (${SQ[ci.q]} sleep)`:''}`);if(EN[ci.energy])st.push(`your energy was <b>${EN[ci.energy]}</b>`);
+    const st=[];if(ci.sleep)st.push(`I slept <b>${fnum(ci.sleep)} h</b>${SQ[ci.q]?` (${SQ[ci.q]} sleep)`:''}`);if(EN[ci.energy])st.push(`my energy was <b>${EN[ci.energy]}</b>`);
     const s1=st.length?st.join(' and ')+'.':'',
-      s2=ci.w>0?` You weighed in at <b>${fnum(r1(ci.w))} ${u}</b>${pw?`, ${wd?`${fnum(Math.abs(wd))} ${u} ${wd<0?'down':'up'} since`:'the same as on'} ${ds(pw.day)}`:''}.`:'',
+      s2=ci.w>0?` I weighed in at <b>${fnum(r1(ci.w))} ${u}</b>${pw?`, ${wd?`${fnum(Math.abs(wd))} ${u} ${wd<0?'down':'up'} since`:'the same as on'} ${ds(pw.day)}`:''}.`:'',
       s3=ci.sleep&&ci.sleep<7&&tone==='red'?' Short sleep on a day over target: worth watching if it repeats.':ci.energy&&ci.energy<=2&&tone===''?' Low energy on a day under target: was it the food, or the sleep?':'';
-    if(s1||s2)out+=sec('Your state',`<p>${(s1+s2+s3).trim()}</p>`)}
+    if(s1||s2)out+=sec('My state',`<p>${(s1+s2+s3).trim()}</p>`)}
   // questions, most specific first
   const q=[],plan=PROT[settings.plan[(pd(day).getDay()+6)%7]];
-  if(B.length&&!B.some(m=>PROT[m.protein]===plan))q.push(`The plan said ${plan.n.toLowerCase()}; you had ${[...new Set(B.map(m=>PROT[m.protein]?.n.toLowerCase()))].join(' and ')}. A choice, or what was on hand?`);
+  if(B.length&&!B.some(m=>PROT[m.protein]===plan))q.push(`The plan said ${plan.n.toLowerCase()}; I had ${[...new Set(B.map(m=>PROT[m.protein]?.n.toLowerCase()))].join(' and ')}. A choice, or what was on hand?`);
   if(tone==='red')q.push('What pushed the day over: a bigger meal, extra snacks, or eating late?');
-  if(tone===''&&kc<tg*.8)q.push('Were you short on time or appetite today, or did something get skipped?');
+  if(tone===''&&kc<tg*.8)q.push('Was I short on time or appetite today, or did something get skipped?');
   if(fx)q.push(`Where would the missing ${fi(short)} g of protein have fit most easily?`);
   if(gap)q.push(`What got in the way between ${hm(gap.a)} and ${hm(gap.b)}? Could a planned snack bridge it?`);
   if(late.length)q.push(`Was the food at ${hm(Date.parse(late[0].time))} hunger, or habit?`);
-  if(!f7&&n7===7)q.push('Which day this week can you fit in salmon or sardines?');
-  q.push('How did you feel after each meal: satisfied, still hungry, or sluggish?','One thing to keep doing tomorrow. One thing to change.');
+  if(!f7&&n7===7)q.push('Which day this week can I fit in salmon or sardines?');
+  q.push('How did I feel after each meal: satisfied, still hungry, or sluggish?','One thing to keep doing tomorrow. One thing to change.');
   out+=sec('Questions to answer',`<ol>${q.map(x=>`<li>${x}</li>`).join('')}</ol>`);
   return out;
 }
