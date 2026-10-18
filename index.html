@@ -70,9 +70,10 @@ button{cursor:pointer;background:none;border:0}
 .lbl{font-size:11px;color:var(--mu);letter-spacing:.08em;text-transform:uppercase}
 .big{font-size:22px;font-weight:600;margin:2px 0 8px}
 .gauge{display:block;width:150px;max-width:100%;margin:6px auto 10px}
-.gauge text{font-weight:600}
-.lr{display:flex;align-items:center;padding:2px 0}
-.lr span{flex:1}.lr b{min-width:24px;text-align:right}.lr em{font-style:normal;width:48px;text-align:right;color:var(--mu)}
+.gauge path{fill:none;stroke-width:9}
+.gauge text{fill:var(--tx);font:600 17px var(--f)}
+.lr{display:grid;grid-template-columns:14px 1fr auto 46px;align-items:center;padding:2px 0}
+.lr span{min-width:0}.lr b{text-align:right}.lr em{font-style:normal;text-align:right;color:var(--mu)}
 .dot{width:7px;height:7px;margin-right:7px;display:inline-block;flex:none}
 .row{display:flex;justify-content:space-between;gap:8px;padding:5px 0}
 .hb{height:20px;background:#111;margin:2px 0 10px;overflow:hidden}
@@ -391,16 +392,12 @@ function stats(ms,rg){
 }
 
 /* ---------- svg charts ---------- */
+const ARC='M12 62A50 50 0 0 1 112 62';
 function gauge(segs,text){
-  const cx=100,cy=92,r=72,id='g'+uid();
-  const P=f=>{const a=Math.PI*(1-f);return(cx+r*Math.cos(a)).toFixed(2)+' '+(cy-r*Math.sin(a)).toFixed(2)};
-  const arc=(a,b)=>`M${P(a)}A${r} ${r} 0 0 1 ${P(b)}`;
   const col={g:'#ffb000',r:'#ff4545',a:'#ff7a33',b:'#7f9cb0',n:'#8f8a7e',v:'#33ff66'};
-  let s=0,p='';
-  for(const[f,c]of segs){if(!(f>0))continue;const e=Math.min(1,s+f);p+=`<path d="${arc(s,e)}" stroke="${col[c]}" stroke-width="12" fill="none"/>`;s=e}
-  return`<svg class="gauge" viewBox="0 0 200 104">
-    <path d="${arc(0,1)}" stroke="#2c2c2c" stroke-width="12" fill="none"/>${p}
-    <text x="100" y="${cy-2}" text-anchor="middle" font-size="22" font-weight="600" fill="#d9d5c8">${text}</text></svg>`;
+  let off=0;
+  const arcs=segs.filter(([f])=>f>0).map(([f,c])=>{f=Math.min(f,1-off);const a=`<path d="${ARC}" stroke="${col[c]}" pathLength="100" stroke-dasharray="${(f*100).toFixed(2)} 100" stroke-dashoffset="${(-off*100).toFixed(2)}"/>`;off+=f;return a}).join('');
+  return`<svg class="gauge" viewBox="0 0 124 70"><path d="${ARC}" stroke="#2c2c2c"/>${arcs}<text x="62" y="60" text-anchor="middle">${text}</text></svg>`;
 }
 // same colours as the other apps: progress toward a target fills green. A cap (calories) shows what runs more
 // than 10% over in red; a minimum (protein) just stays full
@@ -444,7 +441,7 @@ function radar(labels,raw){
 
 /* ---------- sections ---------- */
 const foot=(a,b)=>`<div class="ft"><span>${a}</span><span>${b}</span></div>`;
-const lr=(col,label,v,p)=>`<div class="lr"><i class="dot" style="background:${col}"></i><span>${label}</span><b>${v}</b>${p!==undefined?`<em>${p}</em>`:''}</div>`;
+const lr=(col,label,v,p)=>`<div class="lr"><i class="dot" style="background:${col}"></i><span>${label}</span><b>${v}</b><em>${p??''}</em></div>`;
 const er=(col,label,val,tip='')=>`<div class="er"><i class="dot" style="background:${col}"></i><span>${label}</span><b>${val}</b><i class="q" title="${esc(tip)}">i</i></div>`;
 const hbar=(label,txt,f,grad)=>`<div class="row"><span>${label}</span><span>${txt}</span></div><div class="hb"><i style="width:${Math.min(1,f||0)*100}%;background:${grad}"></i></div>`;
 
@@ -466,10 +463,10 @@ function batchHTML(){
     <div class="empty" style="height:auto;padding:24px 0">No batch logged yet</div></div><div class="ft"><span class="mu">Cook once, assemble daily</span><button class="btn go" data-act="batch">I batch-cooked</button></div></div>`;
   const used=meals.filter(m=>m.kind==='bowl'&&dayOf(m)>=b.date&&!(m.omit||[]).includes('rice')).reduce((s,m)=>s+(m.servings||1),0);
   const left=Math.max(0,b.made-used),age=diffDays(b.date,t),dl=4-age;
-  const [cls,msg]=dl<0?['red',`Past the 4-day window — discard leftovers`]:dl===0?['amb','Last safe day — use today']:['grn',`${dl} day${dl>1?'s':''} left (use by ${pd(addDays(b.date,4)).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})})`];
-  return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:18px">Cooked ${fdate(b.date)}</div>
-    ${hbar('Servings left',`<b>${fnum(left)}</b> / ${b.made}`,b.made?left/b.made:0,'#ffbe1a')}
-    ${hbar('Freshness',`<span class="${cls}">${msg}</span>`,Math.max(0,dl)/4,dl<=0?'#ff4545':'#7f9cb0')}</div>
+  const [cls,msg]=dl<0?['red',`Past the 4-day window — discard leftovers`]:dl===0?['amb','Last safe day — use today']:['grn',`${dl} day${dl>1?'s':''} left`];
+  return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:18px">Cooked ${fdate(b.date)} · use by ${pd(addDays(b.date,4)).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+    ${hbar('Servings left',`<b>${fnum(left)}</b> / ${b.made}`,b.made?left/b.made:0,'#ffb000')}
+    ${hbar('Freshness',`<span class="${cls}">${msg}</span>`,Math.max(0,dl)/4,`var(--${cls==='grn'?'g':cls==='red'?'r':'acc'})`)}</div>
     <div class="ft"><span class="mu">${left<1||dl<=0?'Time to cook a new batch':'Rice + beans ready'}</span><button class="btn ${left<1||dl<=0?'go':''}" data-act="batch">New batch</button></div></div>`;
 }
 
@@ -501,17 +498,17 @@ function topCards(st,F){
   return`<div class="grid g4">
   <div class="card"><div class="bd"><h3>Calories</h3><div class="lbl">Avg / logged day</div><div class="big ${kcTone(kc)}">${fi(kc)}</div>
     ${tgtGauge(kc,settings.kcal,1)}
-    ${lr(ACC,'Bowls',fi(st.avS('base','kcal')+st.avS('prot','kcal')))}${lr('var(--b)','Milk',fi(st.avS('milk','kcal')))}${lr('#555','Other foods',fi(st.avS('quick','kcal')))}</div>${F}</div>
+    ${lr('#2c2c2c','Bowls',fi(st.avS('base','kcal')+st.avS('prot','kcal')))}${lr('#2c2c2c','Milk',fi(st.avS('milk','kcal')))}${lr('#2c2c2c','Other foods',fi(st.avS('quick','kcal')))}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Avg g / logged day</div><div class="big ${pr>=settings.protein?'grn':''}">${fi(pr)} g</div>
     ${tgtGauge(pr,settings.protein)}
-    ${lr(ACC,'Bowl base',fi(st.avS('base','p'))+' g')}${lr('#c8b38a','Rotation protein',fi(st.avS('prot','p'))+' g')}${lr('var(--b)','Milk & other',fi(st.avS('milk','p')+st.avS('quick','p'))+' g')}</div>${F}</div>
+    ${lr('#2c2c2c','Bowl base',fi(st.avS('base','p'))+' g')}${lr('#2c2c2c','Rotation protein',fi(st.avS('prot','p'))+' g')}${lr('#2c2c2c','Milk & other',fi(st.avS('milk','p')+st.avS('quick','p'))+' g')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Omega-3</h3><div class="lbl">EPA + DHA, last 7 days</div><div class="big ${e>=EPA_WK?'grn':''}">${fnum(r1(e))} g</div>
     ${gauge([[Math.min(1,e/EPA_WK),'v']],Math.round(e/EPA_WK*100)+'%')}
-    ${lr(st.fish7>=settings.fishTarget?'var(--g)':'var(--a)','Fish meals (7d)',`${st.fish7} / ${settings.fishTarget}`)}${lr('#3a3a3a','Weekly target',EPA_WK+' g')}${lr('var(--b)','Plant ALA / day',fnum(r1(st.av('ala')))+' g')}</div>${F}</div>
+    ${lr(st.fish7>=settings.fishTarget?'var(--g)':'#2c2c2c','Fish meals (7d)',`${st.fish7} / ${settings.fishTarget}`)}${lr('#2c2c2c','Weekly target',EPA_WK+' g')}${lr('#2c2c2c','Plant ALA / day',fnum(r1(st.av('ala')))+' g')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Macro split</h3><div class="lbl">% of calories</div><div class="big">${Math.round(st.mac.p*100)} / ${Math.round(st.mac.c*100)} / ${Math.round(st.mac.f*100)}</div>
-    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'#ffb000')}
-    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'#c8b38a')}
-    ${hbar('Fat',`${fi(st.av('f'))} g · ${pct(st.mac.f,1)}`,st.mac.f/.5,'#7f9cb0')}</div></div>${F}</div>
+    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'var(--g)')}
+    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'#ffb000')}
+    ${hbar('Fat',`${fi(st.av('f'))} g · ${pct(st.mac.f,1)}`,st.mac.f/.5,'var(--r)')}</div></div>${F}</div>
   </div>`;
 }
 
