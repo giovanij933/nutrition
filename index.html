@@ -619,7 +619,12 @@ function publish(){
   try{
     const D={},from=addDays(today(),-13);
     meals.forEach(m=>{const d=dayOf(m);if(d<from)return;const t=NM(m).t,o=D[d]??={kcal:0,p:0,n:0};o.kcal+=t.kcal||0;o.p+=t.p||0;o.n++});
-    localStorage.setItem('nj.daily.v1',JSON.stringify({sig:(localStorage.getItem(K.m)||'').length+':'+(localStorage.getItem(K.s)||'').length,kcal:settings.kcal,protein:settings.protein,days:D}));
+    const sig=(localStorage.getItem(K.m)||'').length+':'+(localStorage.getItem(K.s)||'').length;
+    localStorage.setItem('nj.daily.v1',JSON.stringify({sig,kcal:settings.kcal,protein:settings.protein,days:D}));
+    // every meal with its nutrients, for LEARN's lessons (which read the apps' logs); rewritten only when meals change
+    if(JSON.parse(localStorage.getItem('nj.mealnut.v1')||'{}').sig!==sig)
+      localStorage.setItem('nj.mealnut.v1',JSON.stringify({sig,meals:meals.map(m=>{const t=NM(m).t,r=v=>Math.round((v||0)*10)/10;
+        return[m.id,m.time,m.kind,m.kind==='bowl'?(PROT[m.protein]?.n||'Bowl')+' bowl':m.name,r(t.kcal),r(t.p),r(t.c),r(t.f),r(t.fib)]})}));
   }catch(e){}
 }
 
