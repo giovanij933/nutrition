@@ -843,7 +843,7 @@ function review(day){
   // the meals in order, with the running calories
   let run=0,hit=null,atHit=0;
   const rows=M.map((m,i)=>{const t=NM(m).t;run+=t.kcal||0;if(hit==null&&run>=tg*.9){hit=i;atHit=run}
-    return `<li>${hm(Date.parse(m.time))} · <b>${what(m)}</b> · ${fi(t.kcal)} kcal · ${fi(t.p)} g protein<span class="tr"> running ${fi(run)} kcal (${pct(run,tg)})${m.note?` · <q>${esc(m.note)}</q>`:''}</span></li>`}).join('');
+    return `<li>${hm(Date.parse(m.time))} · <b>${what(m)}</b> · ${fi(t.kcal)} kcal · ${fi(t.p)} g protein<span class="tr"><span class="ui-sr"> · </span>running ${fi(run)} kcal (${pct(run,tg)})${m.note?` · <q>${esc(m.note)}</q>`:''}</span></li>`}).join('');
   const T=M.map(m=>Date.parse(m.time)),win=n>1?(T.at(-1)-T[0])/6e4:0;
   out+=sec('How it unfolded',`<ol>${rows}</ol>`+(n>1?`<p>First meal at ${hm(T[0])}, last at ${hm(T.at(-1))}: ${an(dur(win))} eating window.${tone==='red'&&hit<n-1?` You'd reached your target by meal ${hit+1}; the ${n-1-hit===1?'meal':pl(n-1-hit,'meal')} after it added ${fi(kc-atHit)} kcal.`:''}</p>`:''));
   // what went well / what to look at
