@@ -383,10 +383,10 @@ const RL={today:'Today',week:'This week',month:'This month',all:'All time'};
 const kindOk=m=>S.kind==='all'||m.kind===S.kind;
 // a day's calorie result: on target within 10%, more than 10% over, or under (the calendar's rule)
 const kres=v=>v>settings.kcal*1.1?'over':v>=settings.kcal*.9?'ok':'under';
-function range(sel=S.sel){
+function range(sel=S.sel,r=S.range){
   if(sel)return[sel,sel];
   const t=today();
-  switch(S.range){
+  switch(r){
     case'today':return[t,t];case'week':return[monday(t),t];case'month':return[t.slice(0,8)+'01',t];   // current calendar month, like the other apps
     default:return['0000-00-00','9999-99-99'];
   }
@@ -1033,6 +1033,7 @@ document.addEventListener('click',e=>{
     mnext:()=>{S.month=new Date(S.month.getFullYear(),S.month.getMonth()+1,1);render()},
     mtoday:()=>{const t=new Date();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.sel=null;render()},
     day:()=>{S.sel=S.sel===v?null:v;S.page=1;render()},
+    rng:()=>{S.range=S.range===v?'all':v;S.sel=null;S.page=1;render()},   // the Today card's period tiles; tap again for all time
     // the meal kind is the Meal type select's own filter (S.kind), so the select follows it
     xf:()=>{const i=v.indexOf(':'),k=v.slice(0,i);let x=v.slice(i+1);if(k==='fish'||k==='milk')x=+x;
       if(k==='kind')S.kind=S.kind===x?'all':x;else if(S.x[k]===x)delete S.x[k];else S.x[k]=x;S.page=1;render()},
@@ -1070,12 +1071,17 @@ addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.isx
 /* ---------- today at a glance (shared hero, timeline and motion from ui.js) ---------- */
 function heroToday(){
   if(!meals.length)return '';
-  const t=today(),T=meals.filter(m=>dayOf(m)===t).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time));
-  const sum=k=>T.reduce((a,m)=>a+(NM(m).t[k]||0),0),kc=sum('kcal'),p=sum('p'),fib=sum('fib'),left=settings.kcal-kc;
-  // calories are 'done' on target (±10%), not for going over: past 110% the ring stays full but amber
-  return UI.hero({key:'fuel',title:'Today',sub:T.length?`${T.length} meal${T.length>1?'s':''} · ${left>=0?fi(left)+' kcal left':fi(-left)+' kcal over'}`:'Nothing logged yet today',
-    big:{value:fi(kc),label:`of ${fi(settings.kcal)} kcal`,tone:kc>settings.kcal*1.1?'neg':kc>=settings.kcal*.9?'pos':''},   // green on target (±10%) · red when well over
-    rings:[{key:'kcal',label:'Calories',value:Math.round(kc),max:settings.kcal,display:`${fi(kc)}/${fi(settings.kcal)}`,done:kc>=settings.kcal*.9&&kc<=settings.kcal*1.1},{key:'p',label:'Protein',value:Math.round(p),max:settings.protein,display:`${fi(p)}/${fi(settings.protein)} g`},{key:'fib',label:'Fiber',value:Math.round(fib),max:28,display:`${fi(fib)}/28 g`}],
+  const t=today(),T=meals.filter(m=>dayOf(m)===t).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time)),tg=settings.kcal;
+  // kcal per logged day over every meal (the Calories card leaves out the meal kind too), with the range filter's own
+  // periods, so each tile is the figure the card shows once the tile switches the dashboard to that range
+  const D={},P={};meals.forEach(m=>{const d=dayOf(m),x=NM(m).t;D[d]=(D[d]||0)+(x.kcal||0);P[d]=(P[d]||0)+(x.p||0)});
+  const per=r=>{const[a,b]=range(null,r),k=Object.keys(D).filter(d=>d>=a&&d<=b);return{n:k.length,av:k.length?k.reduce((s,d)=>s+D[d],0)/k.length:0,ok:k.filter(d=>kres(D[d])==='ok').length}};
+  const td=per('today'),wk=per('week'),mo=per('month'),kc=D[t]||0,p=P[t]||0,left=tg-kc,pl=settings.protein-p;
+  const tone=v=>({ok:'pos',over:'neg'})[kres(v)]||'';   // the calendar's rule: green within 10%, red more than 10% over, under stays neutral
+  const tile=(k,label,x,sub)=>({label,value:x.n?fi(x.av):'—',tone:x.n?tone(x.av):'',sub,attrs:{'data-act':'rng','data-v':k,'aria-label':`${label}: ${x.n?fi(x.av)+' kcal'+(k==='today'?'':' a logged day'):'nothing logged'}. Show ${label.toLowerCase()} below`},on:S.range===k});
+  const days=x=>x.n?`${x.ok} of ${x.n} day${x.n===1?'':'s'} on target`:'nothing logged';
+  return UI.hero({key:'fuel',title:'Today',sub:!T.length?'Nothing logged yet today':kres(kc)==='ok'?'On target ✓':left<0?`${fi(-left)} kcal over`:`${fi(left)} kcal left${pl>0?` · ${fi(pl)} g protein to go`:' · protein done ✓'}`,
+    stats:[tile('today','Today',td,`of ${fi(tg)} · ${fi(p)} g protein`),tile('week','Week',wk,days(wk)),tile('month','Month',mo,days(mo))],
     action:{label:'+ Food',act:'quick'},
     log:T.map(m=>({at:Date.parse(m.time),tag:m.kind==='bowl'?'Bowl':'Food',text:`${m.kind==='bowl'?(PROT[m.protein]?.n||'Bowl')+(m.servings>1?' ×'+m.servings:''):m.name||'Food'} · ${fi(NM(m).t.kcal)} kcal · ${fi(NM(m).t.p)} g protein`}))});
 }
