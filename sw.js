@@ -1,5 +1,5 @@
 // Bump the version string whenever you change index.html so clients pick up the new shell.
-const CACHE = 'isx-fuel-v59';
+const CACHE = 'isx-fuel-v60';
 // all ISIONXXX apps share one site and one cache storage: only ever clear this app's own old caches
 const MINE = k => k.startsWith('isx-fuel-') || k.startsWith('nj-');
 const SHELL = ['./', './index.html', './manifest.json', './icon.svg', './sync.js', './ui.js', './ui.css', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
