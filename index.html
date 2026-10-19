@@ -1063,7 +1063,8 @@ document.addEventListener('click',e=>{
 
 render();
 // another ISIONXXX app can send you straight to an action here (REWIRE's LOG buttons): #do=<action> or a message
-function doAct(a){if(!/^\w+$/.test(a||''))return;const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
+// 'today' (from TODAY's rings and timeline): drop any card filters and show just today, as a chip you can clear
+function doAct(a){if(!/^\w+$/.test(a||''))return;if(a==='today'){const t=new Date();S.x={};S.sel=today();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.page=1;render();return}const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
 addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.isx==='do')doAct(e.data.act)});
 {const m=/do=(\w+)/.exec(location.hash);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>doAct(m[1]),0)}}
 /* ---------- today at a glance (shared hero, timeline and motion from ui.js) ---------- */
