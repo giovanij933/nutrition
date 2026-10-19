@@ -351,7 +351,7 @@ const SV='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.
 const I={
   info:`<svg ${SV}><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>`,
   note:`<svg ${SV}><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>`};
-$('#barBtns').innerHTML=`<button class="btn go" data-act="cook">&#9654; COOK</button><button class="btn" data-act="addbowl">+ BOWL</button><button class="btn" data-act="quick">+ FOOD</button><button class="btn" data-act="grocery">GROCERY</button><button class="btn" data-act="review">REVIEW</button><button class="btn" data-act="data">SETTINGS</button>`;
+$('#barBtns').innerHTML=`<button class="btn go" data-act="cook">&#9654; COOK</button><button class="btn" data-act="addbowl">+ BOWL</button><button class="btn" data-act="quick">+ FOOD</button><button class="btn" data-act="review" data-more>REVIEW</button><button class="btn" data-act="grocery" data-more>GROCERY</button><button class="btn" data-act="data" data-more>SETTINGS</button>`;
 
 /* ---------- nutrition math ---------- */
 const fk=k=>k==='rice'?(settings.riceAs==='cooked'?'rice_ckd':'rice_dry'):k==='seed'?settings.seed:k;
