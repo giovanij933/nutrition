@@ -86,6 +86,23 @@ button{cursor:pointer;background:none;border:0}
 .pdn{font-size:11px;color:var(--mu);letter-spacing:.08em;text-transform:uppercase}
 .pp{border:1px solid var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent);padding:3px 6px;font-size:10px;letter-spacing:.04em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pst{font-size:10px;min-height:12px;display:flex;gap:3px;align-items:center}.pst i{width:7px;height:7px;display:inline-block}
+/* the batch's carb and vegetables */
+.bv{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin:0 0 14px;padding:9px 12px;background:var(--cell);border:1px solid var(--line);border-radius:var(--g-r3,0)}
+.bv .lbl{flex:1 1 100%;font-size:10px}.bv b{font-weight:500}.bv small{color:var(--mu);font-size:11px}
+.lnk{margin-left:auto;color:var(--mu);font-size:11px;letter-spacing:.06em;text-transform:uppercase;text-decoration:underline dotted;text-underline-offset:3px;padding:2px 0}.lnk:hover{color:var(--acc)}
+
+/* next meal: what to eat next, under the Today card */
+.nx{margin-bottom:12px}.nx h3{margin-bottom:8px}
+.nxs{font-size:14px;line-height:1.55;margin:0}
+.nx.ok .nxs::before{content:'✓ ';color:var(--g)}
+.nxl{list-style:none;margin:10px 0 0;padding:0;border-top:1px solid var(--line)}
+.nxl li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:10px 0;border-bottom:1px solid var(--line)}
+.nxl li:last-child{border-bottom:0;padding-bottom:0}
+.nxw{flex:none;width:64px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc)}
+.nxm{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:2px}.nxm b{font-weight:600}.nxm small{font-size:11px;color:var(--mu);line-height:1.45}
+.nxv{color:var(--mu);font-size:12px;white-space:nowrap}
+.nxa{display:flex;gap:6px;margin-left:auto}
+.box.nxd .nxl li:last-child{padding-bottom:10px}
 
 /* calendar */
 .calhd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
@@ -299,10 +316,39 @@ const FD={
   steak:{kcal:55,p:8.3,f:2.2,na:16,k:100,ca:5,fe:.58,mg:7.5,fol:3,b12:.45,zn:1.45,vd:.03},            // per oz cooked lean sirloin
   milk_whole:{kcal:149,p:7.7,c:11.7,f:7.9,na:105,k:322,ca:276,fe:.07,mg:24,fol:12,vd:3.2,b12:1.1,zn:.9},
   milk_2:{kcal:122,p:8.1,c:11.7,f:4.8,na:115,k:342,ca:293,fe:.07,mg:27,fol:12,vd:2.9,b12:1.3,zn:1.2},
-  milk_skim:{kcal:83,p:8.3,c:12.2,f:.2,na:103,k:382,ca:299,fe:.07,mg:27,fol:12,vd:2.9,b12:1.2,zn:1}};
+  milk_skim:{kcal:83,p:8.3,c:12.2,f:.2,na:103,k:382,ca:299,fe:.07,mg:27,fol:12,vd:2.9,b12:1.2,zn:1},
+  // the rotating carbs and vegetables (USDA SR28; its short table has no ALA, so they add none)
+  quinoa_dry:{kcal:626,p:24,c:109,f:10.3,fib:11.9,na:9,k:957,ca:80,fe:7.8,mg:335,fol:313,zn:5.3},               // per cup uncooked, 170 g
+  quinoa_ckd:{kcal:222,p:8.1,c:39.4,f:3.6,fib:5.2,na:13,k:318,ca:31,fe:2.8,mg:118,fol:78,zn:2},                 // per cup cooked, 185 g
+  sweet:{kcal:114,p:2.1,c:26.8,f:.07,fib:4,na:73,k:448,ca:40,fe:.81,mg:33,fol:15,vc:3.2,vk:2.4,zn:.4},          // per cup raw cubes, 133 g
+  kale:{kcal:7.8,p:.68,c:1.4,f:.15,fib:.58,na:6,k:79,ca:24,fe:.24,mg:7.5,fol:23,vc:19,vk:113,zn:.09},            // per cup chopped, loosely packed, 16 g
+  redpep:{kcal:37,p:1.2,c:7.2,f:.36,fib:2.5,na:5,k:251,ca:8,fe:.51,mg:14,fol:55,vc:152,vk:5.8,zn:.3},           // per medium red bell pepper, 119 g
+  broccoli:{kcal:31,p:2.6,c:6,f:.34,fib:2.4,na:30,k:288,ca:43,fe:.66,mg:19,fol:57,vc:81,vk:92.5,zn:.37},         // per cup chopped, 91 g
+  carrot:{kcal:25,p:.57,c:5.8,f:.15,fib:1.7,na:42,k:195,ca:20,fe:.18,mg:7.3,fol:12,vc:3.6,vk:8,zn:.15},          // per medium carrot, 61 g
+  zucchini:{kcal:33,p:2.4,c:6.1,f:.63,fib:2,na:16,k:512,ca:31,fe:.73,mg:35,fol:47,vc:35,vk:8.4,zn:.63},          // per medium zucchini, 196 g
+  mushroom:{kcal:15.4,p:2.2,c:2.3,f:.24,fib:.7,na:3.5,k:223,ca:2,fe:.35,mg:6.3,fol:12,vc:1.5,vd:.14,b12:.03,zn:.36}}; // per cup sliced white, 70 g
 // recipe as written = 3 servings
 const BASE=[['rice',1.5,'cup'],['beans',2.25,'cup'],['avocado',3,''],['spinach',4.5,'cup'],['tomato',3,''],['seed',3,'tbsp'],['oil',3,'tsp'],['garlic',3,'clove'],['lime',1.5,''],['salt',.75,'tsp'],['pepper',.375,'tsp']];
 const OMIT=[['rice','Rice'],['beans','Beans'],['avocado','Avocado'],['spinach','Spinach'],['tomato','Tomato'],['seed','Seeds'],['oil','Olive oil']];
+const BR=k=>BASE.find(x=>x[0]===k);
+/* the bowl's rotating parts: each batch cooks one carb and one pair of vegetables, each the one cooked least recently.
+   Three carbs against four pairs, so the same carb comes back with a different pair: 12 batches before a bowl repeats.
+   They take the places of the rice, the spinach and the tomato in BASE (3 servings, like BASE), so 'rice', 'spinach'
+   and 'tomato' still name those places in a bowl's omit list. The first of each is the recipe as written: a bowl or
+   batch saved without one (everything before the rotation) is cooked from it, so its nutrition never changes.
+   s: name in a sentence; a: the two vegetables; g: what goes in the pan; t: what's diced fresh on top */
+const CARB={rice:{n:'White rice',s:'rice',r:BR('rice')},quinoa:{n:'Quinoa',s:'quinoa',r:['quinoa',1.5,'cup']},sweet:{n:'Sweet potato',s:'sweet potato',r:['sweet',4.5,'cup']}};
+const VEG={st:{n:'Spinach & tomato',a:['spinach','tomato'],g:'spinach',t:'tomato',r:[BR('spinach'),BR('tomato')]},
+  kp:{n:'Kale & red pepper',a:['kale','red pepper'],g:'kale',t:'red pepper',r:[['kale',6,'cup'],['redpep',1.5,'']]},
+  bc:{n:'Broccoli & carrot',a:['broccoli','carrot'],g:'broccoli and carrot',t:'',r:[['broccoli',3,'cup'],['carrot',3,'']]},
+  zm:{n:'Zucchini & mushroom',a:['zucchini','mushrooms'],g:'zucchini and mushrooms',t:'',r:[['zucchini',1.5,''],['mushroom',3,'cup']]}};
+const GRAIN={rice:1,quinoa:1};   // measured uncooked or cooked, as the rice setting says
+const ck=m=>CARB[m?.carb]?m.carb:'rice',vk=m=>VEG[m?.veg]?m.veg:'st',cOf=m=>CARB[ck(m)],vOf=m=>VEG[vk(m)];
+// BASE with this bowl's carb and vegetables in their places (same order, so omit and nutrition line up)
+const recipe=m=>{const c=cOf(m),v=vOf(m);return BASE.map(r=>r[0]==='rice'?c.r:r[0]==='spinach'?v.r[0]:r[0]==='tomato'?v.r[1]:r)};
+// what a left-out place held in this bowl
+const slotName=(m,k)=>k==='rice'?cOf(m).s:k==='spinach'?vOf(m).a[0]:k==='tomato'?vOf(m).a[1]:k;
+const cap1=s=>s[0].toUpperCase()+s.slice(1);
 const PROT={egg:{n:'Eggs',col:'#ffb000',fish:0},salmon:{n:'Salmon',col:'#e0607e',fish:1},sardines:{n:'Sardines',col:'#4fb3a9',fish:1},chicken:{n:'Chicken',col:'#c8b38a',fish:0},steak:{n:'Steak',col:'#9c8aa5',fish:0}};
 const PKEYS=Object.keys(PROT);
 const NUT=[ // key,label,unit,DV,limit?
@@ -313,7 +359,7 @@ const EPA_WK=3.5; // g EPA+DHA per week (~500 mg/day)
 /* ---------- storage ---------- */
 const K={m:'nj.meals.v1',s:'nj.settings.v1'};
 const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}};
-const save=()=>{try{localStorage.setItem(K.m,JSON.stringify(meals));localStorage.setItem(K.s,JSON.stringify(settings))}catch(e){toast('Storage write failed — take a backup')}};
+const save=()=>{try{localStorage.setItem(K.m,JSON.stringify(meals));localStorage.setItem(K.s,JSON.stringify(settings))}catch(e){toast('Storage write failed — take a backup')}UI.replan()};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 let meals=load(K.m,[]);if(!Array.isArray(meals))meals=[];
 let settings=Object.assign({kcal:2000,protein:100,riceAs:'dry',seed:'flax',milk:'whole',portion:4.5,fishTarget:2,
@@ -354,11 +400,11 @@ const I={
 $('#barBtns').innerHTML=`<button class="btn go" data-act="cook">&#9654; COOK</button><button class="btn" data-act="addbowl">+ BOWL</button><button class="btn" data-act="quick">+ FOOD</button><button class="btn" data-act="review" data-more>REVIEW</button><button class="btn" data-act="grocery" data-more>GROCERY</button><button class="btn" data-act="data" data-more>SETTINGS</button>`;
 
 /* ---------- nutrition math ---------- */
-const fk=k=>k==='rice'?(settings.riceAs==='cooked'?'rice_ckd':'rice_dry'):k==='seed'?settings.seed:k;
+const fk=k=>GRAIN[k]?k+(settings.riceAs==='cooked'?'_ckd':'_dry'):k==='seed'?settings.seed:k;
 const protParts=(p,s)=>p==='egg'?[['egg',2*s]]:p==='sardines'?[['sardines',s]]:[[p,settings.portion*s]];
 function parts(m){
   const s=m.servings||1,o=new Set(m.omit||[]),out=[];
-  BASE.forEach(([k,q])=>{if(!o.has(k))out.push(['base',fk(k),q/3*s])});
+  recipe(m).forEach(([k,q],i)=>{if(!o.has(BASE[i][0]))out.push(['base',fk(k),q/3*s])});
   protParts(m.protein||'egg',s).forEach(x=>out.push(['prot',...x]));
   if(m.milk)out.push(['milk','milk_'+settings.milk,1]);
   return out;
@@ -508,17 +554,150 @@ function planHTML(){
     <div class="ft"><span>Fish meals planned: <b class="${fc}">${fp}</b> / ${settings.fishTarget} target <span class="mu">· only salmon &amp; sardines add EPA/DHA</span></span>
     <span style="display:flex;gap:8px"><button class="btn" data-act="grocery">Grocery list</button><button class="btn go" data-act="cook">&#9654; Cook today's bowl</button></span></div></div>`;
 }
-function batchHTML(){
-  const b=settings.batch,t=today();
-  if(!b)return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:18px">Rice &amp; beans keep 4–5 days in the fridge.</div>
-    <div class="empty" style="height:auto;padding:24px 0">No batch logged yet</div></div><div class="ft"><span class="mu">Cook once, assemble daily</span><button class="btn go" data-act="batch">I batch-cooked</button></div></div>`;
+// the batch on hand: servings left (each bowl since it was cooked counts down, unless it left the carb out) and days
+// to its use-by date (negative once it's past)
+function bstat(b=settings.batch,t=today()){
   const used=meals.filter(m=>m.kind==='bowl'&&dayOf(m)>=b.date&&!(m.omit||[]).includes('rice')).reduce((s,m)=>s+(m.servings||1),0);
-  const left=Math.max(0,b.made-used),age=diffDays(b.date,t),dl=4-age;
+  return{left:Math.max(0,b.made-used),dl:4-diffDays(b.date,t)};
+}
+// when each carb and vegetable pair was last cooked: past batches, the batch on hand and every bowl logged
+function lastCooked(){
+  const L={},see=(k,d)=>{if(d&&!(L[k]>=d))L[k]=d};
+  [...(settings.past||[]),settings.batch].forEach(b=>{if(b){see(ck(b),b.date);see(vk(b),b.date)}});
+  meals.forEach(m=>{if(m.kind==='bowl'){const d=dayOf(m);see(ck(m),d);see(vk(m),d)}});
+  return L;
+}
+// the rotation: never cooked first, then the longest ago (ties keep the list order)
+const byLast=(O,L)=>Object.keys(O).sort((a,b)=>(L[a]||'')<(L[b]||'')?-1:(L[a]||'')>(L[b]||'')?1:0);
+function nextVar(){const L=lastCooked();return{carb:byLast(CARB,L)[0],veg:byLast(VEG,L)[0]}}
+// what a bowl is made from now: the batch on hand while it has a serving and is fresh, else the next batch
+function curVar(t=today()){const b=settings.batch;if(b){const{left,dl}=bstat(b,t);if(left>=1&&dl>=0)return{carb:ck(b),veg:vk(b),batch:true,left,dl}}return nextVar()}
+const vname=v=>`${cOf(v).n} · ${vOf(v).n}`;
+function batchHTML(){
+  const b=settings.batch,t=today(),nx=`<div class="bv"><span class="lbl">Next batch</span><b>${vname(nextVar())}</b><small>cooked least recently</small></div>`;
+  if(!b)return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:18px">Cooked carbs &amp; beans keep 4–5 days in the fridge.</div>
+    <div class="empty" style="height:auto;padding:16px 0 20px">No batch logged yet</div>${nx}</div><div class="ft"><span class="mu">Cook once, assemble daily</span><button class="btn go" data-act="batch">I batch-cooked</button></div></div>`;
+  const{left,dl}=bstat(b,t),old=left<1||dl<=0;
   const [cls,msg]=dl<0?['red',`Past the 4-day window — discard leftovers`]:dl===0?['amb','Last safe day — use today']:['grn',`${dl} day${dl>1?'s':''} left`];
-  return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:18px">Cooked ${fdate(b.date)} · use by ${pd(addDays(b.date,4)).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+  return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:12px">Cooked ${fdate(b.date)} · use by ${pd(addDays(b.date,4)).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+    ${old?'':`<div class="bv"><span class="lbl">This batch</span><b>${vname(b)}</b><button class="lnk" data-act="bedit" aria-label="Change this batch's carb and vegetables">Change</button></div>`}
     ${hbar('Servings left',`<b>${fnum(left)}</b> / ${b.made}`,b.made?left/b.made:0,'#ffb000')}
-    ${hbar('Freshness',`<span class="${cls}">${msg}</span>`,Math.max(0,dl)/4,`var(--${cls==='grn'?'g':cls==='red'?'r':'acc'})`)}</div>
-    <div class="ft"><span class="mu">${left<1||dl<=0?'Time to cook a new batch':'Rice + beans ready'}</span><button class="btn ${left<1||dl<=0?'go':''}" data-act="batch">New batch</button></div></div>`;
+    ${hbar('Freshness',`<span class="${cls}">${msg}</span>`,Math.max(0,dl)/4,`var(--${cls==='grn'?'g':cls==='red'?'r':'acc'})`)}${old?nx:''}</div>
+    <div class="ft"><span class="mu">${old?'Time to cook a new batch':`${cOf(b).n} + beans ready`}</span><button class="btn ${old?'go':''}" data-act="batch">New batch</button></div></div>`;
+}
+
+/* ---------- next meal: what to eat next ----------
+   From what's left of today's calories and protein, the hour, the batch on hand and the rotation: a bowl if one fits
+   (a second one tonight when it's before 3 pm and both fit), then the fewest calories of your own logged foods that
+   close the protein gap. Calories may land up to 10% over the target (the calendar's 'on target'); a protein gap
+   under 5 g counts as closed. */
+const bn=p=>({egg:'Egg',sardines:'Sardine'}[p]||PROT[p]?.n||'')+' bowl';
+// your foods: each name you've logged, with its newest values, the most recently eaten first
+function myFoods(){
+  const M=new Map;meals.forEach(m=>{if(m.kind!=='quick'||!m.name)return;const k=m.name.trim().toLowerCase(),t=Date.parse(m.time),o=M.get(k);
+    if(!o||t>o.t)M.set(k,{t,name:m.name.trim(),kcal:+m.kcal||0,p:+m.p||0,c:+m.c||0,f:+m.f||0,fib:+m.fib||0})});
+  return[...M.values()].sort((a,b)=>b.t-a.t);
+}
+// up to three servings of those foods (one may repeat) that close a protein gap g within cap kcal, the fewest kcal
+// first; when none closes it, the most protein that fits
+function snackFit(g,cap,F){
+  F=F.filter(x=>x.p>=1&&x.kcal>0&&x.kcal<=cap).slice(0,30);let best=null,part=null;
+  const look=ix=>{let kc=0,p=0;ix.forEach(i=>{kc+=F[i].kcal;p+=F[i].p});if(kc>cap)return;
+    if(p>=g){if(!best||kc<best.kc||kc===best.kc&&ix.length<best.ix.length)best={ix,kc,p}}else if(!part||p>part.p||p===part.p&&kc<part.kc)part={ix,kc,p}};
+  for(let a=0;a<F.length;a++){look([a]);for(let b=a;b<F.length;b++){look([a,b]);for(let c=b;c<F.length;c++)look([a,b,c])}}
+  const r=best||part;if(!r)return null;
+  const C=new Map;r.ix.forEach(i=>C.set(i,(C.get(i)||0)+1));   // the same food twice reads as ×2
+  return{ok:!!best,kc:r.kc,p:r.p,items:[...C].map(([i,n])=>({kind:'food',name:F[i].name,n,kcal:F[i].kcal*n,p:F[i].p*n,each:F[i]}))};
+}
+function nextMeal(at=new Date()){
+  const t=ymd(at),h=at.getHours(),tg=settings.kcal,tp=settings.protein,G=5,T=meals.filter(m=>dayOf(m)===t),F=myFoods();
+  let kc=0,p=0;T.forEach(m=>{const x=NM(m).t;kc+=x.kcal||0;p+=x.p||0});
+  const N={h,kc,p,left:tg-kc,gap:tp-p,late:h>=21||h<4,items:[],done:false,foods:F.length};
+  // habits from your own bowls (the forms' defaults until there are a few): eggs in the morning, milk on the side
+  const B=meals.filter(m=>m.kind==='bowl').slice(-90),AM=B.filter(m=>new Date(m.time).getHours()<11).slice(-40),B30=B.slice(-30);
+  const eggAM=AM.length>=5&&AM.filter(m=>m.protein==='egg').length>=AM.length*.6,milk=B30.length<5||B30.filter(m=>m.milk).length*2>=B30.length;
+  // the rotation from today on, so a protein you've had today hands over to the next day's
+  const plan=d=>settings.plan[(at.getDay()+6+d)%7],had=new Set(T.filter(m=>m.kind==='bowl').map(m=>m.protein));
+  // just eaten (in the last 2 hours): the next bowl is the next meal time, and after lunch there's only dinner left
+  const last=T.reduce((a,m)=>Math.max(a,Date.parse(m.time)),0),recent=last<=+at&&at-last<72e5,am=eggAM&&h<11&&!recent;
+  N.when=recent?(h<11?'at lunch':h<17?'at dinner':'later'):'now';
+  const order=[...am?['egg']:[],...[0,1,2,3,4,5,6].map(plan),...PKEYS],V=curVar(t),b0=settings.batch&&bstat(settings.batch,t);
+  let cap=tg*1.1-kc,left=N.left,gap=N.gap;
+  if(kres(kc)==='over')N.state='over';
+  else if(gap<G&&kres(kc)==='ok'){N.state='done';N.done=true}
+  else if(N.late&&!T.length)N.state='none';
+  else{
+    for(let i=0;!N.late&&i<(h<15&&!(recent&&h>=11)?2:1);i++){
+      const pr=order.find(x=>!had.has(x)&&!N.items.some(y=>y.protein===x))||plan(0),m={kind:'bowl',servings:1,protein:pr,milk,carb:V.carb,veg:V.veg},bt=nutMeal(m).t;
+      if(bt.kcal>cap||gap<G&&left<bt.kcal*.75)break;
+      const fromB=V.batch&&V.left>=i+1;
+      N.items.push({...m,kcal:bt.kcal,p:bt.p,src:fromB?'batch':'cook',detail:[vname(V)+(milk?' · milk':''),
+        pr===plan(0)?'today\'s plan':am&&pr==='egg'&&!i?'your usual morning bowl':'next in the rotation',
+        fromB?`from your batch (${fnum(r1(V.left-i))} left${V.dl===0?', last safe day':''})`:V.batch?'the batch runs out, cook fresh':b0?(b0.dl<0?'batch past 4 days, cook fresh':'batch used up, cook fresh'):'no batch yet, cook fresh'].join(' · ')});
+      cap-=bt.kcal;left-=bt.kcal;gap-=bt.p;
+    }
+    if(gap>=G){const s=snackFit(gap,cap,F);if(s){s.items.forEach(x=>N.items.push({...x,detail:x.n>1?`your food · ${fi(x.each.kcal)} kcal, ${fi(x.each.p)} g protein each`:'your food'}));N.ok=s.ok;cap-=s.kc;left-=s.kc;gap-=s.p}}
+    N.state=N.items.length?'eat':N.late?'late':'room';
+  }
+  N.after={kc:tg-left,p:tp-gap};
+  // the plan row (title ≤ 28, sub ≤ 64) and a sentence for the card
+  const I=N.items,a=I[0],rest=I.slice(1),cut=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s,nm=x=>x.kind==='bowl'?bn(x.protein):x.name+(x.n>1?' ×'+x.n:'');
+  const join=(A,n)=>{const s=A.join(' + ');return s.length<=n||A.length<2?cut(s,n):cut(A[0],n-9)+` + ${A.length-1} more`},nofood=N.foods?'none of your foods fits':'no foods logged yet';
+  if(N.state==='eat'&&a.kind==='bowl'){
+    const g1=N.gap-a.p,gEnd=gap,rn=rest.map(x=>x.kind==='bowl'?nm(x).toLowerCase()+' tonight':nm(x));
+    N.title=nm(a);
+    N.sub=rest.length?`Then ${join(rn,36)} · ${g1>=G?fi(g1)+' g protein to go':fi(Math.max(0,N.left-a.kcal))+' kcal left'}`
+      :N.gap<G?`Protein done ✓ · ${fi(Math.max(0,N.left))} kcal left`:g1<G?`Closes the ${fi(N.gap)} g protein gap`:`Leaves ${fi(g1)} g protein to go · ${nofood}`;
+    N.say=`${esc(nm(a))} ${N.when}`+(N.gap<G?` — protein's done already, and it fills ${fi(a.kcal)} of the ${fi(N.left)} kcal left`:g1<G?` — it closes the ${fi(N.gap)} g protein gap`:'')
+      +(rest.length?(g1<G?'; then ':', then ')+esc(rn.join(' and '))+(g1<G?` for the ${fi(N.left-a.kcal)} kcal still left`:gEnd<G?` to close the ${fi(g1)} g protein gap`:` for ${fi(g1-gEnd)} of the ${fi(g1)} g protein still to go`)
+      :g1>=G?` — that leaves ${fi(g1)} g protein to go, and ${nofood}`:'')+'.';
+  }else if(N.state==='eat'){
+    N.title=join(I.map(nm),28);
+    N.sub=N.ok?`Closes the ${fi(N.gap)} g protein gap · ${fi(N.after.kc-kc)} kcal`:`${fi(N.after.p-p)} of ${fi(N.gap)} g protein · all that fits`;
+    N.say=`${esc(I.map(nm).join(' and '))}${N.when==='now'?'':' later'} ${N.ok?`to close the ${fi(N.gap)} g protein gap`:`for ${fi(N.after.p-p)} of the ${fi(N.gap)} g protein still to go`}${N.late?' — it\'s late for a bowl':` — a bowl won't fit the ${fi(Math.max(0,N.left))} kcal left`}.`;
+  }else if(N.state==='done'){
+    N.title=N.late?'Day done':'Targets met';N.sub=`${fi(kc)} kcal · ${fi(p)} g protein · nothing more needed`;
+    N.say=`Targets met: ${fi(kc)} kcal (${pct(kc,tg)} of ${fi(tg)}) and ${fi(p)} g protein of ${fi(tp)} g. ${N.late?'The day is done.':'Nothing more needed today.'}`;
+  }else if(N.state==='over'){
+    N.title='Over today\'s calories';N.sub=`${fi(kc-tg)} kcal over · ${N.gap>=G?fi(N.gap)+' g protein short':'protein done ✓'}`;
+    N.say=`${fi(kc)} kcal today, ${fi(kc-tg)} over your ${fi(tg)} target${N.gap>=G?`, with ${fi(N.gap)} g protein still short`:''}. Better to stop here for today.`;
+  }else if(N.state==='none'){
+    N.title='Nothing logged today';N.sub='Log what you ate, or start fresh in the morning';
+    N.say='Nothing logged today. If you ate, log it; otherwise the next bowl is breakfast.';
+  }else if(N.state==='late'){
+    N.title='Nothing more tonight';N.sub=N.gap>=G?`${fi(N.gap)} g protein short · ${nofood}`:`${fi(N.left)} kcal under · protein done ✓`;
+    N.say=N.gap>=G?`${fi(N.gap)} g protein short, and ${N.foods?`none of your foods fits the ${fi(Math.max(0,cap))} kcal left`:'no foods logged yet to suggest'}. It's late for a bowl.`:`Protein's done and you're ${fi(N.left)} kcal under target. It's late for a bowl: fine to stop here.`;
+  }else{
+    N.title=N.gap<G?'Protein done ✓':`${fi(N.gap)} g protein to go`;
+    N.sub=N.gap<G?`${fi(N.left)} kcal left · a snack if you're hungry`:`No room for a bowl · ${nofood}`;
+    N.say=N.gap<G?`Protein's done and ${fi(N.left)} kcal are left: not enough for a bowl, so a snack if you're hungry.`:`${fi(N.gap)} g protein to go, but a bowl won't fit the ${fi(Math.max(0,N.left))} kcal left, and ${nofood}.`;
+  }
+  N.title=cut(N.title,28);N.sub=cut(N.sub,64);
+  return N;
+}
+// the suggestion's rows: each opens its form already filled in (NX keeps them for the buttons)
+let NX=null;
+function nextRows(N){
+  return N.items.length?`<ol class="nxl">${N.items.map((x,i)=>`<li><span class="nxw">${!i?cap1(N.when.replace('at ','')):x.kind==='bowl'?'Tonight':'Then'}</span>
+    <div class="nxm"><b>${esc(x.kind==='bowl'?bn(x.protein):x.name+(x.n>1?' ×'+x.n:''))}</b><small>${esc(x.detail)}</small></div><span class="nxv">${fi(x.kcal)} kcal · ${fi(x.p)} g protein</span>
+    <span class="nxa">${x.kind==='bowl'?`<button class="btn${!i&&x.src==='batch'?' go':''}" data-act="nxbowl" data-v="${i}">Log bowl</button><button class="btn${!i&&x.src!=='batch'?' go':''}" data-act="nxcook" data-v="${i}">Cook</button>`
+      :`<button class="btn${i?'':' go'}" data-act="nxfood" data-v="${i}">Log food</button>`}</span></li>`).join('')}</ol>`:'';
+}
+const nextAfter=N=>N.items.length?`After ${N.items.length>1?'these':'it'}: <b>${fi(N.after.kc)} kcal</b> (${pct(N.after.kc,settings.kcal)}) · <b class="${N.after.p>=settings.protein-5?'grn':''}">${fi(N.after.p)} g protein</b>`:'';
+function nextCard(){
+  if(!meals.length)return'';   // an empty device has the banner's first steps instead
+  const N=NX=nextMeal();
+  return`<div class="card nx${N.done?' ok':''}"><div class="bd"><h3>Next meal</h3><p class="nxs">${N.say}</p>${nextRows(N)}</div>
+    <div class="ft"><span>${nextAfter(N)||'&nbsp;'}</span><button class="btn" data-act="next">Why this?</button></div></div>`;
+}
+// the 'next' action (TODAY's plan card starts here): the same suggestion as a sheet, with how it was picked
+function nextForm(){
+  const N=NX=nextMeal(),tg=settings.kcal,tp=settings.protein;
+  openModal(`<div class="ckh"><h3 style="margin:0">Next meal</h3><button class="btn" data-act="close">Close</button></div>
+    <div class="ns"><div>Eaten today<b>${fi(N.kc)} kcal</b></div><div>Left<b>${fi(Math.max(0,N.left))} kcal</b></div><div>Protein<b>${fi(N.p)} / ${fi(tp)} g</b></div></div>
+    <p class="nxs" style="margin-top:14px">${N.say}</p>${nextRows(N)}${N.items.length?`<p class="mu" style="margin:10px 0 0;font-size:12px">${nextAfter(N)}</p>`:''}
+    <div class="tip">Picked from what's left of today's ${fi(tg)} kcal and ${fi(tp)} g protein, the time of day, your batch and the rotation: a bowl when one fits, then the fewest calories of your own foods that close the protein gap. Calories can land up to 10% over, which still counts as on target. ${N.foods?`Snacks come from the ${N.foods} food${N.foods>1?'s':''} you've logged.`:'Log the foods you snack on with + FOOD and they\'ll be suggested here.'}</div>`);
+  $('#mbox').classList.add('nxd');
 }
 
 /* body weight from ISIONXXX's morning check-in (logged on TODAY; read-only here), next to what you ate:
@@ -639,7 +818,7 @@ function tableHTML(f){
   return`<div class="th"><h3>Log</h3><button class="btn" data-act="export">Export CSV</button></div>
   <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>${F.th(0)}</th><th>${F.th(1)}</th><th class="num">${F.th(2)}</th><th class="num">${F.th(3)}</th><th class="num">${F.th(4)}</th><th class="num">${F.th(5)}</th><th class="num">${F.th(6)}</th><th class="num">${F.th(7)}</th><th class="num">${F.th(8)}</th><th class="num">${F.th(9)}</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
   ${rows.map(m=>{const t=NM(m).t,P=PROT[m.protein];return`<tr><td class="mu2">${tf(m.time)}</td>
-    <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:${P.col};border-color:${P.col}55;background:${P.col}1a">${P.n}</span>${(m.omit||[]).length?` <span class="mu">− ${m.omit.join(', ')}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
+    <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:${P.col};border-color:${P.col}55;background:${P.col}1a">${P.n}</span>${ck(m)!=='rice'||vk(m)!=='st'?` <span class="mu">${cOf(m).s}, ${vOf(m).a[0]}</span>`:''}${(m.omit||[]).length?` <span class="mu">− ${m.omit.map(k=>slotName(m,k)).join(', ')}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
     <td class="num">${m.kind==='bowl'?fnum(m.servings||1):'—'}</td><td class="num">${fi(t.kcal)}</td><td class="num">${fi(t.p)} g</td><td class="num">${fi(t.c)} g</td><td class="num">${fi(t.f)} g</td><td class="num">${fi(t.fib)} g</td>
     <td class="num ${t.epa>=.5?'grn':''}">${t.epa?fi(t.epa*1000)+' mg':'—'}</td><td class="num">${m.milk?'<span class="grn">✓</span>':'—'}</td>
     <td><div class="acts"><button data-act="info" data-id="${m.id}" title="Nutrition" aria-label="Nutrition">${I.info}</button><button data-act="edit" data-id="${m.id}" title="Edit" aria-label="Edit">${I.note}</button></div></td></tr>`}).join('')
@@ -666,7 +845,7 @@ function render(){
   const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load sample data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">&#9654; Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load sample</button></div></div>`;
   // today and this week's plan don't depend on the filters, so they sit above them
-  $('#top').innerHTML=ban+heroToday()+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`;
+  $('#top').innerHTML=ban+heroToday()+nextCard()+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`;
   $('#app').innerHTML=topCards(st,F,stats(view(true,'kind milk'),rg))+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F,S.sel?stats(view(true,'day'),range(null)):st,stats(view(true,'prot fish'),rg))+`<div class="card">${tableHTML(f)}</div>`;
   publish();
 }
@@ -694,42 +873,63 @@ const todayPlan=()=>settings.plan[(new Date().getDay()+6)%7];
 let CK=null;const CT={};
 let AC=null;
 function beep(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;[0,.35,.7].forEach(o=>{const s=AC.createOscillator(),g=AC.createGain();s.frequency.value=880;g.gain.setValueAtTime(0,t+o);g.gain.linearRampToValueAtTime(.2,t+o+.02);g.gain.exponentialRampToValueAtTime(.0001,t+o+.3);s.connect(g).connect(AC.destination);s.start(t+o);s.stop(t+o+.32)})}catch{}}
-function cookMode(p){CK={s:1,protein:p||todayPlan(),milk:true};drawCook()}
+// o: {carb, veg, milk} from the next-meal suggestion; otherwise the batch on hand's carb and vegetables (or the next
+// batch's), which you can change here
+function cookMode(p,o){const v=o?.carb?o:curVar();CK={s:1,protein:p||todayPlan(),milk:o?.milk??true,carb:ck(v),veg:vk(v)};drawCook()}
 function drawCook(){
-  const s=CK.s,p=CK.protein,po=settings.portion,seedN=settings.seed==='chia'?'chia seeds':'ground flaxseed';
-  const q=k=>{const b=BASE.find(x=>x[0]===k),v=b[1]/3*s;return fq(v)+(b[2]?' '+b[2]+(b[2]==='clove'&&v>1?'s':''):'')};
-  const n=k=>BASE.find(x=>x[0]===k)[1]/3*s;
+  const s=CK.s,p=CK.protein,po=settings.portion,seedN=settings.seed==='chia'?'chia seeds':'ground flaxseed',R=recipe(CK),C=ck(CK),V=vk(CK),ckd=settings.riceAs==='cooked';
+  // quantities by place in the recipe ('rice' is this bowl's carb, 'spinach' and 'tomato' its two vegetables)
+  const row=k=>R[BASE.findIndex(x=>x[0]===k)];
+  const q=k=>{const b=row(k),v=b[1]/3*s;return fq(v)+(b[2]?' '+b[2]+(b[2]==='clove'&&v>1?'s':''):'')};
+  const n=k=>row(k)[1]/3*s,pl=(k,one,many)=>n(k)>1?many:one;
   const protIng={egg:`${2*s} large eggs`,salmon:`${fq(po*s)} oz salmon (cooked weight)`,sardines:`${s} can${s>1?'s':''} sardines (3.75 oz)`,chicken:`${fq(po*s)} oz chicken breast (cooked weight)`,steak:`${fq(po*s)} oz sirloin steak (cooked weight)`}[p];
-  const rice=settings.riceAs==='cooked'?'cooked rice':'uncooked rice';
-  const ings=[`${q('rice')} ${rice}`,`${q('beans')} black beans, drained &amp; rinsed`,protIng,`${q('avocado')} avocado${n('avocado')>1?'s':''}`,`${q('spinach')} fresh spinach`,
-    `${q('tomato')} tomato${n('tomato')>1?'es':''}, diced`,`${q('seed')} ${seedN}`,`${q('oil')} olive oil`,`${q('garlic')} garlic, minced`,`${q('lime')} lime, juiced`,`${q('salt')} salt`,`${q('pepper')} black pepper`];
+  const carbIng=GRAIN[C]?`${q('rice')} ${ckd?'cooked':'uncooked'} ${CARB[C].s}`:`${q('rice')} sweet potato, cubed`;
+  const vegIng={st:[`${q('spinach')} fresh spinach`,`${q('tomato')} ${pl('tomato','tomato','tomatoes')}, diced`],kp:[`${q('spinach')} kale, chopped`,`${q('tomato')} red bell ${pl('tomato','pepper','peppers')}, diced`],
+    bc:[`${q('spinach')} broccoli florets`,`${q('tomato')} ${pl('tomato','carrot','carrots')}, sliced`],zm:[`${q('spinach')} zucchini, in half-moons`,`${q('tomato')} white mushrooms, sliced`]}[V];
+  const ings=[carbIng,`${q('beans')} black beans, drained &amp; rinsed`,protIng,`${q('avocado')} avocado${n('avocado')>1?'s':''}`,...vegIng,
+    `${q('seed')} ${seedN}`,`${q('oil')} olive oil`,`${q('garlic')} garlic, minced`,`${q('lime')} lime, juiced`,`${q('salt')} salt`,`${q('pepper')} black pepper`];
   if(CK.milk)ings.push(`${s} × 8 oz glass ${settings.milk==='2'?'2%':settings.milk} milk`);
   const protStep={egg:[`Cook ${2*s} large eggs to your preference — fried, scrambled, or soft-boiled (about 6½ min for jammy). Season with a pinch of salt and pepper.`,390],
     salmon:[`Season ${fq(po*s)} oz salmon. Cook skin-side down over medium-high 4–5 min, flip, 2–3 min more until it flakes (145°F inside).`,420],
     sardines:[`Drain ${s} can${s>1?'s':''} of sardines. Warm in the pan for a minute if you like, or serve as-is.`,0],
     chicken:[`Cook ${fq(po*s)} oz chicken breast over medium heat about 6 min per side until 165°F inside. Rest 3 min, slice.`,720],
     steak:[`Sear ${fq(po*s)} oz steak in a hot pan 3–4 min per side for medium-rare (130–135°F). Rest 5 min, slice against the grain.`,480]}[p];
+  const carbStep={rice:[`Rinse ${q('rice')} rice and cook according to package directions (usually 1:2 rice-to-water, simmered covered). Batch-cook extra at the start of the week.`,1080],
+    quinoa:[`Rinse ${q('rice')} quinoa well (that washes off its bitter coating), then simmer it covered in 2 cups of water per cup for 15 min and let it stand 5 min. Batch-cook extra at the start of the week.`,900],
+    sweet:[`Heat the oven to 425°F. Toss ${q('rice')} cubed sweet potato with a little of the olive oil and roast 25–30 min, turning once, until browned at the edges. Roast extra at the start of the week.`,1680]}[C];
+  const panStep={st:[`Heat ${q('oil')} olive oil over medium. Add ${q('spinach')} spinach and sauté 1–2 min until just wilted. Remove from heat.`,120],
+    kp:[`Heat ${q('oil')} olive oil over medium. Add ${q('spinach')} kale and sauté 3–4 min until tender and bright green. Remove from heat.`,210],
+    bc:[`Heat ${q('oil')} olive oil over medium. Add ${q('spinach')} broccoli and ${q('tomato')} sliced ${pl('tomato','carrot','carrots')} with a splash of water, cover and cook 4–5 min until crisp-tender.`,270],
+    zm:[`Heat ${q('oil')} olive oil over medium-high. Add ${q('tomato')} mushrooms and ${q('spinach')} zucchini and sauté 5–6 min until golden.`,330]}[V];
+  const topStep={st:`Slice ${q('avocado')} avocado and dice ${q('tomato')} tomato. Squeeze ${q('lime')} lime over them — the vitamin C boosts iron absorption from the beans and spinach.`,
+    kp:`Slice ${q('avocado')} avocado and dice ${q('tomato')} red pepper. Squeeze ${q('lime')} lime over them — the vitamin C boosts iron absorption from the beans and kale.`,
+    bc:`Slice ${q('avocado')} avocado and squeeze ${q('lime')} lime over it — its vitamin C, like the broccoli's, boosts iron absorption from the beans.`,
+    zm:`Slice ${q('avocado')} avocado and squeeze ${q('lime')} lime over it — the vitamin C boosts iron absorption from the beans.`}[V];
   const steps=[
-    [settings.riceAs==='cooked'?`Reheat ${q('rice')} cooked rice from your batch (add a splash of water, cover, microwave 1–2 min).`:`Rinse ${q('rice')} rice and cook according to package directions (usually 1:2 rice-to-water, simmered covered). Batch-cook extra at the start of the week.`,settings.riceAs==='cooked'?90:1080],
+    ckd?[`Reheat ${q('rice')} ${C==='sweet'?'roasted sweet potato':'cooked '+CARB[C].s} from your batch (add a splash of water, cover, microwave 1–2 min).`,90]:carbStep,
     [`In a small pot, heat ${q('beans')} black beans over medium with ${q('garlic')} garlic, ${q('salt')} salt and ${q('pepper')} pepper for 4–5 min until warmed through and fragrant.`,300],
-    [`Heat ${q('oil')} olive oil over medium. Add ${q('spinach')} spinach and sauté 1–2 min until just wilted. Remove from heat.`,120],
+    panStep,
     protStep,
-    [`Slice ${q('avocado')} avocado and dice ${q('tomato')} tomato. Squeeze ${q('lime')} lime over them — the vitamin C boosts iron absorption from the beans and spinach.`,0],
-    [`Layer rice, beans and spinach in ${s>1?'bowls':'a bowl'}. Top with the ${PROT[p].n.toLowerCase()}, avocado and tomato.`,0],
+    [topStep,0],
+    [`Layer ${CARB[C].s}, beans and ${VEG[V].g} in ${s>1?'bowls':'a bowl'}. Top with the ${PROT[p].n.toLowerCase()}, avocado${VEG[V].t?' and '+VEG[V].t:''}.`,0],
     [`Sprinkle ${q('seed')} ${seedN} on top just before eating — adding them last preserves the omega-3s.`,0]];
   if(CK.milk)steps.push([`Pour an 8 oz glass of milk on the side for calcium and vitamin D.`,0]);
-  const t=nutMeal({kind:'bowl',servings:1,protein:p,milk:CK.milk}).t;
+  const t=nutMeal({kind:'bowl',servings:1,protein:p,milk:CK.milk,carb:C,veg:V}).t;
+  // the carb and vegetables rotate by batch: the batch on hand's (or the next one's) are marked, the others say when you last had them
+  const cv=curVar(),L=lastCooked(),tag=k=>`<em>${k===cv.carb||k===cv.veg?(cv.batch?'this batch':'next up'):L[k]?'last '+fmd(L[k]):'not cooked yet'}</em>`;
   const was=$('#mbox').classList.contains('ss');   // already open: redraw in place, don't slide up again
   openModal(`<div class="ckh"><h3 style="margin:0;font-size:15px">Complete Balanced Bowl</h3><button class="btn" data-act="close">Close</button></div>
     <div class="ckh"><div><div class="lbl" style="margin-bottom:6px">Servings</div><div class="step"><button data-act="cks" data-v="-1" aria-label="Fewer servings">−</button><b>${s}</b><button data-act="cks" data-v="1" aria-label="More servings">+</button></div></div>
     <div><div class="lbl" style="margin-bottom:6px">Protein ${p===todayPlan()?'<span class="grn">(today\'s plan)</span>':''}</div><div class="vl">${PKEYS.map(k=>`<button class="chip${k===p?' on':''}" data-act="ckp" data-v="${k}">${PROT[k].n}${k===todayPlan()?'<em>today\'s plan</em>':k==='salmon'||k==='sardines'?'<em>omega-3</em>':''}</button>`).join('')}</div></div>
+    <div><div class="lbl" style="margin-bottom:6px">Carb</div><div class="vl">${Object.keys(CARB).map(k=>`<button class="chip${k===C?' on':''}" data-act="ckc" data-v="${k}">${CARB[k].n}${tag(k)}</button>`).join('')}</div></div>
+    <div><div class="lbl" style="margin-bottom:6px">Vegetables</div><div class="vl">${Object.keys(VEG).map(k=>`<button class="chip${k===V?' on':''}" data-act="ckv" data-v="${k}">${VEG[k].n}${tag(k)}</button>`).join('')}</div></div>
     <div><div class="lbl" style="margin-bottom:6px">Side</div><div class="vl multi"><button class="chip${CK.milk?' on':''}" data-act="ckm">Glass of milk<em>calcium · vitamin D</em></button></div></div></div>
     <div class="ns"><div>Per bowl<b>${fi(t.kcal)} kcal</b></div><div>Protein<b>${fi(t.p)} g</b></div><div>Carbs<b>${fi(t.c)} g</b></div><div>Fat<b>${fi(t.f)} g</b></div><div>Fiber<b>${fi(t.fib)} g</b></div><div>EPA+DHA<b class="${t.epa>=.5?'grn':''}">${fi(t.epa*1000)} mg</b></div></div>
     <div class="sec">INGREDIENTS · ${s} SERVING${s>1?'S':''}</div>
     <div class="ing">${ings.map(x=>`<label><input type="checkbox"><span>${x}</span></label>`).join('')}</div>
     <div class="sec">STEPS</div>
     ${steps.map(([txt,sec],i)=>`<div class="stp"><b>${i+1}</b><div>${txt}</div>${sec?`<button class="tmr" data-act="tmr" data-v="${i}|${sec}" data-tmr="${i}">${CT[i]?'⏱ '+mmss((CT[i].end-Date.now())/1000):'⏱ '+mmss(sec)}</button>`:''}</div>`).join('')}
-    <div class="tip"><b>Rotation tip:</b> 2–3× a week swap eggs for salmon or sardines for EPA/DHA. Chicken and steak add protein, iron and zinc but almost no omega-3. Rice &amp; beans keep 4–5 days in the fridge.</div>
+    <div class="tip"><b>Rotation tip:</b> 2–3× a week swap eggs for salmon or sardines for EPA/DHA. Chicken and steak add protein, iron and zinc but almost no omega-3. The carb and vegetables change with each batch, the ones you've cooked least recently first. Cooked carbs &amp; beans keep 4–5 days in the fridge.</div>
     <div class="mact"><div class="sp"></div><button class="btn go" data-act="cklog">Log my bowl (${PROT[p].n}${CK.milk?' + milk':''})</button></div>`,true);
   $('#mbox').classList.add('ss');if(was)$('#mbox').classList.add('ss-on');
 }
@@ -737,26 +937,40 @@ setInterval(()=>{for(const i in CT){const b=document.querySelector(`[data-tmr="$
   if(left<=0){delete CT[i];beep();navigator.vibrate?.([200,100,200]);toast(`Step ${+i+1} timer done`);if(b)b.textContent='✓ Done';continue}
   if(b)b.textContent='⏱ '+mmss(left)}},500);
 
-function bowlForm(m){
-  const isNew=!m;m=m||{time:new Date().toISOString(),kind:'bowl',servings:1,protein:todayPlan(),milk:true,omit:[],note:''};
+// pre: a new bowl filled in by the next-meal suggestion. A new bowl is made from the batch on hand (or the next one);
+// a bowl saved before the rotation shows the recipe as written, which is what it was
+function bowlForm(m,pre){
+  const isNew=!m,v=isNew&&curVar();m=m||{time:new Date().toISOString(),kind:'bowl',servings:1,protein:todayPlan(),milk:true,carb:v.carb,veg:v.veg,omit:[],note:'',...pre};
+  const opt=(O,sel)=>Object.keys(O).map(k=>`<option value="${k}"${k===sel?' selected':''}>${O[k].n}</option>`).join('');
   openModal(`<h3>${isNew?'Log bowl':'Edit bowl'}</h3><div class="fg">
     <label>Time<input id="f_time" type="datetime-local" value="${toLocalInput(m.time)}"></label>
     <label>Servings eaten<input id="f_servings" type="number" min="0.25" step="0.25" value="${m.servings}"></label>
     <label>Protein<select id="f_protein">${PKEYS.map(k=>`<option value="${k}" ${k===m.protein?'selected':''}>${PROT[k].n}</option>`).join('')}</select></label>
     <label>Side<span class="ck" style="padding-top:8px"><label><input type="checkbox" id="f_milk" ${m.milk?'checked':''}>8 oz milk</label></span></label>
-    <label class="full">Left out this time<span class="ck">${OMIT.map(([k,l])=>`<label><input type="checkbox" class="f_omit" value="${k}" ${(m.omit||[]).includes(k)?'checked':''}>${l}</label>`).join('')}</span></label>
+    <label>Carb<select id="f_carb">${opt(CARB,ck(m))}</select></label><label>Vegetables<select id="f_veg">${opt(VEG,vk(m))}</select></label>
+    <label class="full">Left out this time<span class="ck">${OMIT.map(([k,l])=>`<label><input type="checkbox" class="f_omit" value="${k}" ${(m.omit||[]).includes(k)?'checked':''}><span data-slot="${k}">${l}</span></label>`).join('')}</span></label>
     <label class="full">Note<textarea id="f_note" rows="2">${esc(m.note)}</textarea></label></div>
+    <div class="ns" id="f_ns" style="margin-top:12px" aria-live="polite"></div>
     <div class="mact">${isNew?'':`<button class="btn dng" data-act="del" data-id="${m.id}">Delete</button>`}<div class="sp"></div>
     <button class="btn" data-act="close">Cancel</button><button class="btn pri" data-act="savebowl" data-id="${m.id||''}">Save</button></div>`);
+  bowlNS();
+}
+const readBowl=()=>({kind:'bowl',servings:Math.max(.25,+$('#f_servings').value||1),protein:$('#f_protein').value,milk:$('#f_milk').checked,carb:$('#f_carb').value,veg:$('#f_veg').value,
+  omit:[...document.querySelectorAll('.f_omit:checked')].map(x=>x.value)});
+// the bowl form's own totals, as you change it; the left-out boxes follow the carb and vegetables
+function bowlNS(){
+  const m=readBowl(),t=nutMeal(m).t;
+  document.querySelectorAll('[data-slot]').forEach(s=>{const k=s.dataset.slot;if(k==='rice'||k==='spinach'||k==='tomato')s.textContent=cap1(slotName(m,k))});
+  $('#f_ns').innerHTML=`<div>This bowl<b>${fi(t.kcal)} kcal</b></div><div>Protein<b>${fi(t.p)} g</b></div><div>Carbs<b>${fi(t.c)} g</b></div><div>Fat<b>${fi(t.f)} g</b></div><div>Fiber<b>${fi(t.fib)} g</b></div>`;
 }
 function saveBowl(id){
   const d=new Date($('#f_time').value);if(isNaN(d))return toast('Invalid time');
-  const m={id:id||uid(),time:d.toISOString(),kind:'bowl',servings:Math.max(.25,+$('#f_servings').value||1),protein:$('#f_protein').value,milk:$('#f_milk').checked,
-    omit:[...document.querySelectorAll('.f_omit:checked')].map(x=>x.value),note:$('#f_note').value.trim()};
-  upsert(m);closeModal();
+  const{kind,servings,protein,milk,carb,veg,omit}=readBowl();
+  upsert({id:id||uid(),time:d.toISOString(),kind,servings,protein,milk,carb,veg,omit,note:$('#f_note').value.trim()});closeModal();
 }
-function quickForm(m){
-  const isNew=!m;m=m||{time:new Date().toISOString(),kind:'quick',name:'',kcal:'',p:'',c:'',f:'',fib:'',note:''};
+// pre: a new food filled in from one you've logged (the next-meal suggestion)
+function quickForm(m,pre){
+  const isNew=!m;m=m||{time:new Date().toISOString(),kind:'quick',name:'',kcal:'',p:'',c:'',f:'',fib:'',note:'',...pre};
   const names=[...new Set(meals.filter(x=>x.kind==='quick').map(x=>x.name))];
   const f=(k,l)=>`<label>${l}<input id="q_${k}" type="number" step="any" min="0" value="${esc(m[k])}"></label>`;
   openModal(`<h3>${isNew?'Add other food':'Edit food'}</h3><p class="mu">For anything that isn't the bowl — snacks, other meals, drinks. Previous names auto-fill.</p><div class="fg">
@@ -775,35 +989,60 @@ function saveQuick(id){
 function upsert(m){const i=meals.findIndex(x=>x.id===m.id);i>=0?meals[i]=m:meals.push(m);save();render()}
 function info(id){
   const m=meals.find(x=>x.id===id);if(!m)return;const t=NM(m).t;
-  const rows=[['Calories',fi(t.kcal)+' kcal'],['Protein',fnum(r1(t.p||0))+' g'],['Carbs',fnum(r1(t.c||0))+' g'],['Fat',fnum(r1(t.f||0))+' g'],
+  const rows=[...m.kind==='bowl'?[['Made with',vname(m)]]:[],['Calories',fi(t.kcal)+' kcal'],['Protein',fnum(r1(t.p||0))+' g'],['Carbs',fnum(r1(t.c||0))+' g'],['Fat',fnum(r1(t.f||0))+' g'],
     ...(m.kind==='bowl'?NUT.map(([k,l,u,dv])=>[l,`${fnum(r1(t[k]||0))} ${u} <span class="mu">(${Math.round((t[k]||0)/dv*100)}%)</span>`]).concat([['EPA + DHA',fi((t.epa||0)*1000)+' mg']]):[['Fiber',fnum(r1(t.fib||0))+' g']])];
   openModal(`<h3>${m.kind==='bowl'?`Bowl · ${PROT[m.protein].n}${m.milk?' + milk':''}`:esc(m.name)}</h3><div class="kv">${rows.map(([a,b])=>`<span>${a}</span><b style="font-weight:500">${b}</b>`).join('')}
     ${m.note?`<span>Note</span><b style="font-weight:400;white-space:pre-wrap">${esc(m.note)}</b>`:''}</div>
     <div class="mact"><div class="sp"></div><button class="btn" data-act="edit" data-id="${m.id}">Edit</button><button class="btn pri" data-act="close">Close</button></div>`);
 }
-function batchForm(){
-  openModal(`<h3>Batch cook</h3><p class="mu">Log when you cooked rice &amp; beans. Each bowl you log afterwards counts down the servings. Cooked rice and beans keep 4–5 days refrigerated; this tracker warns on day 4.</p><div class="fg">
-    <label>Cooked on<input id="b_date" type="date" value="${today()}"></label><label>Servings made<input id="b_made" type="number" min="1" step="1" value="${settings.batch?.made||5}"></label></div>
-    <div class="mact">${settings.batch?'<button class="btn dng" data-act="clearbatch">Clear batch</button>':''}<div class="sp"></div><button class="btn" data-act="close">Cancel</button><button class="btn pri" data-act="savebatch">Save</button></div>`);
+// a new batch is offered the carb and vegetables cooked least recently; edit (the batch card's Change) keeps this one's
+function batchForm(edit){
+  const b=settings.batch,cur=edit&&b,v=cur?b:nextVar(),L=lastCooked();
+  const opt=(O,sel)=>Object.keys(O).map(k=>`<option value="${k}"${k===sel?' selected':''}>${O[k].n} · ${L[k]?fmd(L[k]):'new'}</option>`).join('');
+  openModal(`<h3>${cur?'Edit batch':'Batch cook'}</h3><p class="mu">Log when you cooked the carb &amp; beans. Each bowl you log afterwards counts down the servings. Cooked carbs and beans keep 4–5 days refrigerated; this tracker warns on day 4.</p><div class="fg">
+    <label>Cooked on<input id="b_date" type="date" value="${cur?b.date:today()}"></label><label>Servings made<input id="b_made" type="number" min="1" step="1" value="${b?.made||5}"></label>
+    <label>Carb<select id="b_carb">${opt(CARB,ck(v))}</select></label><label>Vegetables<select id="b_veg">${opt(VEG,vk(v))}</select></label></div>
+    <p class="mu" style="font-size:11px;margin:10px 0 0">${cur?'':'Picked for you: the carb and the vegetables you cooked least recently (the dates are when you last had each), so bowls don\'t repeat. '}Bowls you log while this batch lasts are made with them.</p>
+    <div class="mact">${settings.batch?'<button class="btn dng" data-act="clearbatch">Clear batch</button>':''}<div class="sp"></div><button class="btn" data-act="close">Cancel</button><button class="btn pri" data-act="savebatch" data-v="${cur?1:''}">Save</button></div>`);
 }
 
 /* grocery list */
+// the carb and vegetables for each of the next nd days: the batch on hand while it lasts (fresh, with servings), then
+// a new batch every 5 days in rotation order
+function varDays(nd,per){
+  const b=settings.batch,L=lastCooked(),oc=byLast(CARB,L),ov=byLast(VEG,L),out=[];let i=0;
+  if(b){const{left,dl}=bstat(b);for(;i<nd&&i<=dl&&(i+1)*per<=left+1e-9;i++)out.push({carb:ck(b),veg:vk(b)})}
+  for(let j=0;i<nd;i++,j++){const k=Math.floor(j/5);out.push({carb:oc[k%oc.length],veg:ov[k%ov.length]})}
+  return out;
+}
 function groceryText(nd,per){
-  const start=today(),pc={};PKEYS.forEach(p=>pc[p]=0);let n=0;
-  for(let i=0;i<nd;i++){const p=settings.plan[(pd(addDays(start,i)).getDay()+6)%7];pc[p]+=per;n+=per}
-  const b=k=>BASE.find(x=>x[0]===k)[1]/3*n,raw=oz=>Math.ceil(oz/.75),lb=oz=>(oz/16).toFixed(1);
-  const riceDry=settings.riceAs==='cooked'?b('rice')/3:b('rice'),beans=b('beans'),spin=b('spinach'),garl=b('garlic'),milk=n;
-  const L=[`Grocery list · ${nd} day${nd>1?'s':''} · ${n} bowl${n>1?'s':''}`,'',
+  const start=today(),pc={};PKEYS.forEach(p=>pc[p]=0);let n=0;const V=varDays(nd,per),Q={},spans=[];
+  for(let i=0;i<nd;i++){const p=settings.plan[(pd(addDays(start,i)).getDay()+6)%7];pc[p]+=per;n+=per;
+    recipe(V[i]).forEach(([k,q])=>Q[k]=(Q[k]||0)+q/3*per);
+    const nm=vname(V[i]),sp=spans.at(-1);if(sp&&sp.nm===nm)sp.b=i;else spans.push({nm,a:i,b:i})}
+  const b=k=>Q[k]||0,raw=oz=>Math.ceil(oz/.75),lb=oz=>(oz/16).toFixed(1),dry=k=>settings.riceAs==='cooked'?b(k)/3:b(k),oz=(k,g)=>Math.ceil(b(k)*g/28.35);
+  const beans=b('beans'),spin=b('spinach'),garl=b('garlic'),milk=n,day=i=>fmd(addDays(start,i));
+  const L=[`Grocery list · ${nd} day${nd>1?'s':''} · ${n} bowl${n>1?'s':''}`,
+    `Carb & vegetables: ${spans.map(s=>s.nm+(spans.length>1?` (${day(s.a)}${s.b>s.a?'–'+day(s.b):''})`:'')).join(', then ')}`,'',
     'PANTRY / BATCH',
-    `• Rice: ${fq(riceDry)} cups dry (~${(riceDry/2.25).toFixed(1)} lb)`,
+    b('rice')&&`• Rice: ${fq(dry('rice'))} cups dry (~${(dry('rice')/2.25).toFixed(1)} lb)`,
+    b('quinoa')&&`• Quinoa: ${fq(dry('quinoa'))} cups dry (~${(dry('quinoa')*170/453.6).toFixed(1)} lb)`,
     `• Black beans: ${fq(beans)} cups drained → ${Math.ceil(beans/1.5)} × 15 oz can${Math.ceil(beans/1.5)>1?'s':''}`,
     `• ${settings.seed==='chia'?'Chia seeds':'Ground flaxseed'}: ${fq(b('seed'))} tbsp (~${Math.round(b('seed')*(settings.seed==='chia'?12:7))} g)`,
     `• Olive oil: ${fq(b('oil'))} tsp`,`• Salt & black pepper (pantry)`,'',
     'PRODUCE',
     `• Avocados: ${Math.ceil(b('avocado'))} — buy at mixed ripeness so they don't all ripen at once`,
-    `• Spinach: ${fq(spin)} cups (~${Math.ceil(spin)} oz → ${Math.ceil(spin/5)} × 5 oz clamshell${Math.ceil(spin/5)>1?'s':''})`,
-    `• Tomatoes: ${Math.ceil(b('tomato'))}`,`• Limes: ${Math.ceil(b('lime'))}`,`• Garlic: ${Math.ceil(garl)} cloves (~${Math.max(1,Math.ceil(garl/10))} head${Math.ceil(garl/10)>1?'s':''})`,'',
-    'PROTEIN & DAIRY'];
+    b('sweet')&&`• Sweet potatoes: ${Math.ceil(b('sweet'))} medium (~${fq(b('sweet'))} cups cubed)`,
+    spin&&`• Spinach: ${fq(spin)} cups (~${Math.ceil(spin)} oz → ${Math.ceil(spin/5)} × 5 oz clamshell${Math.ceil(spin/5)>1?'s':''})`,
+    b('kale')&&`• Kale: ${fq(b('kale'))} cups chopped (~${oz('kale',16)} oz)`,
+    b('broccoli')&&`• Broccoli: ${fq(b('broccoli'))} cups chopped (~${oz('broccoli',91)} oz)`,
+    b('zucchini')&&`• Zucchini: ${Math.ceil(b('zucchini'))}`,
+    b('tomato')&&`• Tomatoes: ${Math.ceil(b('tomato'))}`,
+    b('redpep')&&`• Red bell peppers: ${Math.ceil(b('redpep'))}`,
+    b('carrot')&&`• Carrots: ${Math.ceil(b('carrot'))}`,
+    b('mushroom')&&`• White mushrooms: ${fq(b('mushroom'))} cups sliced (~${oz('mushroom',70)} oz)`,
+    `• Limes: ${Math.ceil(b('lime'))}`,`• Garlic: ${Math.ceil(garl)} cloves (~${Math.max(1,Math.ceil(garl/10))} head${Math.ceil(garl/10)>1?'s':''})`,'',
+    'PROTEIN & DAIRY'].filter(x=>x!==0);
   if(pc.egg)L.push(`• Eggs: ${pc.egg*2} → ${Math.ceil(pc.egg*2/12)} dozen`);
   if(pc.salmon)L.push(`• Salmon: ${pc.salmon} meal${pc.salmon>1?'s':''} → ~${raw(pc.salmon*settings.portion)} oz raw (${lb(raw(pc.salmon*settings.portion))} lb)`);
   if(pc.sardines)L.push(`• Sardines: ${pc.sardines} × 3.75 oz can${pc.sardines>1?'s':''}`);
@@ -826,7 +1065,7 @@ function dataForm(){
   <div class="ui-set">
     ${row('Calorie target','kcal a day',`<input id="s_kcal" type="number" min="800" step="50" value="${s.kcal}" aria-label="Calorie target">`)}
     ${row('Protein target','Grams a day',`<input id="s_protein" type="number" min="20" step="5" value="${s.protein}" aria-label="Protein target">`)}
-    ${row('Recipe rice','The recipe as written measures it uncooked',`<select id="s_rice" aria-label="Recipe rice">${o('dry','Uncooked',s.riceAs)}${o('cooked','Cooked',s.riceAs)}</select>`)}
+    ${row('Recipe grains','Rice and quinoa · the recipe as written measures them uncooked',`<select id="s_rice" aria-label="Recipe rice">${o('dry','Uncooked',s.riceAs)}${o('cooked','Cooked',s.riceAs)}</select>`)}
     ${row('Seeds','Ground flax or chia · plant omega-3',`<select id="s_seed" aria-label="Seeds">${o('flax','Flax',s.seed)}${o('chia','Chia',s.seed)}</select>`)}
     ${row('Milk','The glass on the side',`<select id="s_milk" aria-label="Milk">${o('whole','Whole',s.milk)}${o('2','2%',s.milk)}${o('skim','Skim',s.milk)}</select>`)}
     ${row('Portion','Salmon, chicken, steak · oz cooked',`<input id="s_portion" type="number" min="2" max="12" step="0.5" value="${s.portion}" aria-label="Portion">`)}
@@ -857,15 +1096,15 @@ async function importFile(file){
   if(ix('time')<0||ix('kind')<0)return toast('Unrecognized CSV format');
   const v=(r,k)=>ix(k)>=0?(r[ix(k)]??'').trim():'',n=(r,k)=>+v(r,k)||0,out=[];
   for(const r of rows.slice(1)){const d=new Date(v(r,'time'));if(isNaN(d))continue;
-    if(v(r,'kind')==='bowl')out.push({id:uid(),time:d.toISOString(),kind:'bowl',servings:n(r,'servings')||1,protein:PROT[v(r,'protein')]?v(r,'protein'):'egg',milk:v(r,'milk')==='true',omit:v(r,'omit')?v(r,'omit').split('|'):[],note:v(r,'note')});
+    if(v(r,'kind')==='bowl')out.push({id:uid(),time:d.toISOString(),kind:'bowl',servings:n(r,'servings')||1,protein:PROT[v(r,'protein')]?v(r,'protein'):'egg',milk:v(r,'milk')==='true',...CARB[v(r,'carb')]?{carb:v(r,'carb')}:{},...VEG[v(r,'veg')]?{veg:v(r,'veg')}:{},omit:v(r,'omit')?v(r,'omit').split('|'):[],note:v(r,'note')});
     else out.push({id:uid(),time:d.toISOString(),kind:'quick',name:v(r,'name')||'Food',kcal:n(r,'kcal'),p:n(r,'protein_g'),c:n(r,'carbs_g'),f:n(r,'fat_g'),fib:n(r,'fiber_g'),note:v(r,'note')})}
   const key=m=>[m.time,m.kind,m.protein||m.name].join('|'),have=new Set(meals.map(key)),addl=out.filter(m=>!have.has(key(m)));
   meals.push(...addl);save();render();toast(`Imported ${addl.length} meal${addl.length===1?'':'s'}`);
 }
 function exportCSV(){
   const f=view().sort((a,b)=>new Date(a.time)-new Date(b.time)),q=s=>/[",\n]/.test(s=String(s??''))?`"${s.replace(/"/g,'""')}"`:s;
-  const csv=['time,kind,name,servings,protein,milk,omit,kcal,protein_g,carbs_g,fat_g,fiber_g,epa_dha_mg,note',...f.map(m=>{const t=NM(m).t;
-    return[m.time,m.kind,m.kind==='bowl'?'Bowl':m.name,m.servings??'',m.protein??'',m.milk??'',(m.omit||[]).join('|'),Math.round(t.kcal||0),r1(t.p||0),r1(t.c||0),r1(t.f||0),r1(t.fib||0),Math.round((t.epa||0)*1000),m.note].map(q).join(',')})].join('\n');
+  const csv=['time,kind,name,servings,protein,milk,omit,carb,veg,kcal,protein_g,carbs_g,fat_g,fiber_g,epa_dha_mg,note',...f.map(m=>{const t=NM(m).t;
+    return[m.time,m.kind,m.kind==='bowl'?'Bowl':m.name,m.servings??'',m.protein??'',m.milk??'',(m.omit||[]).join('|'),m.carb??'',m.veg??'',Math.round(t.kcal||0),r1(t.p||0),r1(t.c||0),r1(t.f||0),r1(t.fib||0),Math.round((t.epa||0)*1000),m.note].map(q).join(',')})].join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`meals-${ymd(new Date())}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
@@ -1019,6 +1258,7 @@ document.addEventListener('change',e=>{
     if(l)['kcal','p','c','f','fib'].forEach(k=>$('#q_'+k).value=l[k]??'')}
 });
 addEventListener('storage',e=>{if(e.key==='isx.checkin.v1')render()});
+document.addEventListener('input',e=>{if(e.target.closest('.fg')&&$('#f_ns'))bowlNS()});
 document.addEventListener('input',e=>{if(e.target.id==='g_days'||e.target.id==='g_per'){const nd=Math.max(1,Math.min(28,+$('#g_days').value||7)),per=Math.max(1,Math.min(4,+$('#g_per').value||1));$('#g_out').textContent=groceryText(nd,per)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 // rows that act as buttons (cross-filters, calendar days) answer Enter and Space too, and keep focus after the redraw
@@ -1045,11 +1285,17 @@ document.addEventListener('click',e=>{
     savebowl:()=>saveBowl(id),savequick:()=>saveQuick(id),close:closeModal,export:exportCSV,data:dataForm,grocery:()=>groceryForm(),batch:batchForm,
     del:()=>{if(confirm('Delete this entry?')){meals=meals.filter(x=>x.id!==id);save();closeModal();render()}},
     cycle:()=>{const i=+v;settings.plan[i]=PKEYS[(PKEYS.indexOf(settings.plan[i])+1)%PKEYS.length];save();render()},
-    cks:()=>{CK.s=Math.max(1,Math.min(12,CK.s+ +v));drawCook()},ckp:()=>{CK.protein=v;drawCook()},ckm:()=>{CK.milk=!CK.milk;drawCook()},
-    cklog:()=>{upsert({id:uid(),time:new Date().toISOString(),kind:'bowl',servings:1,protein:CK.protein,milk:CK.milk,omit:[],note:''});closeModal();toast('Bowl logged')},
+    cks:()=>{CK.s=Math.max(1,Math.min(12,CK.s+ +v));drawCook()},ckp:()=>{CK.protein=v;drawCook()},ckm:()=>{CK.milk=!CK.milk;drawCook()},ckc:()=>{CK.carb=v;drawCook()},ckv:()=>{CK.veg=v;drawCook()},
+    // the next-meal suggestion: each row opens its form filled in
+    next:nextForm,nxbowl:()=>{const x=NX?.items[+v];if(x)bowlForm(null,{protein:x.protein,milk:x.milk,carb:x.carb,veg:x.veg})},nxcook:()=>{const x=NX?.items[+v];if(x)cookMode(x.protein,x)},
+    nxfood:()=>{const x=NX?.items[+v]?.each;if(x)quickForm(null,{name:x.name,kcal:x.kcal,p:x.p,c:x.c,f:x.f,fib:x.fib})},bedit:()=>batchForm(1),
+    cklog:()=>{upsert({id:uid(),time:new Date().toISOString(),kind:'bowl',servings:1,protein:CK.protein,milk:CK.milk,carb:CK.carb,veg:CK.veg,omit:[],note:''});closeModal();toast('Bowl logged')},
     tmr:()=>{const[i,sec]=v.split('|').map(Number);if(CT[i]){delete CT[i];b.textContent='⏱ '+mmss(sec)}else{beep();CT[i]={end:Date.now()+sec*1000}}},
     gcopy:async()=>{const t=$('#g_out').textContent;try{if(navigator.share)await navigator.share({text:t});else{await navigator.clipboard.writeText(t);toast('Copied to clipboard')}}catch{}},
-    savebatch:()=>{const d=$('#b_date').value;if(!d)return toast('Pick a date');settings.batch={date:d,made:Math.max(1,+$('#b_made').value||5)};save();closeModal();render()},
+    savebatch:()=>{const d=$('#b_date').value;if(!d)return toast('Pick a date');const o=settings.batch;
+      // the batch it replaces joins the history the rotation is picked from (unless it's this one, edited)
+      if(o&&!v&&o.date!==d)settings.past=[...(settings.past||[]),o].slice(-12);
+      settings.batch={date:d,made:Math.max(1,+$('#b_made').value||5),carb:$('#b_carb').value,veg:$('#b_veg').value};save();closeModal();render()},
     review:()=>reviewForm(rvDefault()),rvgo:()=>v&&reviewForm(v),
     rvcopy:()=>{const t=reviewText();(navigator.clipboard?.writeText(t)||Promise.reject()).then(()=>toast('Review copied'),()=>toast('Copy failed — select the text instead'))},
     clearbatch:()=>{settings.batch=null;save();closeModal();render()},
@@ -1057,7 +1303,7 @@ document.addEventListener('click',e=>{
       milk:$('#s_milk').value,portion:Math.max(2,+$('#s_portion').value||4.5),fishTarget:Math.max(0,+$('#s_fish').value||0)});save();closeModal();render();toast('Settings saved')},
     icsv:()=>$('#i_file').click(),sync:()=>{closeModal();document.getElementById('isx-sync')?.click()},
     demo:()=>{demoData();save();closeModal();S.range='all';S.sel=null;S.page=1;render();toast('Sample data loaded')},
-    clear:()=>{if(confirm('Delete ALL meals and the batch record? Export a CSV first if you want a backup.')){meals=[];settings.batch=null;save();closeModal();render()}}
+    clear:()=>{if(confirm('Delete ALL meals and the batch record? Export a CSV first if you want a backup.')){meals=[];settings.batch=null;delete settings.past;save();closeModal();render()}}
   };
   A[b.dataset.act]?.();
 });
@@ -1065,7 +1311,7 @@ document.addEventListener('click',e=>{
 render();
 // another ISIONXXX app can send you straight to an action here (REWIRE's LOG buttons): #do=<action> or a message
 // 'today' (from TODAY's rings and timeline): drop any card filters and show just today, as a chip you can clear
-function doAct(a){if(!/^\w+$/.test(a||''))return;if(a==='today'){const t=new Date();S.x={};S.sel=today();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.page=1;render();return}const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
+function doAct(a){if(!/^\w+$/.test(a||''))return;if(a==='next')return nextForm();if(a==='today'){const t=new Date();S.x={};S.sel=today();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.page=1;render();return}const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
 addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.isx==='do')doAct(e.data.act)});
 {const m=/do=(\w+)/.exec(location.hash);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>doAct(m[1]),0)}}
 /* ---------- today at a glance (shared hero, timeline and motion from ui.js) ---------- */
@@ -1086,6 +1332,12 @@ function heroToday(){
     log:T.map(m=>({at:Date.parse(m.time),tag:m.kind==='bowl'?'Bowl':'Food',text:`${m.kind==='bowl'?(PROT[m.protein]?.n||'Bowl')+(m.servings>1?' ×'+m.servings:''):m.name||'Food'} · ${fi(NM(m).t.kcal)} kcal · ${fi(NM(m).t.p)} g protein`}))});
 }
 {const r0=render;render=function(...a){r0.apply(this,a);UI.animate($('#app'));UI.animate($('#top'),{onDone:l=>toast(`${l.join(' + ')} target hit ✓`)})};UI.animate($('#top'));UI.animate($('#app'))}
+// TODAY's plan card: the next meal for each part of the day (the hour decides how many bowls still make sense), one row
+// when they all say the same. save() asks for a rebuild
+UI.planner('nutrition',[K.m,K.s],()=>{
+  const R=[[4,11],[11,15],[15,21],[21,4]].map(([h0,h1])=>{const d=new Date();d.setHours(h0,0,0,0);const N=nextMeal(d);return{title:N.title,sub:N.sub,act:'next',h0,h1,...N.done?{done:true}:{}}});
+  return R.every(r=>r.title===R[0].title&&r.sub===R[0].sub)?[{...R[0],h0:undefined,h1:undefined}]:R;
+});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
