@@ -570,27 +570,43 @@ function lastCooked(){
 // the rotation: never cooked first, then the longest ago (ties keep the list order)
 const byLast=(O,L)=>Object.keys(O).sort((a,b)=>(L[a]||'')<(L[b]||'')?-1:(L[a]||'')>(L[b]||'')?1:0);
 function nextVar(){const L=lastCooked();return{carb:byLast(CARB,L)[0],veg:byLast(VEG,L)[0]}}
-// what a bowl is made from now: the batch on hand while it has a serving and is fresh, else the next batch
-function curVar(t=today()){const b=settings.batch;if(b){const{left,dl}=bstat(b,t);if(left>=1&&dl>=0)return{carb:ck(b),veg:vk(b),batch:true,left,dl}}return nextVar()}
+// bowls cooked fresh (no batch logged, or after the batch on hand ran out or passed its 4 days) count as a batch of
+// their own for 4 days from the first of them, so the carb and vegetables don't move on with every bowl: the newest
+// such bowl, or null when there's none or that run is over
+function freshRun(t=today()){
+  const b=settings.batch,end=b&&addDays(b.date,4),B=[];let used=0,runEnd='',last=null;
+  meals.forEach(m=>{if(m.kind!=='bowl')return;const d=dayOf(m);if((!b||d>=b.date)&&d<=t)B.push([Date.parse(m.time),d,m])});
+  B.sort((x,y)=>x[0]-y[0]).forEach(([,d,m])=>{
+    if(b&&d<=end&&b.made-used>=1){if(!(m.omit||[]).includes('rice'))used+=m.servings||1;return}   // from the batch, as bstat counts it
+    if(d>runEnd)runEnd=addDays(d,4);last=m});
+  return last&&t<=runEnd?last:null;
+}
+// what a bowl is made from now: the batch on hand while it has a serving and is fresh, else what you've been cooking
+// fresh lately, else the next batch
+function curVar(t=today()){const b=settings.batch;if(b){const{left,dl}=bstat(b,t);if(left>=1&&dl>=0)return{carb:ck(b),veg:vk(b),batch:true,left,dl}}
+  const f=freshRun(t);return f?{carb:ck(f),veg:vk(f),fresh:true}:nextVar()}
 const vname=v=>`${cOf(v).n} · ${vOf(v).n}`;
 function batchHTML(){
   const b=settings.batch,t=today(),nx=`<div class="bv"><span class="lbl">Next batch</span><b>${vname(nextVar())}</b><small>cooked least recently</small></div>`;
   if(!b)return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:18px">Cooked carbs &amp; beans keep 4–5 days in the fridge.</div>
     <div class="empty" style="height:auto;padding:16px 0 20px">No batch logged yet</div>${nx}</div><div class="ft"><span class="mu">Cook once, assemble daily</span><button class="btn go" data-act="batch">I batch-cooked</button></div></div>`;
-  const{left,dl}=bstat(b,t),old=left<1||dl<=0;
+  // in use while it has a serving and isn't past its 4 days (the last safe day too); time for a new one from that day
+  const{left,dl}=bstat(b,t),use=left>=1&&dl>=0,old=left<1||dl<=0;
   const [cls,msg]=dl<0?['red',`Past the 4-day window — discard leftovers`]:dl===0?['amb','Last safe day — use today']:['grn',`${dl} day${dl>1?'s':''} left`];
   return`<div class="card"><div class="bd"><h3 style="margin-bottom:6px">Batch prep</h3><div class="lbl" style="margin-bottom:12px">Cooked ${fdate(b.date)} · use by ${pd(addDays(b.date,4)).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
-    ${old?'':`<div class="bv"><span class="lbl">This batch</span><b>${vname(b)}</b><button class="lnk" data-act="bedit" aria-label="Change this batch's carb and vegetables">Change</button></div>`}
+    ${!use?'':`<div class="bv"><span class="lbl">This batch</span><b>${vname(b)}</b><button class="lnk" data-act="bedit" aria-label="Change this batch's carb and vegetables">Change</button></div>`}
     ${hbar('Servings left',`<b>${fnum(left)}</b> / ${b.made}`,b.made?left/b.made:0,'#ffb000')}
     ${hbar('Freshness',`<span class="${cls}">${msg}</span>`,Math.max(0,dl)/4,`var(--${cls==='grn'?'g':cls==='red'?'r':'acc'})`)}${old?nx:''}</div>
     <div class="ft"><span class="mu">${old?'Time to cook a new batch':`${cOf(b).n} + beans ready`}</span><button class="btn ${old?'go':''}" data-act="batch">New batch</button></div></div>`;
 }
 
 /* ---------- next meal: what to eat next ----------
-   From what's left of today's calories and protein, the hour, the batch on hand and the rotation: a bowl if one fits
-   (a second one tonight when it's before 3 pm and both fit), then the fewest calories of your own logged foods that
-   close the protein gap. Calories may land up to 10% over the target (the calendar's 'on target'); a protein gap
-   under 5 g counts as closed. */
+   From what's left of today's calories and protein, the hour, the batch on hand and the rotation: a bowl if one fits,
+   then the fewest calories of your own logged foods that close the protein gap. Two bowls a day at most, one before
+   3 pm and one for dinner (3–9 pm), and a part of the day that has had its bowl is done, so following the suggestion
+   doesn't change it. Calories may land up to 10% over the target (the calendar's 'on target'); a protein gap under PG g
+   counts as closed. Before 4 am it's still last night: the day judged is yesterday's plus what you've had since midnight. */
+const PG=5;
 const bn=p=>({egg:'Egg',sardines:'Sardine'}[p]||PROT[p]?.n||'')+' bowl';
 // your foods: each name you've logged, with its newest values, the most recently eaten first
 function myFoods(){
@@ -598,40 +614,46 @@ function myFoods(){
     if(!o||t>o.t)M.set(k,{t,name:m.name.trim(),kcal:+m.kcal||0,p:+m.p||0,c:+m.c||0,f:+m.f||0,fib:+m.fib||0})});
   return[...M.values()].sort((a,b)=>b.t-a.t);
 }
-// up to three servings of those foods (one may repeat) that close a protein gap g within cap kcal, the fewest kcal
-// first; when none closes it, the most protein that fits
+// up to three servings of those foods (one may repeat) that close a protein gap g (to under PG g, with at least PG g
+// of protein) within cap kcal, the fewest kcal first; when none closes it, the most protein that fits
 function snackFit(g,cap,F){
   F=F.filter(x=>x.p>=1&&x.kcal>0&&x.kcal<=cap).slice(0,30);let best=null,part=null;
   const look=ix=>{let kc=0,p=0;ix.forEach(i=>{kc+=F[i].kcal;p+=F[i].p});if(kc>cap)return;
-    if(p>=g){if(!best||kc<best.kc||kc===best.kc&&ix.length<best.ix.length)best={ix,kc,p}}else if(!part||p>part.p||p===part.p&&kc<part.kc)part={ix,kc,p}};
+    if(g-p<PG&&p>=PG){if(!best||kc<best.kc||kc===best.kc&&ix.length<best.ix.length)best={ix,kc,p}}else if(!part||p>part.p||p===part.p&&kc<part.kc)part={ix,kc,p}};
   for(let a=0;a<F.length;a++){look([a]);for(let b=a;b<F.length;b++){look([a,b]);for(let c=b;c<F.length;c++)look([a,b,c])}}
   const r=best||part;if(!r)return null;
   const C=new Map;r.ix.forEach(i=>C.set(i,(C.get(i)||0)+1));   // the same food twice reads as ×2
   return{ok:!!best,kc:r.kc,p:r.p,items:[...C].map(([i,n])=>({kind:'food',name:F[i].name,n,kcal:F[i].kcal*n,p:F[i].p*n,each:F[i]}))};
 }
 function nextMeal(at=new Date()){
-  const t=ymd(at),h=at.getHours(),tg=settings.kcal,tp=settings.protein,G=5,T=meals.filter(m=>dayOf(m)===t),F=myFoods();
+  const t=ymd(at),h=at.getHours(),night=h<4,y=addDays(t,-1),tg=settings.kcal,tp=settings.protein,G=PG,F=myFoods();
+  const T=meals.filter(m=>{const d=dayOf(m);return d===t||night&&d===y});
   let kc=0,p=0;T.forEach(m=>{const x=NM(m).t;kc+=x.kcal||0;p+=x.p||0});
-  const N={h,kc,p,left:tg-kc,gap:tp-p,late:h>=21||h<4,items:[],done:false,foods:F.length};
+  const N={h,kc,p,left:tg-kc,gap:tp-p,late:h>=21||night,night,items:[],done:false,foods:F.length};
   // habits from your own bowls (the forms' defaults until there are a few): eggs in the morning, milk on the side
   const B=meals.filter(m=>m.kind==='bowl').slice(-90),AM=B.filter(m=>new Date(m.time).getHours()<11).slice(-40),B30=B.slice(-30);
   const eggAM=AM.length>=5&&AM.filter(m=>m.protein==='egg').length>=AM.length*.6,milk=B30.length<5||B30.filter(m=>m.milk).length*2>=B30.length;
   // the rotation from today on, so a protein you've had today hands over to the next day's
   const plan=d=>settings.plan[(at.getDay()+6+d)%7],had=new Set(T.filter(m=>m.kind==='bowl').map(m=>m.protein));
-  // just eaten (in the last 2 hours): the next bowl is the next meal time, and after lunch there's only dinner left
-  const last=T.reduce((a,m)=>Math.max(a,Date.parse(m.time)),0),recent=last<=+at&&at-last<72e5,am=eggAM&&h<11&&!recent;
-  N.when=recent?(h<11?'at lunch':h<17?'at dinner':'later'):'now';
+  // just eaten (in the last 2 hours): the next bowl waits for the next meal time, and once it's past 11 that's dinner
+  const ago=m=>at-Date.parse(m.time),justAte=m=>ago(m)>=0&&ago(m)<72e5,recent=T.some(justAte),bowlJust=T.some(m=>m.kind==='bowl'&&justAte(m));
+  // the parts of the day still open for a bowl, two bowls a day in all (one after 9 pm or before 4 am doesn't count)
+  const bh=T.filter(m=>m.kind==='bowl'&&dayOf(m)===t).map(m=>new Date(m.time).getHours()).filter(x=>x>=4);
+  const slots=N.late?[]:[...h<15&&!bh.some(x=>x<15)&&!(recent&&h>=11)?['day']:[],...bh.some(x=>x>=15&&x<21)?[]:['eve']].slice(0,Math.max(0,2-bh.length));
+  const am=eggAM&&slots[0]==='day'&&h<11&&!recent;
   const order=[...am?['egg']:[],...[0,1,2,3,4,5,6].map(plan),...PKEYS],V=curVar(t),b0=settings.batch&&bstat(settings.batch,t);
-  let cap=tg*1.1-kc,left=N.left,gap=N.gap;
+  let cap=tg*1.1-kc,left=N.left,gap=N.gap,NV=null;
+  N.bowls=slots.length;
   if(kres(kc)==='over')N.state='over';
   else if(gap<G&&kres(kc)==='ok'){N.state='done';N.done=true}
   else if(N.late&&!T.length)N.state='none';
   else{
-    for(let i=0;!N.late&&i<(h<15&&!(recent&&h>=11)?2:1);i++){
-      const pr=order.find(x=>!had.has(x)&&!N.items.some(y=>y.protein===x))||plan(0),m={kind:'bowl',servings:1,protein:pr,milk,carb:V.carb,veg:V.veg},bt=nutMeal(m).t;
+    for(let i=0;i<slots.length;i++){
+      // a bowl after the batch runs out is the first of the next batch's carb and vegetables
+      const fromB=V.batch&&V.left>=i+1,Vi=V.batch&&!fromB?(NV=NV||nextVar()):V;
+      const pr=order.find(x=>!had.has(x)&&!N.items.some(y=>y.protein===x))||plan(0),m={kind:'bowl',servings:1,protein:pr,milk,carb:Vi.carb,veg:Vi.veg},bt=nutMeal(m).t;
       if(bt.kcal>cap||gap<G&&left<bt.kcal*.75)break;
-      const fromB=V.batch&&V.left>=i+1;
-      N.items.push({...m,kcal:bt.kcal,p:bt.p,src:fromB?'batch':'cook',detail:[vname(V)+(milk?' · milk':''),
+      N.items.push({...m,slot:slots[i],kcal:bt.kcal,p:bt.p,src:fromB?'batch':'cook',detail:[vname(Vi)+(milk?' · milk':''),
         pr===plan(0)?'today\'s plan':am&&pr==='egg'&&!i?'your usual morning bowl':'next in the rotation',
         fromB?`from your batch (${fnum(r1(V.left-i))} left${V.dl===0?', last safe day':''})`:V.batch?'the batch runs out, cook fresh':b0?(b0.dl<0?'batch past 4 days, cook fresh':'batch used up, cook fresh'):'no batch yet, cook fresh'].join(' · ')});
       cap-=bt.kcal;left-=bt.kcal;gap-=bt.p;
@@ -640,37 +662,46 @@ function nextMeal(at=new Date()){
     N.state=N.items.length?'eat':N.late?'late':'room';
   }
   N.after={kc:tg-left,p:tp-gap};
+  // when the first of them is: a bowl now, at lunch, at dinner or tonight; a snack later when you've just had a bowl
+  const I=N.items,a=I[0],rest=I.slice(1);
+  N.when=!a?'now':a.kind!=='bowl'?(bowlJust?'later':'now'):a.slot==='day'?(recent?'at lunch':'now'):h<15?'tonight':recent&&h<18?'at dinner':'now';
   // the plan row (title ≤ 28, sub ≤ 64) and a sentence for the card
-  const I=N.items,a=I[0],rest=I.slice(1),cut=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s,nm=x=>x.kind==='bowl'?bn(x.protein):x.name+(x.n>1?' ×'+x.n:'');
-  const join=(A,n)=>{const s=A.join(' + ');return s.length<=n||A.length<2?cut(s,n):cut(A[0],n-9)+` + ${A.length-1} more`},nofood=N.foods?'none of your foods fits':'no foods logged yet';
+  const cut=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s,nm=x=>x.kind==='bowl'?bn(x.protein):x.name+(x.n>1?' ×'+x.n:'');
+  const join=(A,n)=>{const s=A.join(' + ');return s.length<=n||A.length<2?cut(s,n):cut(A[0],n-9)+` + ${A.length-1} more`};
+  // with no foods logged there's nothing to suggest for the protein yet: say how to change that
+  const nofood=N.foods?'none of your foods fits':'log snacks with + FOOD',howto='Log the snacks you eat with + FOOD and they\'ll be suggested here.';
+  const nobowl=N.late?'it\'s late for a bowl':N.bowls?`a bowl won't fit the ${fi(Math.max(0,N.left))} kcal left`:'you\'ve had tonight\'s bowl';
   if(N.state==='eat'&&a.kind==='bowl'){
     const g1=N.gap-a.p,gEnd=gap,rn=rest.map(x=>x.kind==='bowl'?nm(x).toLowerCase()+' tonight':nm(x));
     N.title=nm(a);
     N.sub=rest.length?`Then ${join(rn,36)} · ${g1>=G?fi(g1)+' g protein to go':fi(Math.max(0,N.left-a.kcal))+' kcal left'}`
       :N.gap<G?`Protein done ✓ · ${fi(Math.max(0,N.left))} kcal left`:g1<G?`Closes the ${fi(N.gap)} g protein gap`:`Leaves ${fi(g1)} g protein to go · ${nofood}`;
-    N.say=`${esc(nm(a))} ${N.when}`+(N.gap<G?` — protein's done already, and it fills ${fi(a.kcal)} of the ${fi(N.left)} kcal left`:g1<G?` — it closes the ${fi(N.gap)} g protein gap`:'')
-      +(rest.length?(g1<G?'; then ':', then ')+esc(rn.join(' and '))+(g1<G?` for the ${fi(N.left-a.kcal)} kcal still left`:gEnd<G?` to close the ${fi(g1)} g protein gap`:` for ${fi(g1-gEnd)} of the ${fi(g1)} g protein still to go`)
-      :g1>=G?` — that leaves ${fi(g1)} g protein to go, and ${nofood}`:'')+'.';
+    const lead=N.gap<G?` — protein's done already, and ${a.kcal<=N.left?`it fills ${fi(a.kcal)} of the ${fi(N.left)} kcal left`:`it takes you to ${fi(kc+a.kcal)} kcal, ${pct(kc+a.kcal,tg)} of your ${fi(tg)} target`}`
+      :g1<G?` — it closes the ${fi(N.gap)} g protein gap`:'';
+    N.say=`${esc(nm(a))} ${N.when}${lead}`+(rest.length?(g1<G?'; then ':', then ')+esc(rn.join(' and '))+(g1<G?` for the ${fi(N.left-a.kcal)} kcal still left`:gEnd<G?` to close the ${fi(g1)} g protein gap`:` for ${fi(g1-gEnd)} of the ${fi(g1)} g protein still to go`)+'.'
+      :g1>=G?` — that leaves ${fi(g1)} g protein to go${N.foods?', and none of your foods fits.':'. '+howto}`:'.');
   }else if(N.state==='eat'){
     N.title=join(I.map(nm),28);
     N.sub=N.ok?`Closes the ${fi(N.gap)} g protein gap · ${fi(N.after.kc-kc)} kcal`:`${fi(N.after.p-p)} of ${fi(N.gap)} g protein · all that fits`;
-    N.say=`${esc(I.map(nm).join(' and '))}${N.when==='now'?'':' later'} ${N.ok?`to close the ${fi(N.gap)} g protein gap`:`for ${fi(N.after.p-p)} of the ${fi(N.gap)} g protein still to go`}${N.late?' — it\'s late for a bowl':` — a bowl won't fit the ${fi(Math.max(0,N.left))} kcal left`}.`;
+    N.say=`${esc(I.map(nm).join(' and '))}${N.when==='now'?'':' later'} ${N.ok?`to close the ${fi(N.gap)} g protein gap`:`for ${fi(N.after.p-p)} of the ${fi(N.gap)} g protein still to go`} — ${nobowl}.`;
   }else if(N.state==='done'){
     N.title=N.late?'Day done':'Targets met';N.sub=`${fi(kc)} kcal · ${fi(p)} g protein · nothing more needed`;
-    N.say=`Targets met: ${fi(kc)} kcal (${pct(kc,tg)} of ${fi(tg)}) and ${fi(p)} g protein of ${fi(tp)} g. ${N.late?'The day is done.':'Nothing more needed today.'}`;
+    N.say=`Targets met${night?' for the day':''}: ${fi(kc)} kcal (${pct(kc,tg)} of ${fi(tg)}) and ${fi(p)} g protein of ${fi(tp)} g. ${N.late?'The day is done.':'Nothing more needed today.'}`;
   }else if(N.state==='over'){
-    N.title='Over today\'s calories';N.sub=`${fi(kc-tg)} kcal over · ${N.gap>=G?fi(N.gap)+' g protein short':'protein done ✓'}`;
-    N.say=`${fi(kc)} kcal today, ${fi(kc-tg)} over your ${fi(tg)} target${N.gap>=G?`, with ${fi(N.gap)} g protein still short`:''}. Better to stop here for today.`;
+    N.title=`Over ${night?'the day':'today'}'s calories`;N.sub=`${fi(kc-tg)} kcal over · ${N.gap>=G?fi(N.gap)+' g protein short':'protein done ✓'}`;
+    N.say=`${fi(kc)} kcal ${night?'since yesterday':'today'}, ${fi(kc-tg)} over your ${fi(tg)} target${N.gap>=G?`, with ${fi(N.gap)} g protein still short`:''}. Better to stop here for ${night?'tonight':'today'}.`;
   }else if(N.state==='none'){
-    N.title='Nothing logged today';N.sub='Log what you ate, or start fresh in the morning';
-    N.say='Nothing logged today. If you ate, log it; otherwise the next bowl is breakfast.';
+    N.title=night?'Nothing logged yesterday':'Nothing logged today';N.sub='Log what you ate, or start fresh in the morning';
+    N.say=`Nothing logged ${night?'yesterday or tonight':'today'}. If you ate, log it; otherwise the next bowl is breakfast.`;
   }else if(N.state==='late'){
     N.title='Nothing more tonight';N.sub=N.gap>=G?`${fi(N.gap)} g protein short · ${nofood}`:`${fi(N.left)} kcal under · protein done ✓`;
-    N.say=N.gap>=G?`${fi(N.gap)} g protein short, and ${N.foods?`none of your foods fits the ${fi(Math.max(0,cap))} kcal left`:'no foods logged yet to suggest'}. It's late for a bowl.`:`Protein's done and you're ${fi(N.left)} kcal under target. It's late for a bowl: fine to stop here.`;
+    N.say=N.gap>=G?(N.foods?`${fi(N.gap)} g protein short, and none of your foods fits the ${fi(Math.max(0,cap))} kcal left. It's late for a bowl.`:`${fi(N.gap)} g protein short, and it's late for a bowl. ${howto}`)
+      :`Protein's done and you're ${fi(N.left)} kcal under target. It's late for a bowl: fine to stop here.`;
   }else{
     N.title=N.gap<G?'Protein done ✓':`${fi(N.gap)} g protein to go`;
-    N.sub=N.gap<G?`${fi(N.left)} kcal left · a snack if you're hungry`:`No room for a bowl · ${nofood}`;
-    N.say=N.gap<G?`Protein's done and ${fi(N.left)} kcal are left: not enough for a bowl, so a snack if you're hungry.`:`${fi(N.gap)} g protein to go, but a bowl won't fit the ${fi(Math.max(0,N.left))} kcal left, and ${nofood}.`;
+    N.sub=N.gap<G?`${fi(N.left)} kcal left · a snack if you're hungry`:`${N.bowls?'No room for a bowl':'Tonight\'s bowl done'} · ${nofood}`;
+    N.say=N.gap<G?`Protein's done and ${fi(N.left)} kcal are left: ${N.bowls?'not enough for a bowl':'you\'ve had tonight\'s bowl'}, so a snack if you're hungry.`
+      :`${fi(N.gap)} g protein to go, but ${nobowl}${N.foods?', and none of your foods fits.':'. '+howto}`;
   }
   N.title=cut(N.title,28);N.sub=cut(N.sub,64);
   return N;
@@ -694,9 +725,9 @@ function nextCard(){
 function nextForm(){
   const N=NX=nextMeal(),tg=settings.kcal,tp=settings.protein;
   openModal(`<div class="ckh"><h3 style="margin:0">Next meal</h3><button class="btn" data-act="close">Close</button></div>
-    <div class="ns"><div>Eaten today<b>${fi(N.kc)} kcal</b></div><div>Left<b>${fi(Math.max(0,N.left))} kcal</b></div><div>Protein<b>${fi(N.p)} / ${fi(tp)} g</b></div></div>
+    <div class="ns"><div>${N.night?'Since yesterday':'Eaten today'}<b>${fi(N.kc)} kcal</b></div><div>Left<b>${fi(Math.max(0,N.left))} kcal</b></div><div>Protein<b>${fi(N.p)} / ${fi(tp)} g</b></div></div>
     <p class="nxs" style="margin-top:14px">${N.say}</p>${nextRows(N)}${N.items.length?`<p class="mu" style="margin:10px 0 0;font-size:12px">${nextAfter(N)}</p>`:''}
-    <div class="tip">Picked from what's left of today's ${fi(tg)} kcal and ${fi(tp)} g protein, the time of day, your batch and the rotation: a bowl when one fits, then the fewest calories of your own foods that close the protein gap. Calories can land up to 10% over, which still counts as on target. ${N.foods?`Snacks come from the ${N.foods} food${N.foods>1?'s':''} you've logged.`:'Log the foods you snack on with + FOOD and they\'ll be suggested here.'}</div>`);
+    <div class="tip">Picked from what's left of ${N.night?'the day':'today'}'s ${fi(tg)} kcal and ${fi(tp)} g protein, the time of day, your batch and the rotation: a bowl when one fits, then the fewest calories of your own foods that close the protein gap. Calories can land up to 10% over, which still counts as on target. ${N.foods?`Snacks come from the ${N.foods} food${N.foods>1?'s':''} you've logged.`:'Log the foods you snack on with + FOOD and they\'ll be suggested here.'}</div>`);
   $('#mbox').classList.add('nxd');
 }
 
@@ -915,8 +946,9 @@ function drawCook(){
     [`Sprinkle ${q('seed')} ${seedN} on top just before eating — adding them last preserves the omega-3s.`,0]];
   if(CK.milk)steps.push([`Pour an 8 oz glass of milk on the side for calcium and vitamin D.`,0]);
   const t=nutMeal({kind:'bowl',servings:1,protein:p,milk:CK.milk,carb:C,veg:V}).t;
-  // the carb and vegetables rotate by batch: the batch on hand's (or the next one's) are marked, the others say when you last had them
-  const cv=curVar(),L=lastCooked(),tag=k=>`<em>${k===cv.carb||k===cv.veg?(cv.batch?'this batch':'next up'):L[k]?'last '+fmd(L[k]):'not cooked yet'}</em>`;
+  // the carb and vegetables rotate by batch: the batch on hand's (or your last fresh bowl's) are marked, then the next
+  // batch's, and the others say when you last had them
+  const cv=curVar(),nv=nextVar(),L=lastCooked(),tag=k=>`<em>${k===cv.carb||k===cv.veg?(cv.batch?'this batch':cv.fresh?'last bowl':'next up'):k===nv.carb||k===nv.veg?'next batch':L[k]?'last '+fmd(L[k]):'not cooked yet'}</em>`;
   const was=$('#mbox').classList.contains('ss');   // already open: redraw in place, don't slide up again
   openModal(`<div class="ckh"><h3 style="margin:0;font-size:15px">Complete Balanced Bowl</h3><button class="btn" data-act="close">Close</button></div>
     <div class="ckh"><div><div class="lbl" style="margin-bottom:6px">Servings</div><div class="step"><button data-act="cks" data-v="-1" aria-label="Fewer servings">−</button><b>${s}</b><button data-act="cks" data-v="1" aria-label="More servings">+</button></div></div>
@@ -968,23 +1000,29 @@ function saveBowl(id){
   const{kind,servings,protein,milk,carb,veg,omit}=readBowl();
   upsert({id:id||uid(),time:d.toISOString(),kind,servings,protein,milk,carb,veg,omit,note:$('#f_note').value.trim()});closeModal();
 }
-// pre: a new food filled in from one you've logged (the next-meal suggestion)
+// pre: a new food filled in from one you've logged (the next-meal suggestion), n servings of it. A new food can be
+// several servings: each is logged as its own entry, so a food's values stay one serving's
 function quickForm(m,pre){
-  const isNew=!m;m=m||{time:new Date().toISOString(),kind:'quick',name:'',kcal:'',p:'',c:'',f:'',fib:'',note:'',...pre};
+  const isNew=!m;m=m||{time:new Date().toISOString(),kind:'quick',name:'',kcal:'',p:'',c:'',f:'',fib:'',note:'',n:1,...pre};
   const names=[...new Set(meals.filter(x=>x.kind==='quick').map(x=>x.name))];
   const f=(k,l)=>`<label>${l}<input id="q_${k}" type="number" step="any" min="0" value="${esc(m[k])}"></label>`;
   openModal(`<h3>${isNew?'Add other food':'Edit food'}</h3><p class="mu">For anything that isn't the bowl — snacks, other meals, drinks. Previous names auto-fill.</p><div class="fg">
     <label>Time<input id="q_time" type="datetime-local" value="${toLocalInput(m.time)}"></label>
     <label>Name<input id="q_name" list="qList" value="${esc(m.name)}" autocomplete="off"><datalist id="qList">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label>
-    ${f('kcal','Calories')}${f('p','Protein (g)')}${f('c','Carbs (g)')}${f('f','Fat (g)')}${f('fib','Fiber (g)')}<div></div>
-    <label class="full">Note<textarea id="q_note" rows="2">${esc(m.note)}</textarea></label></div>
+    ${f('kcal','Calories')}${f('p','Protein (g)')}${f('c','Carbs (g)')}${f('f','Fat (g)')}${f('fib','Fiber (g)')}${isNew?`<label>Servings<input id="q_n" type="number" min="1" max="20" step="1" value="${m.n}"></label>`:'<div></div>'}
+    <label class="full">Note<textarea id="q_note" rows="2">${esc(m.note)}</textarea></label></div>${isNew?'<p class="mu" id="q_tot" aria-live="polite" style="margin:10px 0 0;font-size:12px"></p>':''}
     <div class="mact">${isNew?'':`<button class="btn dng" data-act="del" data-id="${m.id}">Delete</button>`}<div class="sp"></div>
     <button class="btn" data-act="close">Cancel</button><button class="btn pri" data-act="savequick" data-id="${m.id||''}">Save</button></div>`);
+  if(isNew)quickNS();
 }
+// the food form's total when it's more than one serving (the numbers above are one serving's)
+const qN=()=>Math.max(1,Math.min(20,Math.round(+$('#q_n')?.value||1)));
+function quickNS(){const n=qN(),v=k=>(+$('#q_'+k).value||0)*n;$('#q_tot').textContent=n>1?`Calories and macros are per serving · ${n} servings: ${fi(v('kcal'))} kcal, ${fi(v('p'))} g protein`:''}
 function saveQuick(id){
   const d=new Date($('#q_time').value),name=$('#q_name').value.trim();if(isNaN(d))return toast('Invalid time');if(!name)return toast('Name required');
   const n=k=>Math.max(0,+$('#q_'+k).value||0);
-  upsert({id:id||uid(),time:d.toISOString(),kind:'quick',name,kcal:n('kcal'),p:n('p'),c:n('c'),f:n('f'),fib:n('fib'),note:$('#q_note').value.trim()});closeModal();
+  const e={time:d.toISOString(),kind:'quick',name,kcal:n('kcal'),p:n('p'),c:n('c'),f:n('f'),fib:n('fib'),note:$('#q_note').value.trim()},k=id?1:qN();
+  if(k>1){for(let i=0;i<k;i++)meals.push({id:uid(),...e});save();render()}else upsert({id:id||uid(),...e});closeModal();
 }
 function upsert(m){const i=meals.findIndex(x=>x.id===m.id);i>=0?meals[i]=m:meals.push(m);save();render()}
 function info(id){
@@ -1255,10 +1293,10 @@ document.addEventListener('change',e=>{
   const id=e.target.id;
   if(id==='i_file'){const file=e.target.files[0];e.target.value='';if(file)importFile(file)}
   if(id==='q_name'){const l=meals.filter(m=>m.kind==='quick'&&m.name.toLowerCase()===e.target.value.trim().toLowerCase()).sort((a,b)=>new Date(b.time)-new Date(a.time))[0];
-    if(l)['kcal','p','c','f','fib'].forEach(k=>$('#q_'+k).value=l[k]??'')}
+    if(l)['kcal','p','c','f','fib'].forEach(k=>$('#q_'+k).value=l[k]??'');if($('#q_tot'))quickNS()}
 });
 addEventListener('storage',e=>{if(e.key==='isx.checkin.v1')render()});
-document.addEventListener('input',e=>{if(e.target.closest('.fg')&&$('#f_ns'))bowlNS()});
+document.addEventListener('input',e=>{if(e.target.closest('.fg')&&$('#f_ns'))bowlNS();if(e.target.closest('.fg')&&$('#q_tot'))quickNS()});
 document.addEventListener('input',e=>{if(e.target.id==='g_days'||e.target.id==='g_per'){const nd=Math.max(1,Math.min(28,+$('#g_days').value||7)),per=Math.max(1,Math.min(4,+$('#g_per').value||1));$('#g_out').textContent=groceryText(nd,per)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 // rows that act as buttons (cross-filters, calendar days) answer Enter and Space too, and keep focus after the redraw
@@ -1288,7 +1326,7 @@ document.addEventListener('click',e=>{
     cks:()=>{CK.s=Math.max(1,Math.min(12,CK.s+ +v));drawCook()},ckp:()=>{CK.protein=v;drawCook()},ckm:()=>{CK.milk=!CK.milk;drawCook()},ckc:()=>{CK.carb=v;drawCook()},ckv:()=>{CK.veg=v;drawCook()},
     // the next-meal suggestion: each row opens its form filled in
     next:nextForm,nxbowl:()=>{const x=NX?.items[+v];if(x)bowlForm(null,{protein:x.protein,milk:x.milk,carb:x.carb,veg:x.veg})},nxcook:()=>{const x=NX?.items[+v];if(x)cookMode(x.protein,x)},
-    nxfood:()=>{const x=NX?.items[+v]?.each;if(x)quickForm(null,{name:x.name,kcal:x.kcal,p:x.p,c:x.c,f:x.f,fib:x.fib})},bedit:()=>batchForm(1),
+    nxfood:()=>{const y=NX?.items[+v],x=y?.each;if(x)quickForm(null,{name:x.name,kcal:x.kcal,p:x.p,c:x.c,f:x.f,fib:x.fib,n:y.n})},bedit:()=>batchForm(1),
     cklog:()=>{upsert({id:uid(),time:new Date().toISOString(),kind:'bowl',servings:1,protein:CK.protein,milk:CK.milk,carb:CK.carb,veg:CK.veg,omit:[],note:''});closeModal();toast('Bowl logged')},
     tmr:()=>{const[i,sec]=v.split('|').map(Number);if(CT[i]){delete CT[i];b.textContent='⏱ '+mmss(sec)}else{beep();CT[i]={end:Date.now()+sec*1000}}},
     gcopy:async()=>{const t=$('#g_out').textContent;try{if(navigator.share)await navigator.share({text:t});else{await navigator.clipboard.writeText(t);toast('Copied to clipboard')}}catch{}},
@@ -1333,9 +1371,12 @@ function heroToday(){
 }
 {const r0=render;render=function(...a){r0.apply(this,a);UI.animate($('#app'));UI.animate($('#top'),{onDone:l=>toast(`${l.join(' + ')} target hit ✓`)})};UI.animate($('#top'));UI.animate($('#app'))}
 // TODAY's plan card: the next meal for each part of the day (the hour decides how many bowls still make sense), one row
-// when they all say the same. save() asks for a rebuild
+// when they all say the same. The part of the day you're in is worked out as of now, like the card; the others as of
+// their start. save() asks for a rebuild
 UI.planner('nutrition',[K.m,K.s],()=>{
-  const R=[[4,11],[11,15],[15,21],[21,4]].map(([h0,h1])=>{const d=new Date();d.setHours(h0,0,0,0);const N=nextMeal(d);return{title:N.title,sub:N.sub,act:'next',h0,h1,...N.done?{done:true}:{}}});
+  const now=new Date(),h=now.getHours();
+  const R=[[4,11],[11,15],[15,21],[21,4]].map(([h0,h1])=>{const d=new Date(now);if(!(h0<h1?h>=h0&&h<h1:h>=h0||h<h1))d.setHours(h0,0,0,0);
+    const N=nextMeal(d);return{title:N.title,sub:N.sub,act:'next',h0,h1,...N.done?{done:true}:{}}});
   return R.every(r=>r.title===R[0].title&&r.sub===R[0].sub)?[{...R[0],h0:undefined,h1:undefined}]:R;
 });
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
