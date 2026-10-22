@@ -1022,9 +1022,14 @@ function saveQuick(id){
   const d=new Date($('#q_time').value),name=$('#q_name').value.trim();if(isNaN(d))return toast('Invalid time');if(!name)return toast('Name required');
   const n=k=>Math.max(0,+$('#q_'+k).value||0);
   const e={time:d.toISOString(),kind:'quick',name,kcal:n('kcal'),p:n('p'),c:n('c'),f:n('f'),fib:n('fib'),note:$('#q_note').value.trim()},k=id?1:qN();
-  if(k>1){for(let i=0;i<k;i++)meals.push({id:uid(),...e});save();render()}else upsert({id:id||uid(),...e});closeModal();
+  if(k>1){meals.push(...apart(Array.from({length:k},()=>({id:uid(),...e}))));save();render()}else upsert({id:id||uid(),...e});closeModal();
 }
-function upsert(m){const i=meals.findIndex(x=>x.id===m.id);i>=0?meals[i]=m:meals.push(m);save();render()}
+// sync keeps one of two entries that match in everything but id and note (one meal logged on two devices). Servings
+// and repeats logged here are real meals, so an entry that would match another is logged a millisecond later
+const SOFT=new Set(['id','note','notes','comment']),fpm=m=>JSON.stringify(Object.keys(m).filter(k=>!SOFT.has(k)&&m[k]!==undefined).sort().map(k=>[k,m[k]]));
+function apart(list){const ids=new Set(list.map(m=>m.id)),seen=new Set(meals.filter(x=>!ids.has(x.id)).map(fpm));
+  list.forEach(m=>{let t=+new Date(m.time);while(seen.has(fpm(m)))m.time=new Date(++t).toISOString();seen.add(fpm(m))});return list}
+function upsert(m){apart([m]);const i=meals.findIndex(x=>x.id===m.id);i>=0?meals[i]=m:meals.push(m);save();render()}
 function info(id){
   const m=meals.find(x=>x.id===id);if(!m)return;const t=NM(m).t;
   const rows=[...m.kind==='bowl'?[['Made with',vname(m)]]:[],['Calories',fi(t.kcal)+' kcal'],['Protein',fnum(r1(t.p||0))+' g'],['Carbs',fnum(r1(t.c||0))+' g'],['Fat',fnum(r1(t.f||0))+' g'],
@@ -1136,7 +1141,7 @@ async function importFile(file){
   for(const r of rows.slice(1)){const d=new Date(v(r,'time'));if(isNaN(d))continue;
     if(v(r,'kind')==='bowl')out.push({id:uid(),time:d.toISOString(),kind:'bowl',servings:n(r,'servings')||1,protein:PROT[v(r,'protein')]?v(r,'protein'):'egg',milk:v(r,'milk')==='true',...CARB[v(r,'carb')]?{carb:v(r,'carb')}:{},...VEG[v(r,'veg')]?{veg:v(r,'veg')}:{},omit:v(r,'omit')?v(r,'omit').split('|'):[],note:v(r,'note')});
     else out.push({id:uid(),time:d.toISOString(),kind:'quick',name:v(r,'name')||'Food',kcal:n(r,'kcal'),p:n(r,'protein_g'),c:n(r,'carbs_g'),f:n(r,'fat_g'),fib:n(r,'fiber_g'),note:v(r,'note')})}
-  const key=m=>[m.time,m.kind,m.protein||m.name].join('|'),have=new Set(meals.map(key)),addl=out.filter(m=>!have.has(key(m)));
+  const key=m=>[m.time,m.kind,m.protein||m.name].join('|'),have=new Set(meals.map(key)),addl=apart(out.filter(m=>!have.has(key(m))));
   meals.push(...addl);save();render();toast(`Imported ${addl.length} meal${addl.length===1?'':'s'}`);
 }
 function exportCSV(){
