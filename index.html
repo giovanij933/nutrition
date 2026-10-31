@@ -65,8 +65,8 @@ button{cursor:pointer;background:none;border:0}
 .ban{flex-direction:row;align-items:center;justify-content:space-between;gap:16px;padding:16px;margin-bottom:12px;flex-wrap:wrap;border-color:var(--acc)}
 .bd{padding:16px;flex:1;display:flex;flex-direction:column}
 .ft{border-top:1px solid var(--line);padding:10px 16px;display:flex;justify-content:space-between;font-size:11px;color:var(--mu);gap:10px;flex-wrap:wrap;align-items:center}
-.card h3{font-size:11px;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:12px}
-.card h3::before{content:'> ';color:var(--mu)}
+.card h3,.ban h2{font-size:11px;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:12px}
+.card h3::before,.ban h2::before{content:'> ';color:var(--mu)}   /* the empty device's banner is the page's first section: h2 */
 .lbl{font-size:11px;color:var(--mu);letter-spacing:.08em;text-transform:uppercase}
 .big{font-size:22px;font-weight:600;margin:2px 0 8px}
 .gauge{display:block;width:150px;max-width:100%;margin:6px auto 10px}
@@ -172,6 +172,7 @@ td .acts button:hover{border-color:var(--acc);color:var(--acc)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:9;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
 .box{background:var(--card);border:1px solid var(--acc);padding:20px;width:100%;max-width:560px;max-height:92vh;overflow:auto}
 .box.wide{max-width:760px}
+#mbox:focus{outline:0}   /* focused on open so the keyboard starts inside; the open dialog is the focus cue */
 .box h3{font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:14px}
 .box p{margin-bottom:12px}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -277,6 +278,7 @@ h1.brand{margin:0}
   <h1 class="brand">ISIONXXX <b>//</b> NUTRITION<i class="cur"></i></h1>
   <div class="acts" id="barBtns"></div>
 </header>
+<main>
 <div id="top"></div>
 <div class="bar">
   <select id="fKind" aria-label="Meal type" class="sel"><option value="all">All meals</option><option value="bowl">Bowls only</option><option value="quick">Other foods</option></select>
@@ -286,8 +288,9 @@ h1.brand{margin:0}
   <span id="ctx" class="ctx"></span>
 </div>
 <div id="xf" class="xf" hidden></div>
-<div id="app" role="main"></div>
-<div id="modal" class="modal hidden"><div class="box" id="mbox"></div></div>
+<div id="app"></div>
+</main>
+<div id="modal" class="modal hidden"><div class="box" id="mbox" role="dialog" aria-modal="true" tabindex="-1"></div></div>
 
 <script src="sync.js" data-keys="nj.meals.v1 nj.settings.v1"></script>
 <script src="ui.js"></script>
@@ -361,9 +364,18 @@ const K={m:'nj.meals.v1',s:'nj.settings.v1'};
 const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}};
 const save=()=>{try{localStorage.setItem(K.m,JSON.stringify(meals));localStorage.setItem(K.s,JSON.stringify(settings))}catch(e){toast('Storage write failed — take a backup')}UI.replan()};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-let meals=load(K.m,[]);if(!Array.isArray(meals))meals=[];
-let settings=Object.assign({kcal:2000,protein:100,riceAs:'dry',seed:'flax',milk:'whole',portion:4.5,fishTarget:2,
-  plan:['egg','salmon','egg','chicken','sardines','steak','egg'],batch:null},load(K.s,{}));
+const DEF={kcal:2000,protein:100,riceAs:'dry',seed:'flax',milk:'whole',portion:4.5,fishTarget:2,plan:['egg','salmon','egg','chicken','sardines','steak','egg'],batch:null};
+let meals,settings;
+// read (again, when another tab or window of this app saved): a saved value of the wrong shape (an entry that isn't a
+// meal, a plan that isn't 7 proteins, a batch without a date) is mended here so it never stops the app from starting
+function loadAll(){
+  meals=load(K.m,[]);meals=Array.isArray(meals)?meals.filter(m=>m&&typeof m==='object').map(m=>m.kind==='bowl'?(PROT[m.protein]&&Array.isArray(m.omit??[])?m:{...m,protein:PROT[m.protein]?m.protein:'egg',omit:Array.isArray(m.omit)?m.omit:[]}):m.name==null||typeof m.name==='string'?m:{...m,name:String(m.name)}):[];
+  const s=settings=Object.assign({...DEF,plan:[...DEF.plan]},load(K.s,{}));
+  if(!Array.isArray(s.plan)||s.plan.length!==7||!s.plan.every(p=>PROT[p]))s.plan=[...DEF.plan];
+  if(s.batch&&!(typeof s.batch.date==='string'&&+s.batch.made>0))s.batch=null;if(s.past&&!Array.isArray(s.past))delete s.past;
+  ['kcal','protein','portion'].forEach(k=>{s[k]=+s[k]>0?+s[k]:DEF[k]});
+}
+loadAll();
 
 /* ---------- helpers ---------- */
 const r1=v=>Math.round(v*10)/10;
@@ -387,7 +399,11 @@ const mmss=s=>{s=Math.max(0,Math.ceil(s));return`${Math.floor(s/60)}:${pad(s%60)
 const pct=(a,b)=>b?Math.round(a/b*100)+'%':'0%';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toLocalInput=iso=>{const d=new Date(iso);return`${ymd(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`};
-const toast=m=>{const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)};
+const toast=m=>{const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=m;   // read out too: it carries the forms' errors
+  document.body.appendChild(t);setTimeout(()=>t.remove(),2600)};
+// a number field whose text the browser can't read reports '' (iOS Safari lets '1,5' or a stray letter in): say so,
+// rather than save it as 0 g, 1 serving or the default target
+const badNum=()=>{const b=[...document.querySelectorAll('#mbox input[type=number]')].find(i=>i.validity.badInput);if(b){b.focus();toast('That number can\'t be read: use digits and a point, like 1.5')}return!!b};
 const CV={grn:'var(--g)',red:'var(--r)',amb:'var(--a)','':'transparent'};
 const covCls=(p,lim)=>lim?(p<=100?'grn':p<=130?'amb':'red'):(p>=100?'grn':p>=70?'amb':'red');
 const add=(a,b)=>{for(const k in b)a[k]=(a[k]||0)+b[k];return a};
@@ -737,7 +753,7 @@ function weightHTML(){
   let C=[];try{C=JSON.parse(localStorage.getItem('isx.checkin.v1'))?.log}catch(e){}
   if(!Array.isArray(C))return'';
   const U=(()=>{try{return JSON.parse(localStorage.getItem('isx.training.v1'))?.wu}catch(e){}})()||(/-US$/.test(navigator.language||'')?'lb':'kg');
-  const W=C.filter(e=>e.w>0).sort((a,b)=>a.day<b.day?-1:1).map(e=>({d:e.day,w:!e.u||e.u===U?e.w:U==='kg'?e.w/2.20462:e.w*2.20462}));
+  const W=C.filter(e=>e?.w>0&&typeof e.day==='string').sort((a,b)=>a.day<b.day?-1:1).map(e=>({d:e.day,w:!e.u||e.u===U?e.w:U==='kg'?e.w/2.20462:e.w*2.20462}));
   if(!W.length)return'';
   const av=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null,t=today(),since=n=>addDays(t,-n);
   const w7=av(W.filter(x=>x.d>since(7)).map(x=>x.w)),p7=av(W.filter(x=>x.d<=since(7)&&x.d>since(14)).map(x=>x.w)),rate=w7!=null&&p7!=null?w7-p7:null;
@@ -849,7 +865,7 @@ function tableHTML(f){
   return`<div class="th"><h3>Log</h3><button class="btn" data-act="export">Export CSV</button></div>
   <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>${F.th(0)}</th><th>${F.th(1)}</th><th class="num">${F.th(2)}</th><th class="num">${F.th(3)}</th><th class="num">${F.th(4)}</th><th class="num">${F.th(5)}</th><th class="num">${F.th(6)}</th><th class="num">${F.th(7)}</th><th class="num">${F.th(8)}</th><th class="num">${F.th(9)}</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
   ${rows.map(m=>{const t=NM(m).t,P=PROT[m.protein];return`<tr><td class="mu2">${tf(m.time)}</td>
-    <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:${P.col};border-color:${P.col}55;background:${P.col}1a">${P.n}</span>${ck(m)!=='rice'||vk(m)!=='st'?` <span class="mu">${cOf(m).s}, ${vOf(m).a[0]}</span>`:''}${(m.omit||[]).length?` <span class="mu">− ${m.omit.map(k=>slotName(m,k)).join(', ')}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
+    <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:${P.col};border-color:${P.col}55;background:${P.col}1a">${P.n}</span>${ck(m)!=='rice'||vk(m)!=='st'?` <span class="mu">${cOf(m).s}, ${vOf(m).a[0]}</span>`:''}${(m.omit||[]).length?` <span class="mu">− ${esc(m.omit.map(k=>slotName(m,k)).join(', '))}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
     <td class="num">${m.kind==='bowl'?fnum(m.servings||1):'—'}</td><td class="num">${fi(t.kcal)}</td><td class="num">${fi(t.p)} g</td><td class="num">${fi(t.c)} g</td><td class="num">${fi(t.f)} g</td><td class="num">${fi(t.fib)} g</td>
     <td class="num ${t.epa>=.5?'grn':''}">${t.epa?fi(t.epa*1000)+' mg':'—'}</td><td class="num">${m.milk?'<span class="grn">✓</span>':'—'}</td>
     <td><div class="acts"><button data-act="info" data-id="${m.id}" title="Nutrition" aria-label="Nutrition">${I.info}</button><button data-act="edit" data-id="${m.id}" title="Edit" aria-label="Edit">${I.note}</button></div></td></tr>`}).join('')
@@ -867,13 +883,14 @@ function xfBar(){
   const el=$('#xf');el.hidden=!c.length;
   el.innerHTML=c.length?`<span>Filtered</span>${c.map(([k,l])=>`<button data-act="xclr" data-v="${k}" aria-label="Remove filter: ${l}"><b>${l}</b> ×</button>`).join('')}${c.length>1?'<button class="clr" data-act="xall">Clear all</button>':''}`:'';
 }
+let RK='';const rk=()=>today()+' '+new Date().getHours();   // the day and hour the page was last drawn for
 function render(){
-  nmSync();
+  nmSync();RK=rk();
   if(!RL[S.range])S.range='all';   // an old key ('7d','30d','90d') reads as All time
   $('#fKind').value=S.kind;$('#fRange').value=S.range;
   const rg=range(),f=view(),st=stats(f,rg),F='';xfBar();   // the date range is shown once, under the filters, like the other apps
   $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
-  const ban=meals.length?'':`<div class="card ban"><div><h3 style="margin:0 0 4px">No meals logged yet</h3><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load sample data to explore.</div></div>
+  const ban=meals.length?'':`<div class="card ban"><div><h2 style="margin:0 0 4px">No meals logged yet</h2><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load sample data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">&#9654; Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load sample</button></div></div>`;
   // today and this week's plan don't depend on the filters, so they sit above them
   $('#top').innerHTML=ban+heroToday()+nextCard()+`<div class="grid gm">${planHTML()}${batchHTML()}</div>`;
@@ -896,8 +913,15 @@ function publish(){
 }
 
 /* ---------- modals ---------- */
-const openModal=(h,wide)=>{$('#mbox').className='box'+(wide?' wide':'');$('#mbox').innerHTML=h;$('#modal').classList.remove('hidden')};
-const closeModal=()=>{$('#modal').classList.add('hidden');$('#mbox').classList.remove('ss','ss-on');CK=null};
+// focus goes into the dialog (onto the same control when it redraws itself, like cook mode's + and −) and, when it
+// closes, back to what opened it, or to the same button in its place once a render has replaced it
+let MF=null;const fsel=a=>a?.dataset?.act?`[data-act="${a.dataset.act}"]`+['id','v'].map(k=>a.dataset[k]!=null?`[data-${k}="${CSS.escape(a.dataset[k])}"]`:'').join(''):'';
+const openModal=(h,wide)=>{const a=document.activeElement,inM=$('#mbox').contains(a),k=fsel(a);
+  if(!inM&&$('#modal').classList.contains('hidden'))MF=a&&a!==document.body?{a,k,i:k?[...document.querySelectorAll(k)].indexOf(a):-1}:null;
+  $('#mbox').className='box'+(wide?' wide':'');$('#mbox').innerHTML=h;$('#mbox').setAttribute('aria-label',$('#mbox h3')?.textContent||'Dialog');$('#modal').classList.remove('hidden');
+  (inM&&k&&$('#mbox').querySelector(k)||$('#mbox')).focus({preventScroll:true})};
+const closeModal=()=>{const f=!$('#modal').classList.contains('hidden')&&MF;$('#modal').classList.add('hidden');$('#mbox').classList.remove('ss','ss-on');CK=null;MF=null;
+  if(f)setTimeout(()=>(f.a.isConnected?f.a:f.k&&document.querySelectorAll(f.k)[f.i])?.focus({preventScroll:true}))};
 const todayPlan=()=>settings.plan[(new Date().getDay()+6)%7];
 
 /* cook mode */
@@ -996,7 +1020,7 @@ function bowlNS(){
   $('#f_ns').innerHTML=`<div>This bowl<b>${fi(t.kcal)} kcal</b></div><div>Protein<b>${fi(t.p)} g</b></div><div>Carbs<b>${fi(t.c)} g</b></div><div>Fat<b>${fi(t.f)} g</b></div><div>Fiber<b>${fi(t.fib)} g</b></div>`;
 }
 function saveBowl(id){
-  const d=new Date($('#f_time').value);if(isNaN(d))return toast('Invalid time');
+  if(badNum())return;const d=new Date($('#f_time').value);if(isNaN(d))return toast('Invalid time');
   const{kind,servings,protein,milk,carb,veg,omit}=readBowl();
   upsert({id:id||uid(),time:d.toISOString(),kind,servings,protein,milk,carb,veg,omit,note:$('#f_note').value.trim()});closeModal();
 }
@@ -1019,7 +1043,7 @@ function quickForm(m,pre){
 const qN=()=>Math.max(1,Math.min(20,Math.round(+$('#q_n')?.value||1)));
 function quickNS(){const n=qN(),v=k=>(+$('#q_'+k).value||0)*n;$('#q_tot').textContent=n>1?`Calories and macros are per serving · ${n} servings: ${fi(v('kcal'))} kcal, ${fi(v('p'))} g protein`:''}
 function saveQuick(id){
-  const d=new Date($('#q_time').value),name=$('#q_name').value.trim();if(isNaN(d))return toast('Invalid time');if(!name)return toast('Name required');
+  if(badNum())return;const d=new Date($('#q_time').value),name=$('#q_name').value.trim();if(isNaN(d))return toast('Invalid time');if(!name)return toast('Name required');
   const n=k=>Math.max(0,+$('#q_'+k).value||0);
   const e={time:d.toISOString(),kind:'quick',name,kcal:n('kcal'),p:n('p'),c:n('c'),f:n('f'),fib:n('fib'),note:$('#q_note').value.trim()},k=id?1:qN();
   if(k>1){meals.push(...apart(Array.from({length:k},()=>({id:uid(),...e}))));save();render()}else upsert({id:id||uid(),...e});closeModal();
@@ -1137,9 +1161,9 @@ async function importFile(file){
   const rows=parseCSV(await file.text());if(rows.length<2)return toast('CSV is empty');
   const H=rows[0].map(h=>h.replace(/^\ufeff/,'').trim().toLowerCase()),ix=k=>H.indexOf(k);
   if(ix('time')<0||ix('kind')<0)return toast('Unrecognized CSV format');
-  const v=(r,k)=>ix(k)>=0?(r[ix(k)]??'').trim():'',n=(r,k)=>+v(r,k)||0,out=[];
+  const v=(r,k)=>ix(k)>=0?(r[ix(k)]??'').trim():'',n=(r,k)=>Math.max(0,+v(r,k)||0),out=[];   // a hand-made file can say -3 servings
   for(const r of rows.slice(1)){const d=new Date(v(r,'time'));if(isNaN(d))continue;
-    if(v(r,'kind')==='bowl')out.push({id:uid(),time:d.toISOString(),kind:'bowl',servings:n(r,'servings')||1,protein:PROT[v(r,'protein')]?v(r,'protein'):'egg',milk:v(r,'milk')==='true',...CARB[v(r,'carb')]?{carb:v(r,'carb')}:{},...VEG[v(r,'veg')]?{veg:v(r,'veg')}:{},omit:v(r,'omit')?v(r,'omit').split('|'):[],note:v(r,'note')});
+    if(v(r,'kind')==='bowl')out.push({id:uid(),time:d.toISOString(),kind:'bowl',servings:n(r,'servings')||1,protein:PROT[v(r,'protein')]?v(r,'protein'):'egg',milk:v(r,'milk')==='true',...CARB[v(r,'carb')]?{carb:v(r,'carb')}:{},...VEG[v(r,'veg')]?{veg:v(r,'veg')}:{},omit:v(r,'omit')?v(r,'omit').split('|').filter(k=>OMIT.some(o=>o[0]===k)):[],note:v(r,'note')});
     else out.push({id:uid(),time:d.toISOString(),kind:'quick',name:v(r,'name')||'Food',kcal:n(r,'kcal'),p:n(r,'protein_g'),c:n(r,'carbs_g'),f:n(r,'fat_g'),fib:n(r,'fiber_g'),note:v(r,'note')})}
   const key=m=>[m.time,m.kind,m.protein||m.name].join('|'),have=new Set(meals.map(key)),addl=apart(out.filter(m=>!have.has(key(m))));
   meals.push(...addl);save();render();toast(`Imported ${addl.length} meal${addl.length===1?'':'s'}`);
@@ -1147,7 +1171,9 @@ async function importFile(file){
 function exportCSV(){
   const f=view().sort((a,b)=>new Date(a.time)-new Date(b.time)),q=s=>/[",\n]/.test(s=String(s??''))?`"${s.replace(/"/g,'""')}"`:s;
   const csv=['time,kind,name,servings,protein,milk,omit,carb,veg,kcal,protein_g,carbs_g,fat_g,fiber_g,epa_dha_mg,note',...f.map(m=>{const t=NM(m).t;
-    return[m.time,m.kind,m.kind==='bowl'?'Bowl':m.name,m.servings??'',m.protein??'',m.milk??'',(m.omit||[]).join('|'),m.carb??'',m.veg??'',Math.round(t.kcal||0),r1(t.p||0),r1(t.c||0),r1(t.f||0),r1(t.fib||0),Math.round((t.epa||0)*1000),m.note].map(q).join(',')})].join('\n');
+    return[m.time,m.kind,m.kind==='bowl'?'Bowl':m.name,m.servings??'',m.protein??'',m.milk??'',(m.omit||[]).join('|'),m.carb??'',m.veg??'',
+      // a food's own values as typed (rounding them would change them on export → import); a bowl's are worked out
+      ...m.kind==='quick'?['kcal','p','c','f','fib'].map(k=>+m[k]||0):[Math.round(t.kcal||0),r1(t.p||0),r1(t.c||0),r1(t.f||0),r1(t.fib||0)],Math.round((t.epa||0)*1000),m.note].map(q).join(',')})].join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`meals-${ymd(new Date())}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
@@ -1225,9 +1251,9 @@ function review(day){
   out+=sec('What to look at',look.length?ul(look):'<p>No warning signs in the numbers.</p>');
   // the morning check-in from TODAY, when there is one for this date
   let C=[];try{C=JSON.parse(localStorage.getItem('isx.checkin.v1'))?.log||[]}catch(e){}
-  const ci=Array.isArray(C)?C.find(e=>e.day===day):null;
+  const ci=Array.isArray(C)?C.find(e=>e?.day===day):null;
   if(ci){const SQ=['','poor','restless','OK','good','great'],EN=['','drained','low','steady','good','charged'],u=ci.u||'kg';
-    const pw=ci.w>0&&C.filter(e=>e.w>0&&e.day<day).sort((a,b)=>a.day<b.day?-1:1).at(-1),pwv=pw&&((pw.u||'kg')===u?pw.w:u==='kg'?pw.w/2.20462:pw.w*2.20462),wd=pw?r1(ci.w-pwv):0;
+    const pw=ci.w>0&&C.filter(e=>e?.w>0&&e.day<day).sort((a,b)=>a.day<b.day?-1:1).at(-1),pwv=pw&&((pw.u||'kg')===u?pw.w:u==='kg'?pw.w/2.20462:pw.w*2.20462),wd=pw?r1(ci.w-pwv):0;
     const st=[];if(ci.sleep)st.push(`I slept <b>${fnum(ci.sleep)} h</b>${SQ[ci.q]?` (${SQ[ci.q]} sleep)`:''}`);if(EN[ci.energy])st.push(`my energy was <b>${EN[ci.energy]}</b>`);
     const s1=st.length?st.join(' and ')+'.':'',
       s2=ci.w>0?` I weighed in at <b>${fnum(r1(ci.w))} ${u}</b>${pw?`, ${wd?`${fnum(Math.abs(wd))} ${u} ${wd<0?'down':'up'} since`:'the same as on'} ${ds(pw.day)}`:''}.`:'',
@@ -1300,10 +1326,14 @@ document.addEventListener('change',e=>{
   if(id==='q_name'){const l=meals.filter(m=>m.kind==='quick'&&m.name.toLowerCase()===e.target.value.trim().toLowerCase()).sort((a,b)=>new Date(b.time)-new Date(a.time))[0];
     if(l)['kcal','p','c','f','fib'].forEach(k=>$('#q_'+k).value=l[k]??'');if($('#q_tot'))quickNS()}
 });
-addEventListener('storage',e=>{if(e.key==='isx.checkin.v1')render()});
+// this app open twice (TODAY's tab and a window another app opened, two tabs): take the other's save before the next
+// save here writes over it with what this one had in memory
+addEventListener('storage',e=>{if(e.key===K.m||e.key===K.s||e.key==null){loadAll();render()}else if(e.key==='isx.checkin.v1')render()});
 document.addEventListener('input',e=>{if(e.target.closest('.fg')&&$('#f_ns'))bowlNS();if(e.target.closest('.fg')&&$('#q_tot'))quickNS()});
 document.addEventListener('input',e=>{if(e.target.id==='g_days'||e.target.id==='g_per'){const nd=Math.max(1,Math.min(28,+$('#g_days').value||7)),per=Math.max(1,Math.min(4,+$('#g_per').value||1));$('#g_out').textContent=groceryText(nd,per)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+// left open (a home-screen app is resumed, not reloaded): a new day redraws Today, a new hour the next meal
+const redrawStale=()=>{if(!document.hidden&&RK!==rk())render()};document.addEventListener('visibilitychange',redrawStale);setInterval(redrawStale,6e4);
 // rows that act as buttons (cross-filters, calendar days) answer Enter and Space too, and keep focus after the redraw
 document.addEventListener('keydown',e=>{const b=e.target.closest('[role=button][data-act]');if(!b||(e.key!=='Enter'&&e.key!==' '))return;e.preventDefault();
   const sel=`[data-act="${b.dataset.act}"][data-v="${CSS.escape(b.dataset.v||'')}"]`,i=[...document.querySelectorAll(sel)].indexOf(b);b.dispatchEvent(new MouseEvent('click',{bubbles:true}));   // SVG labels have no .click()
@@ -1335,14 +1365,14 @@ document.addEventListener('click',e=>{
     cklog:()=>{upsert({id:uid(),time:new Date().toISOString(),kind:'bowl',servings:1,protein:CK.protein,milk:CK.milk,carb:CK.carb,veg:CK.veg,omit:[],note:''});closeModal();toast('Bowl logged')},
     tmr:()=>{const[i,sec]=v.split('|').map(Number);if(CT[i]){delete CT[i];b.textContent='⏱ '+mmss(sec)}else{beep();CT[i]={end:Date.now()+sec*1000}}},
     gcopy:async()=>{const t=$('#g_out').textContent;try{if(navigator.share)await navigator.share({text:t});else{await navigator.clipboard.writeText(t);toast('Copied to clipboard')}}catch{}},
-    savebatch:()=>{const d=$('#b_date').value;if(!d)return toast('Pick a date');const o=settings.batch;
+    savebatch:()=>{if(badNum())return;const d=$('#b_date').value;if(!d)return toast('Pick a date');const o=settings.batch;
       // the batch it replaces joins the history the rotation is picked from (unless it's this one, edited)
       if(o&&!v&&o.date!==d)settings.past=[...(settings.past||[]),o].slice(-12);
       settings.batch={date:d,made:Math.max(1,+$('#b_made').value||5),carb:$('#b_carb').value,veg:$('#b_veg').value};save();closeModal();render()},
     review:()=>reviewForm(rvDefault()),rvgo:()=>v&&reviewForm(v),
     rvcopy:()=>{const t=reviewText();(navigator.clipboard?.writeText(t)||Promise.reject()).then(()=>toast('Review copied'),()=>toast('Copy failed — select the text instead'))},
     clearbatch:()=>{settings.batch=null;save();closeModal();render()},
-    savedata:()=>{Object.assign(settings,{kcal:Math.max(800,+$('#s_kcal').value||2000),protein:Math.max(20,+$('#s_protein').value||100),riceAs:$('#s_rice').value,seed:$('#s_seed').value,
+    savedata:()=>{if(badNum())return;Object.assign(settings,{kcal:Math.max(800,+$('#s_kcal').value||2000),protein:Math.max(20,+$('#s_protein').value||100),riceAs:$('#s_rice').value,seed:$('#s_seed').value,
       milk:$('#s_milk').value,portion:Math.max(2,+$('#s_portion').value||4.5),fishTarget:Math.max(0,+$('#s_fish').value||0)});save();closeModal();render();toast('Settings saved')},
     icsv:()=>$('#i_file').click(),sync:()=>{closeModal();document.getElementById('isx-sync')?.click()},
     demo:()=>{demoData();save();closeModal();S.range='all';S.sel=null;S.page=1;render();toast('Sample data loaded')},
