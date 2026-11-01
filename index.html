@@ -30,7 +30,8 @@ body{margin:0 auto;max-width:1440px;padding:calc(env(safe-area-inset-top) + 14px
 button,select,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0}
 :focus-visible{outline:1px solid var(--acc);outline-offset:1px}
-::selection{background:var(--acc);color:#000}
+/* body ::selection, not ::selection: a selection rule that also matches <html> made every root change (the mouse glow) restyle the whole page */
+body ::selection{background:var(--acc);color:#000}
 .red{color:var(--r)}.grn{color:var(--g)}.amb{color:var(--acc)}.mu{color:var(--mu)}.mu2{color:var(--mu)}
 .hidden{display:none!important}
 
@@ -102,7 +103,7 @@ button{cursor:pointer;background:none;border:0}
 
 /* calendar */
 .calhd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
-.wl{color:var(--mu)}
+.wl{color:var(--mu);display:flex;flex-wrap:wrap;column-gap:18px;align-items:baseline}
 .cal{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-top:12px}
 .dh{text-align:center;font-size:11px;color:var(--mu);padding:4px 0;letter-spacing:.08em;text-transform:uppercase}
 .cell{min-height:66px;background:var(--cell);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:11px;color:var(--mu);cursor:pointer;position:relative;overflow:hidden}
@@ -267,6 +268,9 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
 .xf button{border:1px solid var(--acc);color:var(--acc);padding:5px 8px;font-size:12px}.xf button b{font-weight:600}.xf .clr{border-color:var(--line2);color:var(--mu)}
 h1.brand{margin:0}
 .cell span{color:#a9a498}
+/* touch screens: the cook sheet's servings stepper and step timers, the checkbox rows, and the week plan's protein pills,
+   big enough for a thumb (after the rules they resize) */
+@media (pointer:coarse){.step button{width:44px;height:44px}.tmr{padding:10px 12px}:is(.ing,.ck) label{min-height:36px;align-items:center}.pday .pp{padding-top:9px;padding-bottom:9px}.wl .pick{display:inline-block;padding-top:10px;padding-bottom:10px}}
 </style>
 </head>
 <body>
@@ -777,7 +781,7 @@ function calendarHTML(){
     h+=`<div class="cell wk">${wd?`<b class="${{ok:'grn',over:'red'}[kc(wk/wd)]||''}">${fi(wk/wd)}</b><small>avg · <span class="${wf?'grn':''}">${wf} fish</span></small>`:'—'}</div>`;
   }
   return`<div class="card"><div class="bd"><h3 style="margin-bottom:10px">Meal calendar</h3><div class="lbl">Avg calories / logged day</div>
-    <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl">Logged days: <b style="font-weight:500;color:var(--acc,#ffb000)">${md}</b> &nbsp;&nbsp; <span${pk('cres:ok','Days within 10% of your calorie target — click to show only these')}>On target: <b class="${nr.ok?'grn':''}" style="font-weight:500">${nr.ok}</b></span> &nbsp;&nbsp; <span${pk('cres:over','Days more than 10% over target — click to show only these')}>Over: <b class="${nr.over?'red':''}" style="font-weight:500">${nr.over}</b></span> &nbsp;&nbsp; <span${pk('cres:under','Days more than 10% under target — click to show only these')}>Under: <b style="font-weight:500">${nr.under}</b></span> &nbsp;&nbsp; Fish meals: <b class="${mf?'grn':''}" style="font-weight:500">${mf}</b></div></div>
+    <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl"><span>Logged days: <b style="font-weight:500;color:var(--acc,#ffb000)">${md}</b></span><span${pk('cres:ok','Days within 10% of your calorie target — click to show only these')}>On target: <b class="${nr.ok?'grn':''}" style="font-weight:500">${nr.ok}</b></span><span${pk('cres:over','Days more than 10% over target — click to show only these')}>Over: <b class="${nr.over?'red':''}" style="font-weight:500">${nr.over}</b></span><span${pk('cres:under','Days more than 10% under target — click to show only these')}>Under: <b style="font-weight:500">${nr.under}</b></span><span>Fish meals: <b class="${mf?'grn':''}" style="font-weight:500">${mf}</b></span></div></div>
     <div class="cal">${h}</div></div>
     <div class="ft calft"><div class="nav"><button data-act="mprev" aria-label="Previous month">‹</button><span>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span><button data-act="mnext" aria-label="Next month">›</button><button class="tb" data-act="mtoday">Today</button></div>
     <span>${md} days &nbsp;&nbsp; ${mb} meals</span></div></div>`;
