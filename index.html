@@ -1308,7 +1308,9 @@ document.addEventListener('click',e=>{
     cook:()=>cookMode(),addbowl:()=>bowlForm(),quick:()=>quickForm(),info:()=>info(id),
     edit:()=>{const m=meals.find(x=>x.id===id);m?.kind==='bowl'?bowlForm(m):quickForm(m)},
     savebowl:()=>saveBowl(id),savequick:()=>saveQuick(id),close:closeModal,export:exportCSV,data:dataForm,grocery:()=>groceryForm(),
-    del:()=>{if(confirm('Delete this entry?')){meals=meals.filter(x=>x.id!==id);save();closeModal();render()}},
+    // a delete happens at once and can be taken back from the toast (the entry goes back where it was)
+    del:()=>{const i=meals.findIndex(x=>x.id===id);if(i<0)return;const[m]=meals.splice(i,1);save();closeModal();render();
+      UI.undo(m.kind==='bowl'?'Bowl deleted':`${m.name||'Food'} deleted`,()=>{meals.splice(Math.min(i,meals.length),0,m);save();render()})},
     cycle:()=>{const i=+v;settings.plan[i]=PKEYS[(PKEYS.indexOf(settings.plan[i])+1)%PKEYS.length];save();render()},
     cks:()=>{CK.s=Math.max(1,Math.min(12,CK.s+ +v));drawCook()},ckp:()=>{CK.protein=v;drawCook()},ckm:()=>{CK.milk=!CK.milk;drawCook()},ckc:()=>{CK.carb=v;drawCook()},ckv:()=>{CK.veg=v;drawCook()},
     // the next-meal suggestion: each row opens its form filled in
@@ -1323,7 +1325,8 @@ document.addEventListener('click',e=>{
       milk:$('#s_milk').value,portion:Math.max(2,+$('#s_portion').value||4.5),fishTarget:Math.max(0,+$('#s_fish').value||0)});save();closeModal();render();toast('Settings saved')},
     icsv:()=>$('#i_file').click(),sync:()=>{closeModal();document.getElementById('isx-sync')?.click()},
     demo:()=>{demoData();save();closeModal();S.range='all';S.sel=null;S.page=1;render();toast('Sample data loaded')},
-    clear:()=>{if(confirm('Delete ALL meals? Export a CSV first if you want a backup.')){meals=[];save();closeModal();render()}}
+    clear:()=>UI.confirm({title:'Delete all meals?',body:'Every meal on this device is deleted. Export a CSV first if you want a backup.',ok:'Delete all',danger:true})
+      .then(ok=>{if(ok){meals=[];save();closeModal();render()}})
   };
   A[b.dataset.act]?.();
 });
