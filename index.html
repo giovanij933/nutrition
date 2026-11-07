@@ -523,15 +523,19 @@ function area(series,color,tgt,at){
     <path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>${hits}</svg>`;
 }
 // with at, each column gets a full-height area to click or hover, and its bars dim unless they're the chosen one (m.on)
+// a long range (more than 60 days) draws each bar as the average of a run of days, the same runs the click columns use,
+// so a year still reads as bars instead of a smear of hairlines
 function bars(vals,{labels,tgt,at}={}){
   if(!vals.length||!Math.max(...vals))return'<div class="empty">No data in range</div>';
+  const R=!labels&&vals.length>60?cols(vals.length,60):null,k=R?Math.ceil(vals.length/60):1;
+  if(R)vals=R.map(([a,b])=>vals.slice(a,b).reduce((s,v)=>s+v,0)/(b-a));
   const W=400,H=200,p=labels?28:16,mx=Math.max(1,...vals,(tgt||0)*1.1),n=vals.length,slot=(W-20)/n,bw=Math.min(slot*.7,300),id='b'+uid(),Y=v=>H-p-v/mx*(H-p-12);
-  const M=at?cols(n,60).map(([i0,i1])=>({i0,i1,m:at(i0,i1)})):[],mOf=i=>M.find(c=>i>=c.i0&&i<c.i1)?.m;
+  const M=at?(R?R.map(([a,b],j)=>({i0:j,i1:j+1,m:at(a,b)})):cols(n,60).map(([i0,i1])=>({i0,i1,m:at(i0,i1)}))):[],mOf=i=>M.find(c=>i>=c.i0&&i<c.i1)?.m;
   const rects=vals.map((v,i)=>{const x=10+i*slot+(slot-bw)/2,y=Y(v),m=mOf(i);
     return`<rect${m&&m.off?' class="off"':''} x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,H-p-y).toFixed(1)}" fill="#ffb000"/>${labels?`<text x="${(x+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#8f8a7e">${labels[i]}</text>`:''}`}).join('');
   const hits=M.map(({i0,i1,m})=>m&&hit({...m,on:0,d:`M${(10+i0*slot).toFixed(1)} 0h${((i1-i0)*slot).toFixed(1)}v${H}h-${((i1-i0)*slot).toFixed(1)}z`})).join('');
   return`<svg class="chart" viewBox="0 0 ${W} ${H}" ${labels?'':'preserveAspectRatio="none"'}>${rects}${hits}
-    ${tgt?`<line x1="6" x2="${W-6}" y1="${Y(tgt).toFixed(1)}" y2="${Y(tgt).toFixed(1)}" stroke="#8f8a7e" stroke-dasharray="4 4" ${labels?'':'vector-effect="non-scaling-stroke"'}/>`:''}</svg>`;
+    ${tgt?`<line x1="6" x2="${W-6}" y1="${Y(tgt).toFixed(1)}" y2="${Y(tgt).toFixed(1)}" stroke="#8f8a7e" stroke-dasharray="4 4" ${labels?'':'vector-effect="non-scaling-stroke"'}/>`:''}</svg>${R?`<div class="mu" style="font-size:11px;margin-top:6px">Each bar averages ${k} days</div>`:''}`;
 }
 // pick[i] = {f:'key:value', title}: the label becomes a cross-filter, bright when chosen, the others dim
 function radar(labels,raw,pick=[]){
@@ -1099,7 +1103,7 @@ function dataForm(){
     ${row('Fish meals target','Per week',`<input id="s_fish" type="number" min="0" max="7" value="${s.fishTarget}" aria-label="Fish meals target">`)}
     ${row('Sync',window.ISXSync?.state==='ok'?'On · this app syncs across your devices':'Keep every app the same on all your devices','<span class="ui-set-btns"><button type="button" class="btn" data-act="sync">SYNC…</button></span>')}
     ${row('CSV','Import this app\'s export, or export the current filter','<span class="ui-set-btns"><button type="button" class="btn" data-act="icsv">IMPORT CSV</button><button type="button" class="btn" data-act="export">EXPORT CSV</button></span><input id="i_file" type="file" accept=".csv,text/csv" hidden>')}
-    ${row('Sample data','Five weeks of example meals to explore','<span class="ui-set-btns"><button type="button" class="btn" data-act="demo">LOAD SAMPLE</button></span>')}
+    ${row('Sample data','A year of example meals to explore','<span class="ui-set-btns"><button type="button" class="btn" data-act="demo">LOAD SAMPLE</button></span>')}
     ${row('Delete everything','Removes all meals on this device.','<span class="ui-set-btns"><button type="button" class="btn ui-danger" data-act="clear">CLEAR ALL</button></span>')}
   </div>
   <p class="mu" style="font-size:11px;margin:8px 0 0">Changing rice, seed, milk or portion recalculates all past bowls.</p>
@@ -1243,20 +1247,47 @@ function reviewText(){
 
 /* ---------- demo ---------- */
 function demoData(){
-  let sd=5;const rnd=()=>(sd=sd*16807%2147483647)/2147483647;
-  const snacks=[['Greek yogurt',150,15,8,4,0],['Apple',95,.5,25,.3,4.4],['Protein shake',160,30,5,2,1],['Almonds (1 oz)',164,6,6,14,3.5],['Banana',105,1.3,27,.4,3.1]];
-  const now=new Date(),n0=meals.length;
-  for(let k=35;k>=0;k--){
-    const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-k);if(rnd()<.1&&k)continue;
+  /* A year of the bowl plan: two bowls most days (eggs in the morning, or a lunch bowl, then dinner with the day's planned
+     protein, swapped now and then), a snack or two from the usual handful (fruit with the season), and a protein shake
+     after the morning lift on TRAINING's sample days. Dinner out about once a week, mostly Friday or Saturday; a summer
+     week away eating out three times a day, holiday dinners, and a few days nothing got logged. Restaurant and snack
+     macros add up (4 kcal per g of protein or carbs, 9 per g of fat). Fixed seed: the same sample every time, only
+     the dates move with today. */
+  let sd=5;const rnd=()=>(sd=sd*16807%2147483647)/2147483647,pick=a=>a[Math.floor(rnd()*a.length)];
+  // [name, kcal, protein, carbs, fat, fiber]
+  const SN=[['Greek yogurt',150,15,6,7,0],['Apple',95,.5,25,.3,4.4],['Almonds (1 oz)',164,6,6,14,3.5],['Banana',105,1.3,27,.4,3.1],['Cottage cheese (1 cup)',220,25,8,9,0],
+    ['Dark chocolate (1 oz)',170,2,13,12,3],['Peanut butter toast',290,11,30,15,4]];
+  const FRUIT={0:['Orange',62,1.2,15,.2,3.1],5:['Peach',60,1.4,15,.4,2.3],6:['Watermelon (2 cups)',92,1.9,23,.5,1.2],7:['Peach',60,1.4,15,.4,2.3],10:['Pear',100,.6,27,.2,5.5],11:['Orange',62,1.2,15,.2,3.1]};
+  const SHAKE=['Protein shake',160,30,5,2,1];
+  const OUT=[['Burrito bowl (restaurant)',1050,52,120,38,16],['Sushi (12 pieces)',650,30,100,12,4],['Burger and fries',1350,45,120,70,8],['Pizza (3 slices)',900,36,105,36,6],
+    ['Chicken shawarma plate',980,58,85,42,9],['Pad thai',900,32,110,34,5],['Steak dinner',1100,70,50,65,6]];
+  const TRIP=[['Hotel breakfast',650,30,60,32,4],['Fish tacos',750,38,70,34,8],['Poke bowl',700,40,80,22,6],['Seafood pasta',950,45,105,36,6]];
+  const HOL={'11-4-4':['Thanksgiving dinner',1600,75,150,75,12],'12-25':['Christmas dinner',1500,70,140,72,10],'12-31':['New Year\'s Eve party food',1200,35,110,65,6]};
+  const now=new Date(),n0=meals.length,others=PKEYS.filter(p=>p!=='egg');
+  for(let k=364;k>=0;k--){
+    const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-k);
+    const at=(h,m,span)=>{const t=new Date(d);t.setHours(h,m+Math.floor(rnd()*span));return t.toISOString()};
+    const quick=(time,[name,kcal,p,c,f,fib],note='')=>meals.push({id:uid(),time,kind:'quick',name,kcal,p,c,f,fib,note});
+    const bowl=(time,protein)=>meals.push({id:uid(),time,kind:'bowl',servings:1,protein,milk:rnd()<.85,omit:rnd()<.1?['avocado']:[],note:''});
+    const m=d.getMonth(),dd=d.getDate(),wd=d.getDay(),am=1+(8-new Date(d.getFullYear(),7,1).getDay())%7;
+    if(k&&rnd()<.03)continue;   // a day nothing got logged
+    // the week away (TRAINING's and JOURNAL's too): eating out three times a day
+    if(m===7&&dd>=am-2&&dd<am+7){quick(at(8,30,40),TRIP[0]);quick(at(13,0,60),pick(TRIP.slice(1)));quick(at(19,30,60),pick(OUT),'On vacation');continue}
+    const w=(364-k)/7,lift=[0,1,3].includes((7-k%7)%7)&&!(Math.floor(w)===20||Math.floor(w)===21&&(364-k)%7<3);
+    const thx=m===10&&wd===4&&dd>21&&dd<=28,hol=thx?HOL['11-4-4']:HOL[`${m+1}-${dd}`];
     // two bowls a day: breakfast (eggs) or lunch, then dinner with the day's planned protein. Eggs are always the
     // morning bowl, so on an egg day dinner takes another protein
-    const at=(h,m,span)=>{const t=new Date(d);t.setHours(h,m+Math.floor(rnd()*span));return t.toISOString()};
-    const plan=settings.plan[(d.getDay()+6)%7],others=PKEYS.filter(p=>p!=='egg'),other=()=>others[Math.floor(rnd()*others.length)];
-    const dinner=plan==='egg'?other():rnd()<.2?other():plan,morningEggs=plan==='egg'||rnd()<.6;
-    const bowl=(time,protein)=>meals.push({id:uid(),time,kind:'bowl',servings:1,protein,milk:rnd()<.85,omit:rnd()<.1?['avocado']:[],note:''});
+    const plan=settings.plan[(wd+6)%7],other=()=>others[Math.floor(rnd()*others.length)];
+    const morningEggs=plan==='egg'||rnd()<.6;
     bowl(morningEggs?at(7,0,90):at(12,15,45),morningEggs?'egg':other());
-    bowl(at(18,30,60),dinner);
-    const sn=Math.floor(rnd()*3);for(let i=0;i<sn;i++){const[s,kc,p,c,f,fib]=snacks[Math.floor(rnd()*snacks.length)],t=new Date(d);t.setHours(15+i*3,0);meals.push({id:uid(),time:t.toISOString(),kind:'quick',name:s,kcal:kc,p,c,f,fib,note:''})}
+    if(lift)quick(at(7,45,30),SHAKE);
+    // dinner: a holiday, out (about once a week, mostly Friday or Saturday), or the plan's bowl
+    if(hol)quick(at(m===11&&dd===31?21:17,0,60),hol);
+    else if(rnd()<(wd===5||wd===6?.35:.06))quick(at(19,0,75),pick(OUT),rnd()<.3?pick(['Date night','Team dinner','With friends']):'');
+    else bowl(at(18,30,60),plan==='egg'?other():rnd()<.2?other():plan);
+    // snacks: up to two, a seasonal fruit some days; dessert on holidays
+    const sn=Math.floor(rnd()*3);for(let i=0;i<sn;i++){const f=FRUIT[m]&&rnd()<.35?FRUIT[m]:pick(SN),t=new Date(d);t.setHours(15+i*3,Math.floor(rnd()*30));quick(t.toISOString(),f)}
+    if(hol&&m===10)quick(at(19,30,30),['Pumpkin pie (slice)',320,4,40,16,2]);
   }
   // the sample runs up to now: drop what today hasn't reached yet
   // (very early in the morning that's everything, so breakfast moves to just before now)
