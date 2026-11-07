@@ -283,7 +283,7 @@ h1.brand{margin:0}
 <div class="bar">
   <select id="fKind" aria-label="Meal type" class="sel"><option value="all">All meals</option><option value="bowl">Bowls only</option><option value="quick">Other foods</option></select>
   <select id="fRange" aria-label="Date range" class="sel">
-    <option value="today">Today</option><option value="week">This week</option><option value="month">This month</option><option value="all" selected>All time</option>
+    <option value="today">Today</option><option value="week">This week</option><option value="month">This month</option><option value="year">This year</option><option value="all" selected>All time</option>
   </select>
   <span id="ctx" class="ctx"></span>
 </div>
@@ -444,7 +444,7 @@ const NM=m=>{let v=NMC.get(m);if(!v){v=nutMeal(m);NMC.set(m,v)}return v};
 /* ---------- state & filters ---------- */
 const S={kind:'all',range:'all',sel:null,month:null,page:1,x:{}},PER=20;   // fixed 20 rows a page, like the other apps; x: cross-filters set by clicking a card (prot, fish, milk, cres)
 {const t=new Date();S.month=new Date(t.getFullYear(),t.getMonth(),1)}
-const RL={today:'Today',week:'This week',month:'This month',all:'All time'};
+const RL={today:'Today',week:'This week',month:'This month',year:'This year',all:'All time'};
 const kindOk=m=>S.kind==='all'||m.kind===S.kind;
 // a day's calorie result: on target within 10%, more than 10% over, or under (the calendar's rule)
 const kres=v=>v>settings.kcal*1.1?'over':v>=settings.kcal*.9?'ok':'under';
@@ -452,7 +452,7 @@ function range(sel=S.sel,r=S.range){
   if(sel)return[sel,sel];
   const t=today();
   switch(r){
-    case'today':return[t,t];case'week':return[monday(t),t];case'month':return[t.slice(0,8)+'01',t];   // current calendar month, like the other apps
+    case'today':return[t,t];case'week':return[monday(t),t];case'month':return[t.slice(0,8)+'01',t];case'year':return[t.slice(0,5)+'01-01',t];   // the current calendar month or year, like the other apps
     default:return['0000-00-00','9999-99-99'];
   }
 }
