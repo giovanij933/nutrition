@@ -391,11 +391,13 @@ const monday=s=>{const d=pd(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return 
 const today=()=>ymd(new Date());
 // a meal's day, worked out once per timestamp (it's asked for many times per render)
 const DOC=new Map(),dayOf=m=>{let d=DOC.get(m.time);if(d===undefined){d=ymd(new Date(m.time));DOC.set(m.time,d)}return d};
+// and its time as a number: sorting a year of meals read two dates per comparison, some 30,000 a redraw
+const TMS=new Map(),tms=m=>{let v=TMS.get(m.time);if(v===undefined){v=+new Date(m.time);TMS.set(m.time,v)}return v};
 // formatters made once: toLocaleString builds a new one on every call, which adds up over long tables and charts
-const FMT={md:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric'}),dmy:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}),dt:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}),
+const FMT={md:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric'}),nd:new Intl.DateTimeFormat('en-US',{month:'numeric',day:'numeric'}),dmy:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}),dt:new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}),
   n0:new Intl.NumberFormat('en-US',{maximumFractionDigits:0}),n1:new Intl.NumberFormat('en-US',{maximumFractionDigits:1}),n2:new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})};
 const fdate=s=>FMT.dmy.format(pd(s));
-const fsd=s=>pd(s).toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
+const fsd=s=>FMT.nd.format(pd(s));
 const fnum=v=>FMT.n1.format(+v);
 const fi=v=>FMT.n0.format(Math.round(v||0));
 const mmss=s=>{s=Math.max(0,Math.ceil(s));return`${Math.floor(s/60)}:${pad(s%60)}`};
@@ -468,8 +470,16 @@ function view(useRange=true,skip=''){
 }
 
 /* ---------- stats ---------- */
+// One redraw asks for these up to four times: each card that sets a filter leaves its own out, and with none set the
+// lists are the same meals. This redraw's answers are kept (SM, emptied when render starts) and handed back for the
+// same meals and range. Nothing that reads them changes them.
+let SM=[];
 function stats(ms,rg){
-  const a=[...ms].sort((x,y)=>new Date(x.time)-new Date(y.time)),dm={},T={},SRC={base:{},prot:{},milk:{},quick:{}},rot={};PKEYS.forEach(p=>rot[p]=0);
+  const hit=SM.find(c=>c.rg[0]===rg[0]&&c.rg[1]===rg[1]&&c.ms.length===ms.length&&c.ms.every((m,i)=>m===ms[i]));if(hit)return hit.r;
+  const r=stats1(ms,rg);SM.push({ms,rg,r});return r;
+}
+function stats1(ms,rg){
+  const a=[...ms].sort((x,y)=>tms(x)-tms(y)),dm={},T={},SRC={base:{},prot:{},milk:{},quick:{}},rot={};PKEYS.forEach(p=>rot[p]=0);
   let bowls=0,fish=0,milk=0;
   a.forEach(m=>{const{t,src}=NM(m),d=dayOf(m),o=(dm[d]??={t:{},n:0});add(o.t,t);o.n++;add(T,t);for(const k in src)add(SRC[k],src[k]);
     if(m.kind==='bowl'){bowls+=m.servings||1;rot[m.protein]++;if(PROT[m.protein]?.fish)fish++;if(m.milk)milk++}});
@@ -833,9 +843,9 @@ const LOGC=[{label:'Time (local)',get:m=>+new Date(m.time),type:'time'},{label:'
   {label:'EPA+DHA',get:m=>NM(m).t.epa?NM(m).t.epa*1000:null,type:'num',unit:'mg'},{label:'Milk',get:m=>m.milk?'Yes':'No'},null];
 function tableHTML(f){
   const F=UI.filter('log',LOGC,()=>{S.page=1;render()});
-  f=F.apply([...f].sort((a,b)=>new Date(b.time)-new Date(a.time)));
+  f=F.apply([...f].sort((a,b)=>tms(b)-tms(a)));
   const n=f.length,pages=Math.max(1,Math.ceil(n/PER));S.page=Math.max(1,Math.min(S.page,pages));
-  const rows=f.slice((S.page-1)*PER,S.page*PER),tf=d=>new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const rows=f.slice((S.page-1)*PER,S.page*PER),tf=d=>FMT.dt.format(new Date(d));
   return`<div class="th"><h3>Log</h3><button class="btn" data-act="export">Export CSV</button></div>
   <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>${F.th(0)}</th><th>${F.th(1)}</th><th class="num">${F.th(2)}</th><th class="num">${F.th(3)}</th><th class="num">${F.th(4)}</th><th class="num">${F.th(5)}</th><th class="num">${F.th(6)}</th><th class="num">${F.th(7)}</th><th class="num">${F.th(8)}</th><th class="num">${F.th(9)}</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
   ${rows.map(m=>{const t=NM(m).t,P=PROT[m.protein];return`<tr><td class="mu2">${tf(m.time)}</td>
@@ -862,13 +872,13 @@ function render(){
   nmSync();RK=rk();
   if(!RL[S.range])S.range='all';   // an old key ('7d','30d','90d') reads as All time
   $('#fKind').value=S.kind;$('#fRange').value=S.range;
-  const rg=range(),f=view(),st=stats(f,rg),F='';xfBar();   // the date range is shown once, under the filters, like the other apps
+  SM=[];const rg=range(),f=view(),st=stats(f,rg),F='';xfBar();   // the date range is shown once, under the filters, like the other apps
   $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
   const ban=meals.length?'':`<div class="card ban"><div><h2 style="margin:0 0 4px">No meals logged yet</h2><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load sample data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">&#9654; Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load sample</button></div></div>`;
   // today and this week's plan don't depend on the filters, so they sit above them
-  $('#top').innerHTML=ban+heroToday()+nextCard()+`<div class="grid">${planHTML()}</div>`;
-  $('#app').innerHTML=topCards(st,F,stats(view(true,'kind milk'),rg))+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F,S.sel?stats(view(true,'day'),range(null)):st,stats(view(true,'prot fish'),rg))+`<div class="card">${tableHTML(f)}</div>`;
+  UI.paint($('#top'),ban+heroToday()+nextCard()+`<div class="grid">${planHTML()}</div>`,{now:true});
+  UI.paint($('#app'),topCards(st,F,stats(view(true,'kind milk'),rg))+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F,S.sel?stats(view(true,'day'),range(null)):st,stats(view(true,'prot fish'),rg))+`<div class="card">${tableHTML(f)}</div>`);
   publish();
 }
 // daily totals for ISIONXXX's TODAY tab, which can't work out bowl nutrition itself.
