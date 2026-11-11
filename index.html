@@ -115,6 +115,8 @@ body ::selection{background:var(--acc);color:#000}
 .cell.on.over{background:rgba(255,69,69,.10);border-color:rgba(255,69,69,.4)}.cell.on.over b{color:#ff6b6b}
 .cell.on.under{background:rgba(255,176,0,.06)}
 .cell.on b{font-size:12px;color:var(--tx)}
+/* phones: a day's calories are five characters in a 39 px cell; a little smaller, so they don't touch its sides */
+@media(max-width:640px){.cell.on b,.cell.wk b{font-size:10.5px;letter-spacing:-.03em}}
 .cell.sel{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
 .cell small{font-size:10px;color:var(--mu)}
 .cell.wk{border:1px dashed var(--line2);background:#0a0a0a;color:var(--mu);cursor:default}
@@ -525,13 +527,20 @@ function cols(n,max){const k=Math.ceil(n/max)||1,r=[];for(let e=n;e>0;e-=k)r.uns
 const hit=m=>m?`<path class="hit${m.a?' pick':''}${m.on?' on':''}"${m.a?` ${m.a}`:''} d="${m.d}"><title>${esc(m.title)}</title></path>`:'';
 function area(series,color,tgt,at){
   if(series.length<2)return'<div class="empty">Not enough data yet</div>';
-  const W=800,H=200,p=12,mx=Math.max(1,...series,(tgt||0)*1.1),X=i=>p+i*(W-2*p)/(series.length-1),Y=v=>p+(mx-v)/mx*(H-2*p);
+  // a long range (more than 60 days) draws each point as the average of a run of days, the same runs the bars use:
+  // a point a day for a year is a scribble, and the caption says what one point stands for
+  const R=series.length>60?cols(series.length,60):null,k=R?Math.ceil(series.length/60):1;
+  if(R)series=R.map(([a,b])=>series.slice(a,b).reduce((s,v)=>s+v,0)/(b-a));
+  // the scale starts a little under the lowest value, not at zero: days of 2,300-2,700 kcal drawn from zero are a flat
+  // line across the top of a filled block, and the trend is in the part that was squeezed
+  const W=800,H=200,p=12,mx=Math.max(1,...series,(tgt||0)*1.1),mn=Math.min(...series),lo=Math.max(0,mn-(mx-mn)*.6),X=i=>p+i*(W-2*p)/(series.length-1),Y=v=>p+(mx-v)/(mx-lo)*(H-2*p);
   const d=smooth(series.map((v,i)=>[X(i),Y(v)])),id='a'+uid(),cw=(W-2*p)/(series.length-1);
-  const hits=at?cols(series.length,120).map(([i0,i1])=>{const m=at(i0,i1),x0=Math.max(0,X(i0)-cw/2),x1=Math.min(W,X(i1-1)+cw/2);return m&&hit({...m,d:`M${x0.toFixed(1)} 0H${x1.toFixed(1)}V${H}H${x0.toFixed(1)}z`})}).join(''):'';
+  const C=at?(R?R.map(([a,b],j)=>[j,j+1,at(a,b)]):cols(series.length,120).map(([i0,i1])=>[i0,i1,at(i0,i1)])):[];
+  const hits=C.map(([i0,i1,m])=>{const x0=Math.max(0,X(i0)-cw/2),x1=Math.min(W,X(i1-1)+cw/2);return m&&hit({...m,d:`M${x0.toFixed(1)} 0H${x1.toFixed(1)}V${H}H${x0.toFixed(1)}z`})}).join('');
   return`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-    <path d="${d} L${X(series.length-1)},${Y(0)} L${X(0)},${Y(0)} Z" fill="${color}" fill-opacity=".1"/>
+    <path d="${d} L${X(series.length-1)},${Y(lo)} L${X(0)},${Y(lo)} Z" fill="${color}" fill-opacity=".1"/>
     ${tgt?`<line x1="${p}" x2="${W-p}" y1="${Y(tgt)}" y2="${Y(tgt)}" stroke="#2c2c2c" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`:''}
-    <path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>${hits}</svg>`;
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>${hits}</svg>${R?`<div class="mu" style="font-size:11px;margin-top:6px">Each point averages ${k} days</div>`:''}`;
 }
 // with at, each column gets a full-height area to click or hover, and its bars dim unless they're the chosen one (m.on)
 // a long range (more than 60 days) draws each bar as the average of a run of days, the same runs the click columns use,
@@ -809,8 +818,8 @@ function coverageHTML(st){
   const e=st.epa7,ec=e>=EPA_WK?'grn':e>=EPA_WK/2?'amb':'red';
   return`<div class="card"><div class="bd ev"><h3>Nutrient coverage</h3><div class="lbl" style="margin-top:-12px">Avg per logged day vs daily value</div>
     <h4>MINERALS</h4>${grp(['k','ca','fe','mg','zn','na'])}
-    <hr><h4>VITAMINS</h4>${grp(['fol','vc','vd','vk','b12'])}
-    <hr><h4>FIBER &amp; FATS</h4>${grp(['fib','ala'])}
+    <h4>VITAMINS</h4>${grp(['fol','vc','vd','vk','b12'])}
+    <h4>FIBER &amp; FATS</h4>${grp(['fib','ala'])}
     ${er(CV[ec],'EPA + DHA (7 days)',`${fnum(r1(e))} g · <span class="${ec}">${Math.round(e/EPA_WK*100)}%</span>`,`Target ~${EPA_WK} g/week (≈500 mg/day). Only fish provides meaningful amounts.`,`EPA + DHA: ${fnum(r1(e))} g over the last 7 days, ${Math.round(e/EPA_WK*100)}% of ${EPA_WK} g`)}
   </div></div>`;
 }
