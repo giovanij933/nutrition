@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#070707">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="NUTRITION">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -18,10 +19,10 @@
 <link rel="stylesheet" href="ui.css">
 <style>
 :root{
-  color-scheme:dark;
-  --bg:#070707;--card:#0c0c0c;--cell:#0a0a0a;--line:#1c1c1c;--line2:#2c2c2c;
-  --tx:#d9d5c8;--mu:#8f8a7e;--acc:#ffb000;--amber:#ffb000;
-  --g:#33ff66;--r:#ff4545;--a:#ff7a33;--b:#7f9cb0;--blue:#ffb000;
+  color-scheme:light dark;
+  --bg:var(--background);--card:var(--surface);--cell:var(--raised);--line:var(--border-soft);--line2:var(--border);
+  --tx:var(--text-primary);--mu:var(--text-secondary);
+  --g:var(--success);--r:var(--error);--a:var(--warning);--b:var(--info);
   --f:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -29,33 +30,33 @@ html{background:var(--bg)}
 body{margin:0 auto;max-width:1440px;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(48px + env(safe-area-inset-bottom));background:var(--bg);color:var(--tx);font:13px/1.45 var(--f);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 button,select,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0}
-:focus-visible{outline:1px solid var(--acc);outline-offset:1px}
+:focus-visible{outline:1px solid var(--accent);outline-offset:1px}
 /* body ::selection, not ::selection: a selection rule that also matches <html> made every root change (the mouse glow) restyle the whole page */
-body ::selection{background:var(--acc);color:#000}
-.red{color:var(--r)}.grn{color:var(--g)}.amb{color:var(--acc)}.mu{color:var(--mu)}.mu2{color:var(--mu)}
+body ::selection{background:var(--accent);color:var(--on-accent)}
+.red{color:var(--error-text)}.grn{color:var(--success-text)}.amb{color:var(--warning-text)}.mu{color:var(--mu)}.mu2{color:var(--mu)}
 .hidden{display:none!important}
 
 /* header + filter bar */
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .brand{font-weight:600;font-size:15px;letter-spacing:.14em}
-.brand b{color:var(--acc)}
-.cur{display:inline-block;width:.6em;height:1.05em;margin-left:6px;background:var(--acc);vertical-align:-2px;animation:bl 1.1s steps(1) infinite}
+.brand b{color:var(--secondary)}
+.cur{display:inline-block;width:.6em;height:1.05em;margin-left:6px;background:var(--primary);vertical-align:-2px;animation:bl 1.1s steps(1) infinite}
 @keyframes bl{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.cur{animation:none}}
 .top .acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:14px 0}
 .sel{background:var(--bg);border:1px solid var(--line2);border-radius:0;padding:7px 10px;min-width:150px}
-.sel:hover{border-color:var(--acc);color:var(--acc)}
+.sel:hover{border-color:var(--accent);color:var(--accent-text)}
 .ctx{color:var(--mu)}
 .sp{flex:1}
 
 /* buttons */
 .btn{border:1px solid var(--line2);background:var(--bg);border-radius:0;padding:7px 10px;display:inline-flex;gap:6px;align-items:center;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn:hover{border-color:var(--accent);color:var(--accent-text)}
 .btn svg{width:14px;height:14px}
-.btn.pri,.btn.go{background:var(--acc);border-color:var(--acc);color:#000;font-weight:600}
-.btn.pri:hover,.btn.go:hover{color:#000;filter:brightness(1.12)}
-.btn.dng{color:var(--r)}.btn.dng:hover{border-color:var(--r)}
+.btn.pri,.btn.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btn.pri:hover,.btn.go:hover{color:var(--on-accent);filter:brightness(1.12)}
+.btn.dng{color:var(--error-text)}.btn.dng:hover{border-color:var(--r)}
 
 /* layout + cards */
 .grid{display:grid;gap:12px;margin-bottom:12px}
@@ -63,10 +64,10 @@ body ::selection{background:var(--acc);color:#000}
 .gm{grid-template-columns:2fr 1fr}
 .g3{grid-template-columns:repeat(3,1fr)}
 .card{background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
-.ban{flex-direction:row;align-items:center;justify-content:space-between;gap:16px;padding:16px;margin-bottom:12px;flex-wrap:wrap;border-color:var(--acc)}
+.ban{flex-direction:row;align-items:center;justify-content:space-between;gap:16px;padding:16px;margin-bottom:12px;flex-wrap:wrap;border-color:var(--border)}
 .bd{padding:16px;flex:1;display:flex;flex-direction:column}
 .ft{border-top:1px solid var(--line);padding:10px 16px;display:flex;justify-content:space-between;font-size:11px;color:var(--mu);gap:10px;flex-wrap:wrap;align-items:center}
-.card h3,.ban h2{font-size:11px;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin-bottom:12px}
+.card h3,.ban h2{font-size:11px;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--text-primary);margin-bottom:12px}
 .card h3::before,.ban h2::before{content:'> ';color:var(--mu)}   /* the empty device's banner is the page's first section: h2 */
 .lbl{font-size:11px;color:var(--mu);letter-spacing:.08em;text-transform:uppercase}
 .big{font-size:22px;font-weight:600;margin:2px 0 8px}
@@ -77,25 +78,25 @@ body ::selection{background:var(--acc);color:#000}
 .lr span{min-width:0}.lr b{text-align:right}.lr em{font-style:normal;text-align:right;color:var(--mu)}
 .dot{width:7px;height:7px;margin-right:7px;display:inline-block;flex:none}
 .row{display:flex;justify-content:space-between;gap:8px;padding:5px 0}
-.hb{height:20px;background:#111;margin:2px 0 10px;overflow:hidden}
+.hb{height:20px;background:var(--track);margin:2px 0 10px;overflow:hidden}
 .hb i{display:block;height:100%}
 
 /* rotation plan */
 .pdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .pday{background:var(--cell);border:1px solid var(--line);padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
-.pday.today{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.pday.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .pdn{font-size:11px;color:var(--mu);letter-spacing:.08em;text-transform:uppercase}
-.pp{border:1px solid var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent);padding:3px 6px;font-size:10px;letter-spacing:.04em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp{border:1px solid color-mix(in srgb,var(--c) 55%,transparent);color:var(--tx);background:color-mix(in srgb,var(--c) 14%,transparent);padding:3px 6px;font-size:10px;letter-spacing:.04em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pst{font-size:10px;min-height:12px;display:flex;gap:3px;align-items:center}.pst i{width:7px;height:7px;display:inline-block}
 
 /* next meal: what to eat next, under the Today card */
 .nx{margin-bottom:12px}.nx h3{margin-bottom:8px}
 .nxs{font-size:14px;line-height:1.55;margin:0}
-.nx.ok .nxs::before{content:'✓ ';color:var(--g)}
+.nx.ok .nxs::before{content:'✓ ';color:var(--success-text)}
 .nxl{list-style:none;margin:10px 0 0;padding:0;border-top:1px solid var(--line)}
 .nxl li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:10px 0;border-bottom:1px solid var(--line)}
 .nxl li:last-child{border-bottom:0;padding-bottom:0}
-.nxw{flex:none;width:64px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc)}
+.nxw{flex:none;width:64px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-primary)}
 .nxm{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:2px}.nxm b{font-weight:600}.nxm small{font-size:11px;color:var(--mu);line-height:1.45}
 .nxv{color:var(--mu);font-size:12px;white-space:nowrap}
 .nxa{display:flex;gap:6px;margin-left:auto}
@@ -107,25 +108,25 @@ body ::selection{background:var(--acc);color:#000}
 .cal{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-top:12px}
 .dh{text-align:center;font-size:11px;color:var(--mu);padding:4px 0;letter-spacing:.08em;text-transform:uppercase}
 .cell{min-height:66px;background:var(--cell);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:11px;color:var(--mu);cursor:pointer;position:relative;overflow:hidden}
-.cell.hatch{background:repeating-linear-gradient(135deg,#0a0a0a 0 6px,#111 6px 7px)}
+.cell.hatch{background:repeating-linear-gradient(135deg,var(--raised) 0 6px,var(--border-soft) 6px 7px)}
 .cell.out{cursor:default;border-color:transparent;opacity:.5}
-.cell.fut span{color:#827d72}
-.cell.on{border-color:rgba(255,176,0,.3)}
-.cell.on.ok{background:rgba(51,255,102,.10);border-color:rgba(51,255,102,.35)}.cell.on.ok b{color:var(--g)}
-.cell.on.over{background:rgba(255,69,69,.10);border-color:rgba(255,69,69,.4)}.cell.on.over b{color:#ff6b6b}
-.cell.on.under{background:rgba(255,176,0,.06)}
+.cell.fut span{color:var(--text-secondary)}
+.cell.on{border-color:var(--border)}
+.cell.on.ok{background:var(--success-soft);border-color:var(--success-line)}.cell.on.ok b{color:var(--success-text)}
+.cell.on.over{background:var(--error-soft);border-color:var(--error-line)}.cell.on.over b{color:var(--error-text)}
+.cell.on.under{background:var(--warning-soft);border-color:var(--warning-line)}
 .cell.on b{font-size:12px;color:var(--tx)}
 /* phones: a day's calories are five characters in a 39 px cell; a little smaller, so they don't touch its sides */
 @media(max-width:640px){.cell.on b,.cell.wk b{font-size:10.5px;letter-spacing:-.03em}}
-.cell.sel{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.cell.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .cell small{font-size:10px;color:var(--mu)}
-.cell.wk{border:1px dashed var(--line2);background:#0a0a0a;color:var(--mu);cursor:default}
+.cell.wk{border:1px dashed var(--line2);background:var(--raised);color:var(--mu);cursor:default}
 .cell.wk b{font-size:11px}
 .cdots{display:flex;gap:2px}.cdots i{width:5px;height:5px}
 .calft{padding:10px 16px}
 .nav{display:flex;gap:8px;align-items:center}
 .nav button{border:1px solid var(--line2);min-width:33px;height:33px;padding:0 10px;font-size:12px}
-.nav button:hover{border-color:var(--acc);color:var(--acc)}
+.nav button:hover{border-color:var(--accent);color:var(--accent-text)}
 .nav .tb{font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 
 /* coverage */
@@ -156,7 +157,7 @@ th{font-size:11px;font-weight:500;color:var(--mu);letter-spacing:.08em;text-tran
 .pill{display:inline-flex;padding:1px 6px;font-size:10px;border:1px solid;letter-spacing:.06em;text-transform:uppercase}
 .acts{display:flex;gap:4px;justify-content:flex-end}
 td .acts button{width:24px;height:24px;border:1px solid var(--line2);color:var(--tx);display:inline-flex;align-items:center;justify-content:center}
-td .acts button:hover{border-color:var(--acc);color:var(--acc)}
+td .acts button:hover{border-color:var(--accent);color:var(--accent-text)}
 .acts svg{width:13px;height:13px}
 .th{display:flex;align-items:flex-start;gap:12px;padding:16px 16px 4px}   /* title on the same line as every other card title */
 .th h3{margin:0;flex:1}
@@ -164,36 +165,36 @@ td .acts button:hover{border-color:var(--acc);color:var(--acc)}
 .calf{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
 .card>.calf{margin:0;padding:12px 16px 16px}
 .calf button{border:1px solid var(--line2);background:var(--bg);padding:7px 10px;font-size:12px;letter-spacing:.06em}
-.calf button:hover{border-color:var(--acc);color:var(--acc)}
+.calf button:hover{border-color:var(--accent);color:var(--accent-text)}
 .dim{color:var(--mu)}
 
 /* modal (matches the dialogs in MIND / TRAINING) */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:9;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
-.box{background:var(--card);border:1px solid var(--acc);padding:20px;width:100%;max-width:560px;max-height:92vh;overflow:auto}
+.modal{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:center;justify-content:center;z-index:9;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
+.box{background:var(--card);border:1px solid var(--border-soft);padding:20px;width:100%;max-width:560px;max-height:92vh;overflow:auto}
 .box.wide{max-width:760px}
 #mbox:focus{outline:0}   /* focused on open so the keyboard starts inside; the open dialog is the focus cue */
-.box h3{font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:14px}
+.box h3{font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--text-primary);margin-bottom:14px}
 .box p{margin-bottom:12px}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fg label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--mu);letter-spacing:.08em;text-transform:uppercase}
 .fg input,.fg select,.fg textarea{background:var(--bg);border:1px solid var(--line2);padding:7px 10px;width:100%;font-size:13px;letter-spacing:0;text-transform:none;color:var(--tx)}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--acc);outline:0}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);outline:0}
 .ck{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--tx)}
 .fg .ck label,.ck label{flex-direction:row;align-items:center;gap:6px;color:var(--tx);text-transform:none;letter-spacing:0;font-size:12px}
-.ck input{width:auto;accent-color:var(--acc)}
+.ck input{width:auto;accent-color:var(--accent)}
 .full{grid-column:1/-1}
 .mact{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
 .box .ui-set input,.box .ui-set select{flex:none;width:110px;background:var(--bg);border:1px solid var(--line2);padding:7px 10px;font-size:13px;color:var(--tx)}
-.box .ui-set input:focus,.box .ui-set select:focus{border-color:var(--acc);outline:0}
+.box .ui-set input:focus,.box .ui-set select:focus{border-color:var(--accent);outline:0}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px}.kv span{color:var(--mu)}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:90vw;background:var(--card);border:1px solid var(--acc);color:var(--acc);padding:8px 14px;z-index:30}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:90vw;background:var(--card);border:1px solid var(--border-soft);color:var(--text-primary);padding:8px 14px;z-index:30}
 
 /* cook mode */
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .chip{border:1px solid var(--line2);padding:7px 10px;font-size:12px;letter-spacing:.06em}
-.chip:hover{border-color:var(--acc);color:var(--acc)}
-.chip.on{background:var(--acc);border-color:var(--acc);color:#000}
-.step{display:flex;align-items:center;gap:8px}.step button{width:30px;height:30px;border:1px solid var(--line2);font-size:15px}.step button:hover{border-color:var(--acc);color:var(--acc)}.step b{font-size:18px;min-width:26px;text-align:center}
+.chip:hover{border-color:var(--accent);color:var(--accent-text)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.step{display:flex;align-items:center;gap:8px}.step button{width:30px;height:30px;border:1px solid var(--line2);font-size:15px}.step button:hover{border-color:var(--accent);color:var(--accent-text)}.step b{font-size:18px;min-width:26px;text-align:center}
 .ckh{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:14px}
 .ckh h3{margin:0}
 .sec{font-size:10px;letter-spacing:.16em;color:var(--mu);text-transform:uppercase;margin:12px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
@@ -201,12 +202,12 @@ td .acts button:hover{border-color:var(--acc);color:var(--acc)}
 .ing label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}.ing input{accent-color:var(--g);margin-top:3px}
 .ing input:checked+span{color:var(--mu);text-decoration:line-through}
 .stp{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);line-height:1.5}
-.stp>b{width:22px;height:22px;border:1px solid var(--acc);color:var(--acc);display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:11px}
+.stp>b{width:22px;height:22px;border:1px solid var(--border);color:var(--text-primary);display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:11px}
 .stp>div{flex:1}
 .tmr{border:1px solid var(--line2);padding:3px 8px;font-size:11px;white-space:nowrap;align-self:flex-start;letter-spacing:.06em}
-.tmr:hover{border-color:var(--acc);color:var(--acc)}
+.tmr:hover{border-color:var(--accent);color:var(--accent-text)}
 .ns{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;background:var(--bg);border:1px solid var(--line);padding:10px 12px}.ns b{color:var(--tx);display:block;font-size:13px;letter-spacing:0;text-transform:none}
-.tip{color:var(--mu);border:1px solid var(--line);border-left:2px solid var(--acc);padding:10px 12px;margin-top:14px;line-height:1.5}
+.tip{color:var(--mu);border:1px solid var(--line);border-left:2px solid var(--info);padding:10px 12px;margin-top:14px;line-height:1.5}
 pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1px solid var(--line);padding:12px;margin-top:12px}
 /* daily review: a script to read top to bottom */
 .box.rvd{max-width:680px}
@@ -228,17 +229,17 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
   .fg input,.fg select,.fg textarea{font-size:16px}
 }
 /* ---------- cook mode as a session sheet (same as MIND / TRAINING / REWIRE sessions) ----------
-   full screen on a phone, a centred sheet on wide screens, soft amber glow, slides up once, actions pinned to the bottom */
-.modal:has(>.box.ss){padding:0;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+   full screen on a phone, a centred sheet on wide screens, soft accent wash, slides up once, actions pinned to the bottom */
+.modal:has(>.box.ss){padding:0;background:var(--scrim);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .box.ss{max-width:none;width:100%;height:100%;max-height:none;border:0;padding:calc(env(safe-area-inset-top) + 18px) 20px 0;overscroll-behavior:contain;
-  background:radial-gradient(90% 42% at 50% 18%,rgba(255,176,0,.06),transparent 72%),var(--bg);animation:ssIn .4s cubic-bezier(.2,.8,.2,1)}
+  background:radial-gradient(90% 42% at 50% 18%,var(--accent-soft),transparent 72%),var(--bg);animation:ssIn .4s cubic-bezier(.2,.8,.2,1)}
 .box.ss.ss-on{animation:none}
 @keyframes ssIn{from{opacity:0;transform:translateY(32px)}}
 .box.ss>*{max-width:560px;margin-left:auto;margin-right:auto}
 .box.ss .ckh h3{font-size:11px!important;font-weight:600;letter-spacing:.22em;color:var(--mu)}
 .box.ss .ckh>div{flex:1 1 100%}.box.ss .ckh .vl{margin-bottom:6px}
 .box.ss .chip{transition:background-color .18s,border-color .18s,color .18s}
-.box.ss .mact{position:sticky;bottom:0;z-index:2;margin:18px -20px 0;max-width:none;padding:22px 20px calc(env(safe-area-inset-bottom) + 18px);background:linear-gradient(rgba(7,7,7,0),var(--bg) 40%)}
+.box.ss .mact{position:sticky;bottom:0;z-index:2;margin:18px -20px 0;max-width:none;padding:22px 20px calc(env(safe-area-inset-bottom) + 18px);background:linear-gradient(transparent,var(--bg) 40%)}
 .box.ss .mact .sp{display:none}.box.ss .mact .btn{flex:1;justify-content:center;padding:14px 8px}
 @media(min-width:700px){.modal:has(>.box.ss){padding:24px}.box.ss{width:min(640px,100%);height:min(900px,100%);border:1px solid var(--line2)}}
 @media(prefers-reduced-motion:reduce){.box.ss{animation:none}}
@@ -247,32 +248,33 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
 .box.ss .vl{display:flex;flex-direction:column;gap:0;margin:6px 0 20px;border-top:1px solid var(--line)}
 .box.ss .vl button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 4px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font-size:13px;letter-spacing:0;color:var(--tx);transition:background-color .18s,color .18s}
 .box.ss .vl button::before{content:'';flex:none;width:8px;height:8px;border-radius:50%;border:1px solid var(--line2);transition:background-color .18s,border-color .18s,box-shadow .18s}
-.box.ss .vl button.on{color:var(--amber);background:rgba(255,176,0,.06)}
-.box.ss .vl button.on::before{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px rgba(255,176,0,.6)}
-.box.ss .vl.multi button::before{width:14px;height:14px;border-radius:2px;display:grid;place-items:center;font-size:10px;font-weight:600;line-height:1;color:#000}
+.box.ss .vl button.on{color:var(--accent-text);background:var(--accent-soft)}
+.box.ss .vl button.on::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 transparent}
+.box.ss .vl.multi button::before{width:14px;height:14px;border-radius:2px;display:grid;place-items:center;font-size:10px;font-weight:600;line-height:1;color:var(--on-accent)}
 .box.ss .vl.multi button.on::before{content:'✓';box-shadow:none}
-.box.ss .vl button:hover{color:var(--amber)}
+.box.ss .vl button:hover{color:var(--accent-text)}
 .box.ss .vl em{margin-left:auto;font-style:normal;font-size:11px;color:var(--mu);text-align:right}
-.box.ss .vl button.on em{color:var(--amber)}
+.box.ss .vl button.on em{color:var(--accent-text)}
 .box.ss .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;margin:6px 0 20px;border:1px solid var(--line2)}
 .box.ss .seg button{border:0;border-right:1px solid var(--line2);padding:11px 2px;text-align:center;background:none;font-size:12px;transition:background-color .18s,color .18s}
 .box.ss .seg button:last-child{border-right:0}
-.box.ss .seg button.on{background:var(--amber);color:#000}
+.box.ss .seg button.on{background:var(--accent);color:var(--on-accent)}
 /* cross-filters: anything with .pick narrows every card and the log; the filters show as chips under the bar */
-.pick{cursor:pointer}.pick:focus-visible{outline:1px solid var(--acc);outline-offset:2px}
-.lr.pick{margin:0 -6px;padding-left:6px;padding-right:6px}.lr.pick:hover{background:#121212}
-.lr.on{background:#1a1406;box-shadow:inset 2px 0 0 var(--acc)}
-.ks .pick:hover,.ks .pick.on,.ks .pick.on b,.wl .pick:hover{color:var(--acc)}.wl .pick{border-bottom:1px dotted var(--line2)}.wl .pick.on{color:var(--acc);border-color:var(--acc)}
-.chart .off,.cell.off{opacity:.25}.chart .hit{fill:transparent}.chart .hit.pick:hover{fill:rgba(255,176,0,.08)}.chart .hit.on{fill:rgba(255,176,0,.12)}
-.radar text.pick:hover,.radar text.on{fill:var(--acc)}.radar text.off{opacity:.4}
+.pick{cursor:pointer}.pick:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+.lr.pick{margin:0 -6px;padding-left:6px;padding-right:6px}.lr.pick:hover{background:var(--hover)}
+.lr.on{background:var(--accent-soft);box-shadow:inset 2px 0 0 var(--accent)}
+.ks .pick:hover,.ks .pick.on,.ks .pick.on b,.wl .pick:hover{color:var(--accent-text)}.wl .pick{border-bottom:1px dotted var(--line2)}.wl .pick.on{color:var(--accent-text);border-color:var(--accent)}
+.chart .off,.cell.off{opacity:.25}.chart .hit{fill:transparent}.chart .hit.pick:hover{fill:var(--accent-soft)}.chart .hit.on{fill:var(--accent-soft)}
+.radar text.pick:hover,.radar text.on{fill:var(--accent)}.radar text.off{opacity:.4}
 .xf{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 12px}
 .xf span{color:var(--mu);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-right:2px}
-.xf button{border:1px solid var(--acc);color:var(--acc);padding:5px 8px;font-size:12px}.xf button b{font-weight:600}.xf .clr{border-color:var(--line2);color:var(--mu)}
+.xf button{border:1px solid var(--accent);color:var(--accent-text);padding:5px 8px;font-size:12px}.xf button b{font-weight:600}.xf .clr{border-color:var(--line2);color:var(--mu)}
 h1.brand{margin:0}
-.cell span{color:#a9a498}
+.cell span{color:var(--text-secondary)}
 /* touch screens: the cook sheet's servings stepper and step timers, the checkbox rows, and the week plan's protein pills,
    big enough for a thumb (after the rules they resize) */
 @media (pointer:coarse){.step button{width:44px;height:44px}.tmr{padding:10px 12px}:is(.ing,.ck) label{min-height:36px;align-items:center}.pday .pp{padding-top:9px;padding-bottom:9px}.wl .pick{display:inline-block;padding-top:10px;padding-bottom:10px}}
+.cell.on span,.cell.on small{color:var(--tx)}
 </style>
 </head>
 <body>
@@ -299,7 +301,7 @@ h1.brand{margin:0}
 <script src="ui.js"></script>
 <script type="isx/app">
 const $=s=>document.querySelector(s);
-const ACC='var(--acc,#ffb000)';                       // brand amber (measurement)
+const ACC='var(--accent)';                             // the measured series
 /* ---------- nutrition data (approx. USDA FoodData Central values) ---------- */
 const FD={
   rice_dry:{kcal:675,p:13.2,c:148,f:1.2,fib:2.4,na:9,k:213,ca:52,fe:4.4,mg:46,fol:350,zn:2},          // per cup uncooked, enriched white
@@ -356,7 +358,7 @@ const recipe=m=>{const c=cOf(m),v=vOf(m);return BASE.map(r=>r[0]==='rice'?c.r:r[
 // what a left-out place held in this bowl
 const slotName=(m,k)=>k==='rice'?cOf(m).s:k==='spinach'?vOf(m).a[0]:k==='tomato'?vOf(m).a[1]:k;
 const cap1=s=>s[0].toUpperCase()+s.slice(1);
-const PROT={egg:{n:'Eggs',col:'#ffb000',fish:0},salmon:{n:'Salmon',col:'#e0607e',fish:1},sardines:{n:'Sardines',col:'#4fb3a9',fish:1},chicken:{n:'Chicken',col:'#c8b38a',fish:0},steak:{n:'Steak',col:'#9c8aa5',fish:0}};
+const PROT={egg:{n:'Eggs',col:'var(--warning)',fish:0},salmon:{n:'Salmon',col:'var(--accent)',fish:1},sardines:{n:'Sardines',col:'var(--info)',fish:1},chicken:{n:'Chicken',col:'var(--secondary)',fish:0},steak:{n:'Steak',col:'var(--primary)',fish:0}};
 const PKEYS=Object.keys(PROT);
 const NUT=[ // key,label,unit,DV,limit?
   ['fib','Fiber','g',28],['na','Sodium','mg',2300,1],['k','Potassium','mg',4700],['ca','Calcium','mg',1300],['fe','Iron','mg',18],['mg','Magnesium','mg',420],['zn','Zinc','mg',11],
@@ -503,10 +505,10 @@ function stats1(ms,rg){
 const ARC='M12 62A50 50 0 0 1 112 62';
 // tip: the ring's tooltip (the rings here are ratios to a target, so they explain themselves rather than filter)
 function gauge(segs,text,tip){
-  const col={g:'#ffb000',r:'#ff4545',a:'#ff7a33',b:'#7f9cb0',n:'#8f8a7e',v:'#33ff66'};
+  const col={g:'var(--accent)',r:'var(--error)',a:'var(--warning)',b:'var(--info)',n:'var(--secondary)',v:'var(--success)'};
   let off=0;
-  const arcs=segs.filter(([f])=>f>0).map(([f,c])=>{f=Math.min(f,1-off);const a=`<path d="${ARC}" stroke="${col[c]}" pathLength="100" stroke-dasharray="${(f*100).toFixed(2)} 100" stroke-dashoffset="${(-off*100).toFixed(2)}"/>`;off+=f;return a}).join('');
-  return`<svg class="gauge" viewBox="0 0 124 70">${tip?`<title>${esc(tip)}</title>`:''}<path d="${ARC}" stroke="#2c2c2c"/>${arcs}<text x="62" y="60" text-anchor="middle">${text}</text></svg>`;
+  const arcs=segs.filter(([f])=>f>0).map(([f,c])=>{f=Math.min(f,1-off);const a=`<path d="${ARC}" style="stroke:${col[c]}" pathLength="100" stroke-dasharray="${(f*100).toFixed(2)} 100" stroke-dashoffset="${(-off*100).toFixed(2)}"/>`;off+=f;return a}).join('');
+  return`<svg class="gauge" viewBox="0 0 124 70">${tip?`<title>${esc(tip)}</title>`:''}<path d="${ARC}" style="stroke:var(--track)"/>${arcs}<text x="62" y="60" text-anchor="middle">${text}</text></svg>`;
 }
 // same colours as the other apps: progress toward a target fills green. A cap (calories) shows what runs more
 // than 10% over in red; a minimum (protein) just stays full
@@ -538,9 +540,9 @@ function area(series,color,tgt,at){
   const C=at?(R?R.map(([a,b],j)=>[j,j+1,at(a,b)]):cols(series.length,120).map(([i0,i1])=>[i0,i1,at(i0,i1)])):[];
   const hits=C.map(([i0,i1,m])=>{const x0=Math.max(0,X(i0)-cw/2),x1=Math.min(W,X(i1-1)+cw/2);return m&&hit({...m,d:`M${x0.toFixed(1)} 0H${x1.toFixed(1)}V${H}H${x0.toFixed(1)}z`})}).join('');
   return`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-    <path d="${d} L${X(series.length-1)},${Y(lo)} L${X(0)},${Y(lo)} Z" fill="${color}" fill-opacity=".1"/>
-    ${tgt?`<line x1="${p}" x2="${W-p}" y1="${Y(tgt)}" y2="${Y(tgt)}" stroke="#2c2c2c" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`:''}
-    <path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>${hits}</svg>${R?`<div class="mu" style="font-size:11px;margin-top:6px">Each point averages ${k} days</div>`:''}`;
+    <path d="${d} L${X(series.length-1)},${Y(lo)} L${X(0)},${Y(lo)} Z" style="fill:${color}" fill-opacity=".1"/>
+    ${tgt?`<line x1="${p}" x2="${W-p}" y1="${Y(tgt)}" y2="${Y(tgt)}" style="stroke:var(--secondary)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`:''}
+    <path d="${d}" fill="none" style="stroke:${color}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>${hits}</svg>${R?`<div class="mu" style="font-size:11px;margin-top:6px">Each point averages ${k} days</div>`:''}`;
 }
 // with at, each column gets a full-height area to click or hover, and its bars dim unless they're the chosen one (m.on)
 // a long range (more than 60 days) draws each bar as the average of a run of days, the same runs the click columns use,
@@ -552,10 +554,10 @@ function bars(vals,{labels,tgt,at}={}){
   const W=400,H=200,p=labels?28:16,mx=Math.max(1,...vals,(tgt||0)*1.1),n=vals.length,slot=(W-20)/n,bw=Math.min(slot*.7,300),id='b'+uid(),Y=v=>H-p-v/mx*(H-p-12);
   const M=at?(R?R.map(([a,b],j)=>({i0:j,i1:j+1,m:at(a,b)})):cols(n,60).map(([i0,i1])=>({i0,i1,m:at(i0,i1)}))):[],mOf=i=>M.find(c=>i>=c.i0&&i<c.i1)?.m;
   const rects=vals.map((v,i)=>{const x=10+i*slot+(slot-bw)/2,y=Y(v),m=mOf(i);
-    return`<rect${m&&m.off?' class="off"':''} x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,H-p-y).toFixed(1)}" fill="#ffb000"/>${labels?`<text x="${(x+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#8f8a7e">${labels[i]}</text>`:''}`}).join('');
+    return`<rect${m&&m.off?' class="off"':''} x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,H-p-y).toFixed(1)}" style="fill:var(--accent)"/>${labels?`<text x="${(x+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" style="fill:var(--text-secondary)">${labels[i]}</text>`:''}`}).join('');
   const hits=M.map(({i0,i1,m})=>m&&hit({...m,on:0,d:`M${(10+i0*slot).toFixed(1)} 0h${((i1-i0)*slot).toFixed(1)}v${H}h-${((i1-i0)*slot).toFixed(1)}z`})).join('');
   return`<svg class="chart" viewBox="0 0 ${W} ${H}" ${labels?'':'preserveAspectRatio="none"'}>${rects}${hits}
-    ${tgt?`<line x1="6" x2="${W-6}" y1="${Y(tgt).toFixed(1)}" y2="${Y(tgt).toFixed(1)}" stroke="#8f8a7e" stroke-dasharray="4 4" ${labels?'':'vector-effect="non-scaling-stroke"'}/>`:''}</svg>${R?`<div class="mu" style="font-size:11px;margin-top:6px">Each bar averages ${k} days</div>`:''}`;
+    ${tgt?`<line x1="6" x2="${W-6}" y1="${Y(tgt).toFixed(1)}" y2="${Y(tgt).toFixed(1)}" style="stroke:var(--secondary)" stroke-dasharray="4 4" ${labels?'':'vector-effect="non-scaling-stroke"'}/>`:''}</svg>${R?`<div class="mu" style="font-size:11px;margin-top:6px">Each bar averages ${k} days</div>`:''}`;
 }
 // pick[i] = {f:'key:value', title}: the label becomes a cross-filter, bright when chosen, the others dim
 function radar(labels,raw,pick=[]){
@@ -564,10 +566,10 @@ function radar(labels,raw,pick=[]){
   const poly=f=>A.map((_,i)=>pt(i,f(i)).map(x=>x.toFixed(1)).join(',')).join(' ');
   const lab=labels.map((l,i)=>{const[x,y]=pt(i,1.2),c=Math.cos(A[i]),k=pick[i],f=k&&k.f;
     return`<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${Math.abs(c)<.2?'middle':c>0?'start':'end'}"${f?` class="pick${xon(f)?' on':xoff(f)?' off':''}" role="button" tabindex="0" aria-pressed="${xon(f)}" data-act="xf" data-v="${f}"`:''}>${k?`<title>${esc(k.title)}</title>`:''}${l}</text>`}).join('');
-  return`<svg class="radar" viewBox="0 0 300 240" font-size="10" letter-spacing=".08em" fill="#8f8a7e">
-    ${[1,.75,.5,.25].map(v=>`<polygon points="${poly(()=>v)}" fill="none" stroke="#2c2c2c"/>`).join('')}
-    ${A.map((_,i)=>{const[x,y]=pt(i,1);return`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#2c2c2c"/>`}).join('')}
-    <polygon points="${poly(i=>Math.max(.04,raw[i]/mx))}"  fill="#ffb000" fill-opacity=".16" stroke="#ffb000" stroke-width="1.5"/>${lab}</svg>`;
+  return`<svg class="radar" viewBox="0 0 300 240" font-size="10" letter-spacing=".08em" style="fill:var(--text-secondary)">
+    ${[1,.75,.5,.25].map(v=>`<polygon points="${poly(()=>v)}" fill="none" style="stroke:var(--border)"/>`).join('')}
+    ${A.map((_,i)=>{const[x,y]=pt(i,1);return`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" style="stroke:var(--border)"/>`}).join('')}
+    <polygon points="${poly(i=>Math.max(.04,raw[i]/mx))}"  style="fill:var(--accent);stroke:var(--accent)" fill-opacity=".16" stroke-width="1.5"/>${lab}</svg>`;
 }
 
 /* ---------- sections ---------- */
@@ -757,9 +759,9 @@ function weightHTML(){
   return`<div class="grid gm">
   <div class="card"><div class="bd"><div class="eqh"><div><h3>Body weight</h3><div class="big" style="font-size:20px">${fnum(r1(last.w))} <span class="mu" style="font-size:12px;font-weight:500">${U} · ${fdate(last.d)}</span></div><div class="lbl" style="margin-top:4px">From your morning check-in · last 30 days</div></div>
     <div class="ks"><div>7-DAY AVG<b>${w7!=null?fnum(r1(w7)):'—'}</b></div><div>WEEK CHANGE<b class="${rate==null?'':rate<0?'grn':''}">${rate==null?'—':(rate>0?'+':'')+fnum(r1(rate))}</b></div><div>WEIGH-INS<b>${W30.length}</b></div></div></div>
-    ${W30.length>1?area(W30.map(w=>r1(w-lo)),'#7f9cb0',0,(i0,i1)=>{const P=W.filter(x=>x.d>since(30)).slice(i0,i1);return{title:P.length>1?`${fmd(P[0].d)} – ${fmd(P.at(-1).d)}`:`${fmd(P[0].d)}: ${fnum(r1(P[0].w))} ${U}`}}):'<div class="empty">Add your weight at check-in on TODAY</div>'}</div></div>
+    ${W30.length>1?area(W30.map(w=>r1(w-lo)),'var(--info)',0,(i0,i1)=>{const P=W.filter(x=>x.d>since(30)).slice(i0,i1);return{title:P.length>1?`${fmd(P[0].d)} – ${fmd(P.at(-1).d)}`:`${fmd(P[0].d)}: ${fnum(r1(P[0].w))} ${U}`}}):'<div class="empty">Add your weight at check-in on TODAY</div>'}</div></div>
   <div class="card"><div class="bd"><h3>Weight vs calories</h3><div class="lbl">Last 2 weeks</div><div class="big" style="font-size:20px">${say}</div>
-    ${lr(ACC,'Average intake',k14!=null?`${fi(k14)} kcal`:'—')}${lr('#555','Your target',`${fi(settings.kcal)} kcal`)}${lr('var(--b)','Days with meals logged',`${kv.length} / 14`)}
+    ${lr(ACC,'Average intake',k14!=null?`${fi(k14)} kcal`:'—')}${lr('var(--secondary)','Your target',`${fi(settings.kcal)} kcal`)}${lr('var(--b)','Days with meals logged',`${kv.length} / 14`)}
     <div class="lbl" style="margin-top:10px">${rate==null||k14==null?'Needs two weeks of weigh-ins and logged meals.':Math.abs(rate)<(U==='kg'?.1:.2)?`About ${fi(k14)} kcal a day keeps you at this weight.`:`Each ${U==='kg'?'0.5 kg':'1 lb'} a week is roughly ${U==='kg'?'550':'500'} kcal a day ${rate<0?'below':'above'} what you burn.`}</div></div></div>
   </div>`;
 }
@@ -769,27 +771,27 @@ function topCards(st,F,stK){
   return`<div class="grid g4">
   <div class="card"><div class="bd"><h3>Calories</h3><div class="lbl">Avg / logged day</div><div class="big ${kcTone(kc)}">${fi(kc)}</div>
     ${tgtGauge(kc,settings.kcal,1,`${fi(kc)} of ${fi(settings.kcal)} kcal target a day (${pct(kc,settings.kcal)})`)}
-    ${lr('#2c2c2c','Bowls',fi(kb),'','kind:bowl',`Bowls: ${fi(kb)} kcal a day, ${of(kb)} — click to show only bowls`)}${lr('#2c2c2c','Milk',fi(km),'','milk:1',`Milk: ${fi(km)} kcal a day — click to show only bowls with milk`)}${lr('#2c2c2c','Other foods',fi(kq),'','kind:quick',`Other foods: ${fi(kq)} kcal a day, ${of(kq)} — click to show only other foods`)}</div>${F}</div>
+    ${lr('var(--border)','Bowls',fi(kb),'','kind:bowl',`Bowls: ${fi(kb)} kcal a day, ${of(kb)} — click to show only bowls`)}${lr('var(--border)','Milk',fi(km),'','milk:1',`Milk: ${fi(km)} kcal a day — click to show only bowls with milk`)}${lr('var(--border)','Other foods',fi(kq),'','kind:quick',`Other foods: ${fi(kq)} kcal a day, ${of(kq)} — click to show only other foods`)}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Avg g / logged day</div><div class="big ${pr>=settings.protein?'grn':''}">${fi(pr)} g</div>
     ${tgtGauge(pr,settings.protein,0,`${fi(pr)} of ${fi(settings.protein)} g target a day (${pct(pr,settings.protein)})`)}
-    ${lr('#2c2c2c','Bowl base',fi(st.avS('base','p'))+' g','','','Rice, beans, vegetables and seeds')}${lr('#2c2c2c','Rotation protein',fi(st.avS('prot','p'))+' g','','','The bowl\'s eggs, fish or meat')}${lr('#2c2c2c','Milk & other',fi(st.avS('milk','p')+st.avS('quick','p'))+' g','','','Milk on the side plus other foods')}</div>${F}</div>
+    ${lr('var(--border)','Bowl base',fi(st.avS('base','p'))+' g','','','Rice, beans, vegetables and seeds')}${lr('var(--border)','Rotation protein',fi(st.avS('prot','p'))+' g','','','The bowl\'s eggs, fish or meat')}${lr('var(--border)','Milk & other',fi(st.avS('milk','p')+st.avS('quick','p'))+' g','','','Milk on the side plus other foods')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Omega-3</h3><div class="lbl">EPA + DHA, last 7 days</div><div class="big ${e>=EPA_WK?'grn':''}">${fnum(r1(e))} g</div>
     ${gauge([[Math.min(1,e/EPA_WK),'v']],Math.round(e/EPA_WK*100)+'%',`${fnum(r1(e))} of ${EPA_WK} g weekly target (${Math.round(e/EPA_WK*100)}%)`)}
-    ${lr(st.fish7>=settings.fishTarget?'var(--g)':'#2c2c2c','Fish meals (7d)',`${st.fish7} / ${settings.fishTarget}`,'','fish:1','Salmon and sardine bowls — click to show only fish bowls')}${lr('#2c2c2c','Weekly target',EPA_WK+' g')}${lr('#2c2c2c','Plant ALA / day',fnum(r1(st.av('ala')))+' g')}</div>${F}</div>
+    ${lr(st.fish7>=settings.fishTarget?'var(--g)':'var(--border)','Fish meals (7d)',`${st.fish7} / ${settings.fishTarget}`,'','fish:1','Salmon and sardine bowls — click to show only fish bowls')}${lr('var(--border)','Weekly target',EPA_WK+' g')}${lr('var(--border)','Plant ALA / day',fnum(r1(st.av('ala')))+' g')}</div>${F}</div>
   <div class="card"><div class="bd"><h3>Macro split</h3><div class="lbl">% of calories</div><div class="big">${Math.round(st.mac.p*100)} / ${Math.round(st.mac.c*100)} / ${Math.round(st.mac.f*100)}</div>
-    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'var(--g)',`Protein: ${fi(pr)} g × 4 = ${fi(pr*4)} kcal, ${pct(st.mac.p,1)} of calories (bar full at 50%)`)}
-    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'#ffb000',`Carbs: ${fi(st.av('c'))} g × 4 = ${fi(st.av('c')*4)} kcal, ${pct(st.mac.c,1)} of calories (bar full at 70%)`)}
-    ${hbar('Fat',`${fi(st.av('f'))} g · ${pct(st.mac.f,1)}`,st.mac.f/.5,'var(--r)',`Fat: ${fi(st.av('f'))} g × 9 = ${fi(st.av('f')*9)} kcal, ${pct(st.mac.f,1)} of calories (bar full at 50%)`)}</div></div>${F}</div>
+    <div style="margin-top:22px">${hbar('Protein',`${fi(pr)} g · ${pct(st.mac.p,1)}`,st.mac.p/.5,'var(--accent)',`Protein: ${fi(pr)} g × 4 = ${fi(pr*4)} kcal, ${pct(st.mac.p,1)} of calories (bar full at 50%)`)}
+    ${hbar('Carbs',`${fi(st.av('c'))} g · ${pct(st.mac.c,1)}`,st.mac.c/.7,'var(--info)',`Carbs: ${fi(st.av('c'))} g × 4 = ${fi(st.av('c')*4)} kcal, ${pct(st.mac.c,1)} of calories (bar full at 70%)`)}
+    ${hbar('Fat',`${fi(st.av('f'))} g · ${pct(st.mac.f,1)}`,st.mac.f/.5,'var(--secondary)',`Fat: ${fi(st.av('f'))} g × 9 = ${fi(st.av('f')*9)} kcal, ${pct(st.mac.f,1)} of calories (bar full at 50%)`)}</div></div>${F}</div>
   </div>`;
 }
 
 function calendarHTML(){
   // same rule as the calories ring and the Today number: on target (within 10%) green, more than 10% over red,
-  // under target faint amber
+  // under target: a faint warning tint
   // it sets the calorie-result filter, so it leaves it out and dims the days that don't match
   const kc=kres,cr=S.x.cres;
   const dm={};view(false,'cres').forEach(m=>{const d=dayOf(m),o=(dm[d]??={kcal:0,p:0,dots:[],fish:0});const t=NM(m).t;o.kcal+=t.kcal||0;o.p+=t.p||0;
-    if(m.kind==='bowl'){o.dots.push(PROT[m.protein].col);if(PROT[m.protein].fish)o.fish++}else o.dots.push('#666')});
+    if(m.kind==='bowl'){o.dots.push(PROT[m.protein].col);if(PROT[m.protein].fish)o.fish++}else o.dots.push('var(--border)')});
   const y=S.month.getFullYear(),mo=S.month.getMonth(),first=new Date(y,mo,1),start=new Date(first);start.setDate(1-(first.getDay()+6)%7);
   const tk=today();let h=['Mon','Tue','Wed','Thu','Fri','Sat','Sun','Week'].map(d=>`<div class="dh">${d}</div>`).join(''),mk=0,md=0,mb=0,mf=0;const nr={ok:0,over:0,under:0};
   for(let w=0;w<6;w++){
@@ -805,7 +807,7 @@ function calendarHTML(){
     h+=`<div class="cell wk">${wd?`<b class="${{ok:'grn',over:'red'}[kc(wk/wd)]||''}">${fi(wk/wd)}</b><small>avg · <span class="${wf?'grn':''}">${wf} fish</span></small>`:'—'}</div>`;
   }
   return`<div class="card"><div class="bd"><h3 style="margin-bottom:10px">Meal calendar</h3><div class="lbl">Avg calories / logged day</div>
-    <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl"><span>Logged days: <b style="font-weight:500;color:var(--acc,#ffb000)">${md}</b></span><span${pk('cres:ok','Days within 10% of your calorie target — click to show only these')}>On target: <b class="${nr.ok?'grn':''}" style="font-weight:500">${nr.ok}</b></span><span${pk('cres:over','Days more than 10% over target — click to show only these')}>Over: <b class="${nr.over?'red':''}" style="font-weight:500">${nr.over}</b></span><span${pk('cres:under','Days more than 10% under target — click to show only these')}>Under: <b style="font-weight:500">${nr.under}</b></span><span>Fish meals: <b class="${mf?'grn':''}" style="font-weight:500">${mf}</b></span></div></div>
+    <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl"><span>Logged days: <b style="font-weight:500;color:var(--tx)">${md}</b></span><span${pk('cres:ok','Days within 10% of your calorie target — click to show only these')}>On target: <b class="${nr.ok?'grn':''}" style="font-weight:500">${nr.ok}</b></span><span${pk('cres:over','Days more than 10% over target — click to show only these')}>Over: <b class="${nr.over?'red':''}" style="font-weight:500">${nr.over}</b></span><span${pk('cres:under','Days more than 10% under target — click to show only these')}>Under: <b style="font-weight:500">${nr.under}</b></span><span>Fish meals: <b class="${mf?'grn':''}" style="font-weight:500">${mf}</b></span></div></div>
     <div class="cal">${h}</div></div>
     <div class="ft calft"><div class="nav"><button data-act="mprev" aria-label="Previous month">‹</button><span>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span><button data-act="mnext" aria-label="Next month">›</button><button class="tb" data-act="mtoday">Today</button></div>
     <span>${md} days &nbsp;&nbsp; ${mb} meals</span></div></div>`;
@@ -833,13 +835,13 @@ function chartsHTML(st,F,stD,stR){
   return`<div class="grid gm">
     <div class="card"><div class="bd"><div class="eqh"><div><h3>Calories trend</h3><div class="big" style="font-size:20px">${fi(st.av('kcal'))} <span class="mu" style="font-size:12px;font-weight:500">/ ${fi(settings.kcal)} target</span></div><div class="lbl" style="margin-top:4px">${rt}</div></div>
       <div class="ks">${ks('kind:bowl','BOWLS',fnum(st.bowls),'','Click to show only bowls')}<div>AVG PROTEIN<b>${fi(st.av('p'))} g</b></div><div>FIBER<b class="${st.av('fib')>=28?'grn':''}">${fi(st.av('fib'))} g</b></div>${ks('fish:1','FISH MEALS',st.fish,st.fish?'grn':'','Salmon and sardine bowls — click to show only these')}${ks('milk:1','WITH MILK',st.milk,'','Bowls with a glass of milk — click to show only these')}</div></div>
-      ${(kc.length>1?area:(v,c,t,at)=>bars(v,{tgt:t,at}))(kc,'#ffb000',settings.kcal,dayAt(stD.ds,kc,v=>`${fi(v)} kcal · ${res[kres(v)]}`))}</div>${F}</div>
+      ${(kc.length>1?area:(v,c,t,at)=>bars(v,{tgt:t,at}))(kc,'var(--accent)',settings.kcal,dayAt(stD.ds,kc,v=>`${fi(v)} kcal · ${res[kres(v)]}`))}</div>${F}</div>
     <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Grams / day</div><div class="big">${fi(st.av('p'))} g</div>${bars(pr,{tgt:settings.protein,at:dayAt(stD.ds,pr,v=>`${fi(v)} g protein`)})}</div>${F}</div>
   </div>
   <div class="grid g3">
     <div class="card"><div class="bd"><h3>Rotation mix</h3><div class="lbl">Bowls by protein</div><div class="big">${stR.bowls?PROT[PKEYS.slice().sort((x,y)=>stR.rot[y]-stR.rot[x])[0]].n:'—'}</div>
       ${stR.bowls?radar(PKEYS.map(p=>PROT[p].n),PKEYS.map(p=>stR.rot[p]),PKEYS.map(p=>({f:'prot:'+p,title:`${PROT[p].n}: ${pl(stR.rot[p],'bowl')}, ${pct(stR.rot[p],nb)} — click to show only these`}))):'<div class="empty">No bowls logged</div>'}
-      ${stR.bowls?lr('#e0607e','Fish',pl(stR.fish,'bowl'),pct(stR.fish,nb),'fish:1','Salmon and sardines — click to show only fish bowls')+lr('#2c2c2c','No fish',pl(nb-stR.fish,'bowl'),pct(nb-stR.fish,nb),'fish:0','Eggs, chicken and steak — click to show only these bowls'):''}</div>${F}</div>
+      ${stR.bowls?lr('var(--accent)','Fish',pl(stR.fish,'bowl'),pct(stR.fish,nb),'fish:1','Salmon and sardines — click to show only fish bowls')+lr('var(--border)','No fish',pl(nb-stR.fish,'bowl'),pct(nb-stR.fish,nb),'fish:0','Eggs, chicken and steak — click to show only these bowls'):''}</div>${F}</div>
     <div class="card"><div class="bd"><h3>Omega-3 by week</h3><div class="lbl">EPA + DHA grams · dashed = ${EPA_WK} g target</div><div class="big ${st.wk.at(-1).s>=EPA_WK?'grn':''}">${fnum(r1(st.wk.at(-1).s))} g <span class="mu" style="font-size:12px;font-weight:500">this week</span></div>
       ${bars(st.wk.map(w=>r1(w.s)),{labels:st.wk.map(w=>fsd(w.ws)),tgt:EPA_WK,at:i=>({title:`Week of ${fmd(st.wk[i].ws)}: ${fnum(r1(st.wk[i].s))} g EPA + DHA (${Math.round(st.wk[i].s/EPA_WK*100)}% of ${EPA_WK} g)`})})}</div>${F}</div>
     <div class="card"><div class="bd"><h3>Fiber</h3><div class="lbl">Grams / day · dashed = 28 g</div><div class="big">${fi(st.av('fib'))} g</div>${bars(fb,{tgt:28,at:dayAt(stD.ds,fb,v=>`${fi(v)} g fiber`)})}</div>${F}</div>
@@ -858,11 +860,11 @@ function tableHTML(f){
   return`<div class="th"><h3>Log</h3><button class="btn" data-act="export">Export CSV</button></div>
   <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>${F.th(0)}</th><th>${F.th(1)}</th><th class="num">${F.th(2)}</th><th class="num">${F.th(3)}</th><th class="num">${F.th(4)}</th><th class="num">${F.th(5)}</th><th class="num">${F.th(6)}</th><th class="num">${F.th(7)}</th><th class="num">${F.th(8)}</th><th class="num">${F.th(9)}</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
   ${rows.map(m=>{const t=NM(m).t,P=PROT[m.protein];return`<tr><td class="mu2">${tf(m.time)}</td>
-    <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:${P.col};border-color:${P.col}55;background:${P.col}1a">${P.n}</span>${ck(m)!=='rice'||vk(m)!=='st'?` <span class="mu">${cOf(m).s}, ${vOf(m).a[0]}</span>`:''}${(m.omit||[]).length?` <span class="mu">− ${esc(m.omit.map(k=>slotName(m,k)).join(', '))}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
+    <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:var(--tx);border-color:color-mix(in srgb,${P.col} 55%,transparent);background:color-mix(in srgb,${P.col} 14%,transparent)">${P.n}</span>${ck(m)!=='rice'||vk(m)!=='st'?` <span class="mu">${cOf(m).s}, ${vOf(m).a[0]}</span>`:''}${(m.omit||[]).length?` <span class="mu">− ${esc(m.omit.map(k=>slotName(m,k)).join(', '))}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
     <td class="num">${m.kind==='bowl'?fnum(m.servings||1):'—'}</td><td class="num">${fi(t.kcal)}</td><td class="num">${fi(t.p)} g</td><td class="num">${fi(t.c)} g</td><td class="num">${fi(t.f)} g</td><td class="num">${fi(t.fib)} g</td>
     <td class="num ${t.epa>=.5?'grn':''}">${t.epa?fi(t.epa*1000)+' mg':'—'}</td><td class="num">${m.milk?'<span class="grn">✓</span>':'—'}</td>
     <td><div class="acts"><button data-act="info" data-id="${m.id}" title="Nutrition" aria-label="Nutrition">${I.info}</button><button data-act="edit" data-id="${m.id}" title="Edit" aria-label="Edit">${I.note}</button></div></td></tr>`}).join('')
-  ||'<tr><td colspan="11" style="text-align:center;color:#8f8a7e;padding:30px">Nothing logged in this range</td></tr>'}
+  ||'<tr><td colspan="11" style="text-align:center;color:var(--mu);padding:30px">Nothing logged in this range</td></tr>'}
   </tbody></table></div>
   <div class="calf"><div><button data-act="pp" aria-label="Previous page">&lt;</button> Page <b>${S.page}</b> of ${pages} <button data-act="pn" aria-label="Next page">&gt;</button></div><span class="dim">${n} record${n===1?'':'s'}${F.clear()}</span></div>`;
 }
