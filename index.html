@@ -171,6 +171,10 @@ td .acts button:hover{border-color:var(--accent);color:var(--accent-text)}
 .box p{margin-bottom:12px}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fg label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
+.qrec{margin:0 0 14px}.qrk{margin:0 0 6px;font-size:11px;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
+.qrec .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html body .qrec .chip{min-height:44px;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 12px;border-radius:12px;font-size:13px;letter-spacing:0;text-transform:none;text-align:left;cursor:pointer}
+.qrec .chip span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.qrec .chip em{flex:none;font-style:normal;color:var(--mu);font-size:12px}
 .fg input,.fg select,.fg textarea{background:var(--bg);border:1px solid var(--line2);padding:7px 10px;width:100%;font-size:13px;letter-spacing:0;text-transform:none;color:var(--tx)}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);outline:0}
 .ck{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--tx)}
@@ -1020,8 +1024,11 @@ function saveBowl(id){
 function quickForm(m,pre){
   const isNew=!m;m=m||{time:new Date().toISOString(),kind:'quick',name:'',kcal:'',p:'',c:'',f:'',fib:'',note:'',n:1,...pre};
   const names=[...new Set(meals.filter(x=>x.kind==='quick').map(x=>x.name))];
+  // the foods logged most recently, one each: a tap logs it again (most "other foods" are ones you've had before)
+  const rec=[];if(isNew&&!pre?.name)for(const x of meals.filter(x=>x.kind==='quick'&&x.name).sort((a,b)=>new Date(b.time)-new Date(a.time))){
+    if(!rec.some(r=>r.name.toLowerCase()===x.name.toLowerCase()))rec.push(x);if(rec.length===6)break}
   const f=(k,l)=>`<label>${l}<input id="q_${k}" type="number" step="any" min="0" value="${esc(m[k])}"></label>`;
-  openModal(`<h3>${isNew?'Add other food':'Edit food'}</h3><p class="mu">For anything that isn't the bowl — snacks, other meals, drinks. Previous names auto-fill.</p><div class="fg">
+  openModal(`<h3>${isNew?'Add other food':'Edit food'}</h3><p class="mu">For anything that isn't the bowl — snacks, other meals, drinks. Previous names auto-fill.</p>${rec.length?`<div class="qrec"><p class="qrk" id="qrk">Log again</p><div class="chips" role="group" aria-labelledby="qrk">${rec.map(r=>`<button type="button" class="chip" data-act="again" data-id="${esc(r.id)}" aria-label="Log ${esc(r.name)} again, ${fi(r.kcal)} kcal"><span>${esc(r.name)}</span><em>${fi(r.kcal)} kcal</em></button>`).join('')}</div></div>`:''}<div class="fg">
     <label>Time<input id="q_time" type="datetime-local" value="${toLocalInput(m.time)}"></label>
     <label>Name<input id="q_name" list="qList" value="${esc(m.name)}" autocomplete="off"><datalist id="qList">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label>
     ${f('kcal','Calories')}${f('p','Protein (g)')}${f('c','Carbs (g)')}${f('f','Fat (g)')}${f('fib','Fiber (g)')}${isNew?`<label>Servings<input id="q_n" type="number" min="1" max="20" step="1" value="${m.n}"></label>`:'<div></div>'}
@@ -1033,6 +1040,12 @@ function quickForm(m,pre){
 // the food form's total when it's more than one serving (the numbers above are one serving's)
 const qN=()=>Math.max(1,Math.min(20,Math.round(+$('#q_n')?.value||1)));
 function quickNS(){const n=qN(),v=k=>(+$('#q_'+k).value||0)*n;$('#q_tot').textContent=n>1?`Calories and macros are per serving · ${n} servings: ${fi(v('kcal'))} kcal, ${fi(v('p'))} g protein`:''}
+// a recent food, logged again at the form's time and servings (Save's own checks and path), with Undo
+function logAgain(id){
+  const l=meals.find(x=>x.id===id);if(!l)return;$('#q_name').value=l.name;['kcal','p','c','f','fib'].forEach(k=>$('#q_'+k).value=l[k]??'');
+  const had=new Set(meals.map(m=>m.id));saveQuick('');const add=meals.filter(m=>!had.has(m.id));if(!add.length)return;
+  UI.undo(`${l.name} logged`,()=>{add.forEach(a=>{const i=meals.findIndex(m=>m.id===a.id);if(i>=0)meals.splice(i,1)});save();render()});
+}
 function saveQuick(id){
   if(badNum())return;const d=new Date($('#q_time').value),name=$('#q_name').value.trim();if(isNaN(d))return toast('Invalid time');if(!name)return toast('Name required');
   const n=k=>Math.max(0,+$('#q_'+k).value||0);
@@ -1354,7 +1367,7 @@ document.addEventListener('click',e=>{
     pp:()=>{if(S.page>1){S.page--;render()}},pn:()=>{S.page++;render()},   // tableHTML clamps to the last page
     cook:()=>cookMode(),addbowl:()=>bowlForm(),quick:()=>quickForm(),info:()=>info(id),
     edit:()=>{const m=meals.find(x=>x.id===id);m?.kind==='bowl'?bowlForm(m):quickForm(m)},
-    savebowl:()=>saveBowl(id),savequick:()=>saveQuick(id),close:closeModal,export:exportCSV,data:dataForm,grocery:()=>groceryForm(),
+    savebowl:()=>saveBowl(id),savequick:()=>saveQuick(id),again:()=>logAgain(id),close:closeModal,export:exportCSV,data:dataForm,grocery:()=>groceryForm(),
     // a delete happens at once and can be taken back from the toast (the entry goes back where it was)
     del:()=>{const i=meals.findIndex(x=>x.id===id);if(i<0)return;const[m]=meals.splice(i,1);save();closeModal();render();
       UI.undo(m.kind==='bowl'?'Bowl deleted':`${m.name||'Food'} deleted`,()=>{meals.splice(Math.min(i,meals.length),0,m);save();render()})},
