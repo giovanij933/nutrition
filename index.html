@@ -1080,6 +1080,13 @@ function nmRing(t,size=20,big){
   return `<svg class="nm-ring" viewBox="0 0 42 42" width="${size}" height="${size}" aria-hidden="true"><circle r="${r}" cx="21" cy="21" fill="none" class="nm-rt" stroke-width="${sw}"/>${T?seg(kp,'nm-rp')+seg(kc,'nm-rc')+seg(kf,'nm-rf'):''}${
     big?`<text x="21" y="20.5" class="nm-k">${fi(t.kcal||0)}</text><text x="21" y="27" class="nm-u">KCAL</text>`:''}</svg>`;
 }
+  // TODAY's plan art (isionxxx ARCHITECTURE.md, 2h): a picture as a small SVG in the shared plan-art classes (pa-*), which
+// TODAY colours with the palette, light or dark, so it shows without this app's CSS. M: class here → [pa classes, attributes]
+const toArt=(svg,M)=>{try{const r=new DOMParser().parseFromString(svg,'image/svg+xml').documentElement;if(r.nodeName!=='svg')return '';
+  [r,...r.querySelectorAll('*')].forEach(e=>{const k=[];(e.getAttribute('class')||'').split(/\s+/).forEach(c=>{const m=M[c];if(!m)return;if(m[0])k.push(m[0]);for(const a in m[1]||{})e.setAttribute(a,m[1][a])});
+    e.removeAttribute('class');e.removeAttribute('style');e.removeAttribute('aria-hidden');if(k.length)e.setAttribute('class',k.join(' '))});
+  return new XMLSerializer().serializeToString(r)}catch(e){return ''}};
+const nmArt=t=>toArt(nmRing(t,40),{'nm-rt':['pa-st'],'nm-rp':['pa-sp'],'nm-rc':['pa-si'],'nm-rf':['pa-sg']});
 // what each ingredient is called here
 const ING={rice_dry:'rice',rice_ckd:'rice',quinoa_dry:'quinoa',quinoa_ckd:'quinoa',sweet:'sweet potato',beans:'beans',egg:'eggs',avocado:'avocado',spinach:'spinach',tomato:'tomato',flax:'flax seeds',chia:'chia seeds',
   oil:'olive oil',garlic:'garlic',lime:'lime',salt:'salt',pepper:'pepper',salmon:'salmon',sardines:'sardines',chicken:'chicken',steak:'steak',milk_whole:'milk',milk_2:'milk',milk_skim:'milk',kale:'kale',redpep:'red pepper',
@@ -1468,8 +1475,11 @@ function heroToday(){
 // their start. save() asks for a rebuild
 UI.planner('nutrition',[K.m,K.s],()=>{
   const now=new Date(),h=now.getHours();
+  const dT={p:0,c:0,f:0,kcal:0};meals.filter(m=>dayOf(m)===today()).forEach(m=>{const t=NM(m).t;for(const k in dT)dT[k]+=t[k]||0}),dayT=dT.kcal?dT:null;
   const R=[[4,11],[11,15],[15,21],[21,4]].map(([h0,h1])=>{const d=new Date(now);if(!(h0<h1?h>=h0&&h<h1:h>=h0||h<h1))d.setHours(h0,0,0,0);
-    const N=nextMeal(d);return{title:N.title,sub:N.sub,act:'next',h0,h1,...N.done?{done:true}:{}}});
+    // art: the next meal's protein, carbs and fat ring, for TODAY's plan; with no meal to suggest, the day's so far
+    const N=nextMeal(d),a=N.items?.[0],at=a?(a.kind==='bowl'?nutMeal(a).t:a.c!=null&&a.f!=null?a:null):dayT;
+    return{title:N.title,sub:N.sub,act:'next',h0,h1,...N.done?{done:true}:{},art:at?nmArt(at):undefined}});
   return R.every(r=>r.title===R[0].title&&r.sub===R[0].sub)?[{...R[0],h0:undefined,h1:undefined}]:R;
 });
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
