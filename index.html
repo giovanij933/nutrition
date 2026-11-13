@@ -185,6 +185,19 @@ html body .qrec .chip{min-height:44px;min-width:0;display:flex;align-items:cente
 .box .ui-set input,.box .ui-set select{flex:none;width:110px;background:var(--bg);border:1px solid var(--line2);padding:7px 10px;font-size:13px;color:var(--tx)}
 .box .ui-set input:focus,.box .ui-set select:focus{border-color:var(--accent);outline:0}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px}.kv span{color:var(--mu)}
+/* a food's nutrient map: a ring of protein, carbs and fat by calories beside each food, and in its ⓘ the ring with
+   grams, then a tile per nutrient lit by how much of a day's need it covers (solid 20%+, light 10–19%) */
+.nm-ring{display:block;flex:none}.nm-ring .nm-rt{stroke:var(--track)}.nm-ring .nm-rp{stroke:var(--accent)}.nm-ring .nm-rc{stroke:var(--info)}.nm-ring .nm-rf{stroke:var(--secondary)}
+.nm-ring text{text-anchor:middle;font-family:var(--f)}.nm-ring .nm-k{font-size:8px;font-weight:700;fill:var(--text-primary)}.nm-ring .nm-u{font-size:3.6px;letter-spacing:.06em;fill:var(--text-secondary)}
+.nm-top{display:flex;align-items:center;justify-content:center;gap:20px;margin:4px 0 16px}.nm-leg{display:grid;gap:6px;font-size:14px}.nm-leg span{display:flex;align-items:center;gap:8px}
+.nm-leg i{width:10px;height:10px;border-radius:3px;flex:none}.nm-key{display:flex;gap:14px;justify-content:center;font-size:12px;color:var(--mu);margin:0 0 10px}.nm-key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.nm-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 16px}.nm-tile{border-radius:10px;padding:7px 8px;background:var(--track);font-size:11px;line-height:1.3;color:var(--text-secondary);min-width:0;overflow-wrap:anywhere}
+.nm-tile b{display:block;font-size:15px;color:var(--text-primary)}.nm-tile.nm-p{background:var(--accent);color:var(--on-accent)}.nm-tile.nm-p b{color:var(--on-accent)}.nm-tile.nm-s{background:color-mix(in srgb,var(--accent) 30%,var(--track));color:var(--text-primary)}
+.nm-l{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px;line-height:1.45}.nm-l dt{padding-top:2px;color:var(--text-secondary);font-size:11px;letter-spacing:.05em;text-transform:uppercase}.nm-l dd{margin:0;color:var(--text-primary)}
+.qrec .chip:has(.qn){justify-content:flex-start;gap:9px}.qrec .chip .qn{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.25}.qrec .chip .qn>span{max-width:100%}.qrec .chip .qn em{font-size:11px}.nmc{display:inline-flex;align-items:center;gap:8px;vertical-align:middle}
+.nm-ib{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 6px;margin:-12px 0;cursor:pointer;color:var(--accent-text);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.nm-ib:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}.nm-i{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;font:600 11px/1 var(--f);letter-spacing:0}
+.ns .nm-ring{align-self:center}#gd{color:var(--tx);padding:20px;width:min(560px,calc(100vw - 24px))}#gd h3{margin:0 0 14px;font-size:13px;letter-spacing:.06em;color:var(--text-primary)}#gd .mact{margin-top:18px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:90vw;background:var(--card);border:1px solid var(--border-soft);color:var(--text-primary);padding:8px 14px;z-index:30}
 
 /* cook mode */
@@ -293,6 +306,7 @@ h1.brand{margin:0}
 <div id="app"></div>
 </main>
 <div id="modal" class="modal hidden"><div class="box" id="mbox" role="dialog" aria-modal="true" tabindex="-1"></div></div>
+<dialog id="gd" aria-labelledby="gdt"></dialog>
 
 <script src="db.js"></script>
 <script src="sync.js" data-keys="nj.meals.v1 nj.settings.v1"></script>
@@ -858,7 +872,7 @@ function tableHTML(f){
   return`<div class="th"><h3>Log</h3><button class="btn" data-act="export">Export CSV</button></div>
   <div class="tw" tabindex="0" role="region" aria-label="Table"><table><thead><tr><th>${F.th(0)}</th><th>${F.th(1)}</th><th class="num">${F.th(2)}</th><th class="num">${F.th(3)}</th><th class="num">${F.th(4)}</th><th class="num">${F.th(5)}</th><th class="num">${F.th(6)}</th><th class="num">${F.th(7)}</th><th class="num">${F.th(8)}</th><th class="num">${F.th(9)}</th><th><span class="ui-sr">Actions</span></th></tr></thead><tbody>
   ${rows.map(m=>{const t=NM(m).t,P=PROT[m.protein];return`<tr><td class="mu2">${tf(m.time)}</td>
-    <td>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:var(--tx);border-color:color-mix(in srgb,${P.col} 55%,transparent);background:color-mix(in srgb,${P.col} 14%,transparent)">${P.n}</span>${ck(m)!=='rice'||vk(m)!=='st'?` <span class="mu">${cOf(m).s}, ${vOf(m).a[0]}</span>`:''}${(m.omit||[]).length?` <span class="mu">− ${esc(m.omit.map(k=>slotName(m,k)).join(', '))}</span>`:''}`:`<b>${esc(m.name)}</b>`}</td>
+    <td><span class="nmc">${nmRing(t)}<span>${m.kind==='bowl'?`<b>Bowl</b> <span class="pill" style="color:var(--tx);border-color:color-mix(in srgb,${P.col} 55%,transparent);background:color-mix(in srgb,${P.col} 14%,transparent)">${P.n}</span>${ck(m)!=='rice'||vk(m)!=='st'?` <span class="mu">${cOf(m).s}, ${vOf(m).a[0]}</span>`:''}${(m.omit||[]).length?` <span class="mu">− ${esc(m.omit.map(k=>slotName(m,k)).join(', '))}</span>`:''}`:`<b>${esc(m.name)}</b>`}</span></span></td>
     <td class="num">${m.kind==='bowl'?fnum(m.servings||1):'—'}</td><td class="num">${fi(t.kcal)}</td><td class="num">${fi(t.p)} g</td><td class="num">${fi(t.c)} g</td><td class="num">${fi(t.f)} g</td><td class="num">${fi(t.fib)} g</td>
     <td class="num ${t.epa>=.5?'grn':''}">${t.epa?fi(t.epa*1000)+' mg':'—'}</td><td class="num">${m.milk?'<span class="grn">✓</span>':'—'}</td>
     <td><div class="acts"><button data-act="info" data-id="${m.id}" title="Nutrition" aria-label="Nutrition">${I.info}</button><button data-act="edit" data-id="${m.id}" title="Edit" aria-label="Edit">${I.note}</button></div></td></tr>`}).join('')
@@ -1012,7 +1026,7 @@ const readBowl=()=>({kind:'bowl',servings:Math.max(.25,+$('#f_servings').value||
 function bowlNS(){
   const m=readBowl(),t=nutMeal(m).t;
   document.querySelectorAll('[data-slot]').forEach(s=>{const k=s.dataset.slot;if(k==='rice'||k==='spinach'||k==='tomato')s.textContent=cap1(slotName(m,k))});
-  $('#f_ns').innerHTML=`<div>This bowl<b>${fi(t.kcal)} kcal</b></div><div>Protein<b>${fi(t.p)} g</b></div><div>Carbs<b>${fi(t.c)} g</b></div><div>Fat<b>${fi(t.f)} g</b></div><div>Fiber<b>${fi(t.fib)} g</b></div>`;
+  $('#f_ns').innerHTML=`${nmRing(t,30)}<div>This bowl<b>${fi(t.kcal)} kcal</b></div><div>Protein<b>${fi(t.p)} g</b></div><div>Carbs<b>${fi(t.c)} g</b></div><div>Fat<b>${fi(t.f)} g</b></div><div>Fiber<b>${fi(t.fib)} g</b></div><button type="button" class="nm-ib" data-act="nmap" aria-label="This bowl's nutrients"><span class="nm-i" aria-hidden="true">i</span>Nutrients</button>`;
 }
 function saveBowl(id){
   if(badNum())return;const d=new Date($('#f_time').value);if(isNaN(d))return toast('Invalid time');
@@ -1028,7 +1042,7 @@ function quickForm(m,pre){
   const rec=[];if(isNew&&!pre?.name)for(const x of meals.filter(x=>x.kind==='quick'&&x.name).sort((a,b)=>new Date(b.time)-new Date(a.time))){
     if(!rec.some(r=>r.name.toLowerCase()===x.name.toLowerCase()))rec.push(x);if(rec.length===6)break}
   const f=(k,l)=>`<label>${l}<input id="q_${k}" type="number" step="any" min="0" value="${esc(m[k])}"></label>`;
-  openModal(`<h3>${isNew?'Add other food':'Edit food'}</h3><p class="mu">For anything that isn't the bowl — snacks, other meals, drinks. Previous names auto-fill.</p>${rec.length?`<div class="qrec"><p class="qrk" id="qrk">Log again</p><div class="chips" role="group" aria-labelledby="qrk">${rec.map(r=>`<button type="button" class="chip" data-act="again" data-id="${esc(r.id)}" aria-label="Log ${esc(r.name)} again, ${fi(r.kcal)} kcal"><span>${esc(r.name)}</span><em>${fi(r.kcal)} kcal</em></button>`).join('')}</div></div>`:''}<div class="fg">
+  openModal(`<h3>${isNew?'Add other food':'Edit food'}</h3><p class="mu">For anything that isn't the bowl — snacks, other meals, drinks. Previous names auto-fill.</p>${rec.length?`<div class="qrec"><p class="qrk" id="qrk">Log again</p><div class="chips" role="group" aria-labelledby="qrk">${rec.map(r=>`<button type="button" class="chip" data-act="again" data-id="${esc(r.id)}" aria-label="Log ${esc(r.name)} again, ${fi(r.kcal)} kcal">${nmRing(r,22)}<span class="qn"><span>${esc(r.name)}</span><em>${fi(r.kcal)} kcal</em></span></button>`).join('')}</div></div>`:''}<div class="fg">
     <label>Time<input id="q_time" type="datetime-local" value="${toLocalInput(m.time)}"></label>
     <label>Name<input id="q_name" list="qList" value="${esc(m.name)}" autocomplete="off"><datalist id="qList">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label>
     ${f('kcal','Calories')}${f('p','Protein (g)')}${f('c','Carbs (g)')}${f('f','Fat (g)')}${f('fib','Fiber (g)')}${isNew?`<label>Servings<input id="q_n" type="number" min="1" max="20" step="1" value="${m.n}"></label>`:'<div></div>'}
@@ -1058,12 +1072,46 @@ const SOFT=new Set(['id','note','notes','comment']),fpm=m=>JSON.stringify(Object
 function apart(list){const ids=new Set(list.map(m=>m.id)),seen=new Set(meals.filter(x=>!ids.has(x.id)).map(fpm));
   list.forEach(m=>{let t=+new Date(m.time);while(seen.has(fpm(m)))m.time=new Date(++t).toISOString();seen.add(fpm(m))});return list}
 function upsert(m){apart([m]);const i=meals.findIndex(x=>x.id===m.id);i>=0?meals[i]=m:meals.push(m);save();render()}
+/* ---------- a food's nutrient map ---------- */
+// the ring: protein, carbs and fat, each by its share of the calories (4, 4 and 9 kcal a gram)
+function nmRing(t,size=20,big){
+  const kp=(t.p||0)*4,kc=(t.c||0)*4,kf=(t.f||0)*9,T=kp+kc+kf,r=15.9155,sw=big?3.4:5.6;let o=25;
+  const seg=(k,c)=>{const L=T?k/T*100:0,g=L>3?1.2:0,s=`<circle r="${r}" cx="21" cy="21" fill="none" class="${c}" stroke-width="${sw}" stroke-dasharray="${Math.max(0,L-g).toFixed(2)} ${(100-Math.max(0,L-g)).toFixed(2)}" stroke-dashoffset="${o.toFixed(2)}"/>`;o-=L;return s};
+  return `<svg class="nm-ring" viewBox="0 0 42 42" width="${size}" height="${size}" aria-hidden="true"><circle r="${r}" cx="21" cy="21" fill="none" class="nm-rt" stroke-width="${sw}"/>${T?seg(kp,'nm-rp')+seg(kc,'nm-rc')+seg(kf,'nm-rf'):''}${
+    big?`<text x="21" y="20.5" class="nm-k">${fi(t.kcal||0)}</text><text x="21" y="27" class="nm-u">KCAL</text>`:''}</svg>`;
+}
+// what each ingredient is called here
+const ING={rice_dry:'rice',rice_ckd:'rice',quinoa_dry:'quinoa',quinoa_ckd:'quinoa',sweet:'sweet potato',beans:'beans',egg:'eggs',avocado:'avocado',spinach:'spinach',tomato:'tomato',flax:'flax seeds',chia:'chia seeds',
+  oil:'olive oil',garlic:'garlic',lime:'lime',salt:'salt',pepper:'pepper',salmon:'salmon',sardines:'sardines',chicken:'chicken',steak:'steak',milk_whole:'milk',milk_2:'milk',milk_skim:'milk',kale:'kale',redpep:'red pepper',
+  broccoli:'broccoli',carrot:'carrot',zucchini:'zucchini',mushroom:'mushrooms'};
+// the map for a meal (saved or still in the bowl form): the ring and grams; for a bowl, a tile per nutrient and which
+// ingredient brings most of each one it is rich in; for a food you typed in, only what it carries
+function nmapHTML(m){
+  const t=nutMeal(m).t,kp=(t.p||0)*4,kc=(t.c||0)*4,kf=(t.f||0)*9,T=kp+kc+kf||1,bowl=m.kind==='bowl',sh=x=>x.replace('Vitamin ','Vit ').replace(' omega-3','');
+  const leg=`<div class="nm-leg"><span><i style="background:var(--accent)"></i>Protein <b>${fi(t.p||0)} g</b> · ${Math.round(kp/T*100)}%</span><span><i style="background:var(--info)"></i>Carbs <b>${fi(t.c||0)} g</b> · ${Math.round(kc/T*100)}%</span><span><i style="background:var(--secondary)"></i>Fat <b>${fi(t.f||0)} g</b> · ${Math.round(kf/T*100)}%</span></div>`;
+  const top=`<div class="nm-top">${nmRing(t,128,1)}${leg}</div>`;
+  if(!bowl)return top+`<dl class="nm-l"><dt>Fiber</dt><dd>${fnum(r1(t.fib||0))} g · ${Math.round((t.fib||0)/28*100)}% of a day</dd><dt>Note</dt><dd>A food you log yourself carries calories, protein, carbs, fat and fiber only, so there is no vitamin or mineral map for it.</dd></dl>`;
+  const N=NUT.filter(n=>!n[4]),share=([k,,,dv])=>(t[k]||0)/dv,rich=N.filter(n=>share(n)>=.2),also=N.filter(n=>share(n)>=.1&&share(n)<.2);
+  // for each nutrient it is rich in, the ingredient that brings the most
+  const P=parts(m),from={};const low=l=>/^[A-Z]{2}/.test(l)?l:l.replace(/^Vitamin /,'vitamin ').replace(/^[A-Z](?=[a-z])/,c=>c.toLowerCase());
+  rich.forEach(([k,l])=>{let b=null,v=0;P.forEach(([,key,q])=>{const x=(FD[key]?.[k]||0)*q;if(x>v){v=x;b=ING[key]||key}});if(b)(from[b]??=[]).push(low(l))});
+  const na=NUT.find(n=>n[4]);
+  return top+`<div class="nm-key"><span><i style="background:var(--accent)"></i>20%+ of a day</span><span><i style="background:color-mix(in srgb,var(--accent) 30%,var(--track))"></i>10–19%</span></div>
+    <div class="nm-tiles">${N.map(n=>{const v=share(n);return `<div class="nm-tile${v>=.2?' nm-p':v>=.1?' nm-s':''}"><b>${Math.round(v*100)}%</b>${sh(n[1])}</div>`}).join('')}</div>
+    <dl class="nm-l">${rich.length?`<dt>Rich in</dt><dd>${rich.map(n=>n[1]).join(', ')}</dd>`:''}${also.length?`<dt>Also</dt><dd>${also.map(n=>n[1]).join(', ')}</dd>`:''}
+    ${Object.keys(from).length?`<dt>From</dt><dd>${Object.entries(from).map(([b,l])=>`<b style="font-weight:600">${cap1(b)}</b>: ${l.join(', ')}`).join(' · ')}</dd>`:''}
+    ${t.epa?`<dt>EPA + DHA</dt><dd>${fi(t.epa*1000)} mg, the omega-3s only fish brings</dd>`:''}<dt>${na[1]}</dt><dd>${fi(t[na[0]]||0)} ${na[2]} · ${Math.round((t[na[0]]||0)/na[3]*100)}% of the daily limit</dd></dl>`;
+}
+// over the bowl form: the map of the bowl as it stands, before it is saved
+function nmapForm(){
+  const d=$('#gd'),m=readBowl();if(!d)return;
+  d.innerHTML=`<h3 id="gdt">${esc(PROT[m.protein].n).toUpperCase()} BOWL${m.servings!==1?` · ${fnum(m.servings)} SERVINGS`:''}</h3>${nmapHTML(m)}<div class="mact"><button type="button" class="btn pri" data-gx style="flex:1">Done</button></div>`;
+  d.onclick=e=>{if(e.target===d||e.target.closest('[data-gx]'))d.close()};d.showModal();d.querySelector('[data-gx]').focus();
+}
 function info(id){
-  const m=meals.find(x=>x.id===id);if(!m)return;const t=NM(m).t;
-  const rows=[...m.kind==='bowl'?[['Made with',vname(m)]]:[],['Calories',fi(t.kcal)+' kcal'],['Protein',fnum(r1(t.p||0))+' g'],['Carbs',fnum(r1(t.c||0))+' g'],['Fat',fnum(r1(t.f||0))+' g'],
-    ...(m.kind==='bowl'?NUT.map(([k,l,u,dv])=>[l,`${fnum(r1(t[k]||0))} ${u} <span class="mu">(${Math.round((t[k]||0)/dv*100)}%)</span>`]).concat([['EPA + DHA',fi((t.epa||0)*1000)+' mg']]):[['Fiber',fnum(r1(t.fib||0))+' g']])];
-  openModal(`<h3>${m.kind==='bowl'?`Bowl · ${PROT[m.protein].n}${m.milk?' + milk':''}`:esc(m.name)}</h3><div class="kv">${rows.map(([a,b])=>`<span>${a}</span><b style="font-weight:500">${b}</b>`).join('')}
-    ${m.note?`<span>Note</span><b style="font-weight:400;white-space:pre-wrap">${esc(m.note)}</b>`:''}</div>
+  const m=meals.find(x=>x.id===id);if(!m)return;
+  openModal(`<h3>${m.kind==='bowl'?`Bowl · ${PROT[m.protein].n}${m.milk?' + milk':''}`:esc(m.name)}</h3>${m.kind==='bowl'?`<p class="mu" style="margin:-6px 0 12px">${esc(vname(m))}${(m.servings||1)!==1?` · ${fnum(m.servings)} servings`:''}</p>`:''}${nmapHTML(m)}
+    ${m.note?`<div class="kv" style="margin-top:12px"><span>Note</span><b style="font-weight:400;white-space:pre-wrap">${esc(m.note)}</b></div>`:''}
     <div class="mact"><div class="sp"></div><button class="btn" data-act="edit" data-id="${m.id}">Edit</button><button class="btn pri" data-act="close">Close</button></div>`);
 }
 
@@ -1365,7 +1413,7 @@ document.addEventListener('click',e=>{
     xclr:()=>{if(v==='kind')S.kind='all';else if(v==='day')S.sel=null;else delete S.x[v];S.page=1;render()},
     xall:()=>{S.kind='all';S.x={};S.sel=null;S.page=1;render()},
     pp:()=>{if(S.page>1){S.page--;render()}},pn:()=>{S.page++;render()},   // tableHTML clamps to the last page
-    cook:()=>cookMode(),addbowl:()=>bowlForm(),quick:()=>quickForm(),info:()=>info(id),
+    cook:()=>cookMode(),addbowl:()=>bowlForm(),quick:()=>quickForm(),info:()=>info(id),nmap:()=>nmapForm(),
     edit:()=>{const m=meals.find(x=>x.id===id);m?.kind==='bowl'?bowlForm(m):quickForm(m)},
     savebowl:()=>saveBowl(id),savequick:()=>saveQuick(id),again:()=>logAgain(id),close:closeModal,export:exportCSV,data:dataForm,grocery:()=>groceryForm(),
     // a delete happens at once and can be taken back from the toast (the entry goes back where it was)
