@@ -734,10 +734,20 @@ let NX=null;
 function nextRows(N){
   return N.items.length?`<ol class="nxl">${N.items.map((x,i)=>`<li><span class="nxw">${!i?cap1(N.when.replace('at ','')):x.kind==='bowl'?'Tonight':'Then'}</span>
     <div class="nxm"><b>${esc(x.kind==='bowl'?bn(x.protein):x.name+(x.n>1?' ×'+x.n:''))}</b><small>${esc(x.detail)}</small></div><span class="nxv">${fi(x.kcal)} kcal · ${fi(x.p)} g protein</span>
-    <span class="nxa">${x.kind==='bowl'?`<button class="btn" data-act="nxbowl" data-v="${i}">Log bowl</button><button class="btn${i?'':' go'}" data-act="nxcook" data-v="${i}">Cook</button>`
-      :`<button class="btn${i?'':' go'}" data-act="nxfood" data-v="${i}">Log food</button>`}</span></li>`).join('')}</ol>`:'';
+    <span class="nxa">${x.kind==='bowl'?`<button class="btn" data-act="nxbowl" data-v="${i}">Log it</button><button class="btn${i?'':' go'}" data-act="nxcook" data-v="${i}">Cook</button>`
+      :`<button class="btn${i?'':' go'}" data-act="nxfood" data-v="${i}">Log it</button>`}</span></li>`).join('')}</ol>`:'';
 }
 const nextAfter=N=>N.items.length?`After ${N.items.length>1?'these':'it'}: <b>${fi(N.after.kc)} kcal</b> (${pct(N.after.kc,settings.kcal)}) · <b class="${N.after.p>=settings.protein-5?'grn':''}">${fi(N.after.p)} g protein</b>`:'';
+// one tap logs a suggestion as it stands: a bowl now, one serving; a food its suggested servings. Undo takes it back,
+// and like any meal it can be edited in the log. TODAY's plan logs the first suggestion the same way (eatnext)
+function logNext(i){
+  const x=(NX||nextMeal()).items?.[i];if(!x)return nextForm();
+  const t=new Date().toISOString(),y=x.each;
+  const add=apart(x.kind==='bowl'?[{id:uid(),time:t,kind:'bowl',servings:1,protein:x.protein,milk:!!x.milk,carb:x.carb,veg:x.veg,omit:[],note:''}]
+    :Array.from({length:x.n||1},()=>({id:uid(),time:t,kind:'quick',name:y.name,kcal:y.kcal,p:y.p,c:y.c,f:y.f,fib:y.fib,note:''})));
+  meals.push(...add);save();render();
+  UI.undo(`${x.kind==='bowl'?bn(x.protein):y.name+(x.n>1?' ×'+x.n:'')} logged`,()=>{add.forEach(a=>{const j=meals.findIndex(m=>m.id===a.id);if(j>=0)meals.splice(j,1)});save();render()});
+}
 function nextCard(){
   if(!meals.length)return'';   // an empty device has the banner's first steps instead
   const N=NX=nextMeal();
@@ -1429,8 +1439,8 @@ document.addEventListener('click',e=>{
     cycle:()=>{const i=+v;settings.plan[i]=PKEYS[(PKEYS.indexOf(settings.plan[i])+1)%PKEYS.length];save();render()},
     cks:()=>{CK.s=Math.max(1,Math.min(12,CK.s+ +v));drawCook()},ckp:()=>{CK.protein=v;drawCook()},ckm:()=>{CK.milk=!CK.milk;drawCook()},ckc:()=>{CK.carb=v;drawCook()},ckv:()=>{CK.veg=v;drawCook()},
     // the next-meal suggestion: each row opens its form filled in
-    next:nextForm,nxbowl:()=>{const x=NX?.items[+v];if(x)bowlForm(null,{protein:x.protein,milk:x.milk,carb:x.carb,veg:x.veg})},nxcook:()=>{const x=NX?.items[+v];if(x)cookMode(x.protein,x)},
-    nxfood:()=>{const y=NX?.items[+v],x=y?.each;if(x)quickForm(null,{name:x.name,kcal:x.kcal,p:x.p,c:x.c,f:x.f,fib:x.fib,n:y.n})},
+    next:nextForm,nxbowl:()=>logNext(+v),nxfood:()=>logNext(+v),eatnext:()=>logNext(0),nxcook:()=>{const x=NX?.items[+v];if(x)cookMode(x.protein,x)},
+
     cklog:()=>{upsert({id:uid(),time:new Date().toISOString(),kind:'bowl',servings:1,protein:CK.protein,milk:CK.milk,carb:CK.carb,veg:CK.veg,omit:[],note:''});closeModal();toast('Bowl logged')},
     tmr:()=>{const[i,sec]=v.split('|').map(Number);if(CT[i]){delete CT[i];b.textContent='⏱ '+mmss(sec)}else{beep();CT[i]={end:Date.now()+sec*1000}}},
     gcopy:async()=>{const t=$('#g_out').textContent;try{if(navigator.share)await navigator.share({text:t});else{await navigator.clipboard.writeText(t);toast('Copied to clipboard')}}catch{}},
@@ -1449,7 +1459,7 @@ document.addEventListener('click',e=>{
 render();
 // another ISIONXXX app can send you straight to an action here (REWIRE's LOG buttons): #do=<action> or a message
 // 'today' (from TODAY's rings and timeline): drop any card filters and show just today, as a chip you can clear
-function doAct(a){if(!/^\w+$/.test(a||''))return;if(a==='next')return nextForm();if(a==='today'){const t=new Date();S.x={};S.sel=today();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.page=1;render();return}const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
+function doAct(a){if(!/^\w+$/.test(a||''))return;if(a==='next')return nextForm();if(a==='eatnext')return logNext(0);if(a==='today'){const t=new Date();S.x={};S.sel=today();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.page=1;render();return}const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
 addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.isx==='do')doAct(e.data.act)});
 {const m=/do=(\w+)/.exec(location.hash);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>doAct(m[1]),0)}}
 /* ---------- today at a glance (shared hero, timeline and motion from ui.js) ---------- */
@@ -1479,7 +1489,8 @@ UI.planner('nutrition',[K.m,K.s],()=>{
   const R=[[4,11],[11,15],[15,21],[21,4]].map(([h0,h1])=>{const d=new Date(now);if(!(h0<h1?h>=h0&&h<h1:h>=h0||h<h1))d.setHours(h0,0,0,0);
     // art: the next meal's protein, carbs and fat ring, for TODAY's plan; with no meal to suggest, the day's so far
     const N=nextMeal(d),a=N.items?.[0],at=a?(a.kind==='bowl'?nutMeal(a).t:a.c!=null&&a.f!=null?a:null):dayT;
-    return{title:N.title,sub:N.sub,act:'next',h0,h1,...N.done?{done:true}:{},art:at?nmArt(at):undefined}});
+    // a suggestion to eat now gets TODAY's button to log it in one tap (btn: the button's words)
+    return{title:N.title,sub:N.sub,act:a&&N.state==='eat'?'eatnext':'next',...a&&N.state==='eat'?{btn:'Log it'}:{},h0,h1,...N.done?{done:true}:{},art:at?nmArt(at):undefined}});
   return R.every(r=>r.title===R[0].title&&r.sub===R[0].sub)?[{...R[0],h0:undefined,h1:undefined}]:R;
 });
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
