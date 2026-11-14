@@ -46,7 +46,7 @@ body ::selection{background:var(--accent);color:var(--on-accent)}
 .sp{flex:1}
 
 /* buttons */
-.btn{border:1px solid var(--line2);background:var(--bg);border-radius:0;padding:7px 10px;display:inline-flex;gap:6px;align-items:center;font-size:12px;letter-spacing:.03em;text-transform:uppercase}
+.btn{border:1px solid var(--line2);background:var(--bg);border-radius:0;padding:7px 10px;display:inline-flex;gap:6px;align-items:center;font-size:12px}
 .btn:hover{border-color:var(--accent);color:var(--accent-text)}
 .btn svg{width:14px;height:14px}
 .btn.pri,.btn.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
@@ -62,9 +62,9 @@ body ::selection{background:var(--accent);color:var(--on-accent)}
 .ban{flex-direction:row;align-items:center;justify-content:space-between;gap:16px;padding:16px;margin-bottom:12px;flex-wrap:wrap;border-color:var(--border)}
 .bd{padding:16px;flex:1;display:flex;flex-direction:column}
 .ft{border-top:1px solid var(--line);padding:10px 16px;display:flex;justify-content:space-between;font-size:11px;color:var(--mu);gap:10px;flex-wrap:wrap;align-items:center}
-.card h3,.ban h2{font-size:11px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(--text-primary);margin-bottom:12px}
+.card h3,.ban h2{font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:12px}
    /* the empty device's banner is the page's first section: h2 */
-.lbl{font-size:11px;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
+.lbl{font-size:12px;color:var(--mu)}
 .big{font-size:22px;font-weight:600;margin:2px 0 8px}
 .gauge{display:block;width:150px;max-width:100%;margin:6px auto 10px}
 .gauge path{fill:none;stroke-width:9}
@@ -80,7 +80,7 @@ body ::selection{background:var(--accent);color:var(--on-accent)}
 .pdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .pday{background:var(--cell);border:1px solid var(--line);padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
 .pday.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-.pdn{font-size:11px;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
+.pdn{font-size:12px;color:var(--mu)}
 .pp{border:1px solid color-mix(in srgb,var(--c) 55%,transparent);color:var(--tx);background:color-mix(in srgb,var(--c) 14%,transparent);padding:3px 6px;font-size:10px;letter-spacing:.04em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pst{font-size:10px;min-height:12px;display:flex;gap:3px;align-items:center}.pst i{width:7px;height:7px;display:inline-block}
 
@@ -91,7 +91,7 @@ body ::selection{background:var(--accent);color:var(--on-accent)}
 .nxl{list-style:none;margin:10px 0 0;padding:0;border-top:1px solid var(--line)}
 .nxl li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:10px 0;border-bottom:1px solid var(--line)}
 .nxl li:last-child{border-bottom:0;padding-bottom:0}
-.nxw{flex:none;width:64px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-primary)}
+.nxw{flex:none;width:64px;font-size:11px;color:var(--text-primary)}
 .nxm{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:2px}.nxm b{font-weight:600}.nxm small{font-size:11px;color:var(--mu);line-height:1.45}
 .nxv{color:var(--mu);font-size:12px;white-space:nowrap}
 .nxa{display:flex;gap:6px;margin-left:auto}
@@ -101,7 +101,7 @@ body ::selection{background:var(--accent);color:var(--on-accent)}
 .calhd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
 .wl{color:var(--mu);display:flex;flex-wrap:wrap;column-gap:18px;align-items:baseline}
 .cal{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-top:12px}
-.dh{text-align:center;font-size:11px;color:var(--mu);padding:4px 0;letter-spacing:.05em;text-transform:uppercase}
+.dh{text-align:center;font-size:12px;color:var(--mu);padding:4px 0}
 .cell{min-height:66px;background:var(--cell);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:11px;color:var(--mu);cursor:pointer;position:relative;overflow:hidden}
 .cell.hatch{background:repeating-linear-gradient(135deg,var(--raised) 0 6px,var(--border-soft) 6px 7px)}
 .cell.out{cursor:default;border-color:transparent;opacity:.5}
@@ -122,10 +122,10 @@ body ::selection{background:var(--accent);color:var(--on-accent)}
 .nav{display:flex;gap:8px;align-items:center}
 .nav button{border:1px solid var(--line2);min-width:33px;height:33px;padding:0 10px;font-size:12px}
 .nav button:hover{border-color:var(--accent);color:var(--accent-text)}
-.nav .tb{font-size:11px;letter-spacing:.03em;text-transform:uppercase}
+.nav .tb{font-size:12px}
 
 /* coverage */
-.ev h4{font-size:10px;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;font-weight:400;margin:12px 0 4px;padding-top:12px;border-top:1px solid var(--line)}
+.ev h4{font-size:11px;color:var(--mu);font-weight:400;margin:12px 0 4px;padding-top:12px;border-top:1px solid var(--line)}
 .ev h4:first-of-type{border:0;padding-top:0;margin-top:0}
 .er{display:flex;align-items:center;padding:5px 0;gap:2px}
 .er span{flex:1}.er b{margin-right:8px;text-align:right;font-weight:600}
@@ -135,10 +135,10 @@ hr{border:0;border-top:1px solid var(--line);margin:4px 0 8px}
 /* charts */
 .chart{width:100%;height:160px;display:block;margin-top:8px}
 .chart *{vector-effect:non-scaling-stroke}
-.empty{height:160px;display:grid;place-items:center;color:var(--mu);letter-spacing:.06em;font-size:11px;text-transform:uppercase;text-align:center}
+.empty{height:160px;display:grid;place-items:center;color:var(--mu);font-size:12px;text-align:center}
 .eqh{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .ks{display:flex;gap:22px;flex-wrap:wrap}
-.ks div{font-size:11px;color:var(--mu);letter-spacing:.05em;text-transform:uppercase;display:flex;flex-direction:column;gap:2px}
+.ks div{font-size:12px;color:var(--mu);display:flex;flex-direction:column;gap:2px}
 .ks b{font-size:13px;color:var(--tx);letter-spacing:0;text-transform:none}
 .radar{width:100%;max-width:230px;height:auto;margin:0 auto;display:block}
 svg text{font-family:var(--f)}
@@ -147,9 +147,9 @@ svg text{font-family:var(--f)}
 .tw{overflow-x:auto;position:relative}
 table{width:100%;border-collapse:collapse}
 th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-th{font-size:11px;font-weight:500;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
+th{font-size:12px;font-weight:500;color:var(--mu)}
 .num{text-align:right}
-.pill{display:inline-flex;padding:1px 6px;font-size:10px;border:1px solid;letter-spacing:.03em;text-transform:uppercase}
+.pill{display:inline-flex;padding:1px 6px;font-size:11px;border:1px solid}
 .acts{display:flex;gap:4px;justify-content:flex-end}
 td .acts button{width:24px;height:24px;border:1px solid var(--line2);color:var(--tx);display:inline-flex;align-items:center;justify-content:center}
 td .acts button:hover{border-color:var(--accent);color:var(--accent-text)}
@@ -168,11 +168,11 @@ td .acts button:hover{border-color:var(--accent);color:var(--accent-text)}
 .box{background:var(--card);border:1px solid var(--border-soft);padding:20px;width:100%;max-width:560px;max-height:92vh;overflow:auto}
 .box.wide{max-width:760px}
 #mbox:focus{outline:0}   /* focused on open so the keyboard starts inside; the open dialog is the focus cue */
-.box h3{font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text-primary);margin-bottom:14px}
+.box h3{font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:14px}
 .box p{margin-bottom:12px}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fg label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
-.qrec{margin:0 0 14px}.qrk{margin:0 0 6px;font-size:11px;color:var(--mu);letter-spacing:.05em;text-transform:uppercase}
+.fg label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mu)}
+.qrec{margin:0 0 14px}.qrk{margin:0 0 6px;font-size:12px;color:var(--mu)}
 .qrec .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 html body .qrec .chip{min-height:44px;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 12px;border-radius:12px;font-size:13px;letter-spacing:0;text-transform:none;text-align:left;cursor:pointer}
 .qrec .chip span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.qrec .chip em{flex:none;font-style:normal;color:var(--mu);font-size:12px}
@@ -194,9 +194,9 @@ html body .qrec .chip{min-height:44px;min-width:0;display:flex;align-items:cente
 .nm-leg i{width:10px;height:10px;border-radius:3px;flex:none}.nm-key{display:flex;gap:14px;justify-content:center;font-size:12px;color:var(--mu);margin:0 0 10px}.nm-key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .nm-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 16px}.nm-tile{border-radius:10px;padding:7px 8px;background:var(--track);font-size:11px;line-height:1.3;color:var(--text-secondary);min-width:0;overflow-wrap:anywhere}
 .nm-tile b{display:block;font-size:15px;color:var(--text-primary)}.nm-tile.nm-p{background:var(--accent);color:var(--on-accent)}.nm-tile.nm-p b{color:var(--on-accent)}.nm-tile.nm-s{background:color-mix(in srgb,var(--accent) 30%,var(--track));color:var(--text-primary)}
-.nm-l{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px;line-height:1.45}.nm-l dt{padding-top:2px;color:var(--text-secondary);font-size:11px;letter-spacing:.05em;text-transform:uppercase}.nm-l dd{margin:0;color:var(--text-primary)}
+.nm-l{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px;line-height:1.45}.nm-l dt{padding-top:2px;color:var(--text-secondary);font-size:12px}.nm-l dd{margin:0;color:var(--text-primary)}
 .qrec .chip:has(.qn){justify-content:flex-start;gap:9px}.qrec .chip .qn{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.25}.qrec .chip .qn>span{max-width:100%}.qrec .chip .qn em{font-size:11px}.nmc{display:inline-flex;align-items:center;gap:8px;vertical-align:middle}
-.nm-ib{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 6px;margin:-12px 0;cursor:pointer;color:var(--accent-text);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.nm-ib{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 6px;margin:-12px 0;cursor:pointer;color:var(--accent-text);font-size:12px}
 .nm-ib:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}.nm-i{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;font:600 11px/1 var(--f);letter-spacing:0}
 .ns .nm-ring{align-self:center}#gd{color:var(--tx);padding:20px;width:min(560px,calc(100vw - 24px))}#gd h3{margin:0 0 14px;font-size:13px;letter-spacing:.06em;color:var(--text-primary)}#gd .mact{margin-top:18px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:90vw;background:var(--card);border:1px solid var(--border-soft);color:var(--text-primary);padding:8px 14px;z-index:30}
@@ -209,7 +209,7 @@ html body .qrec .chip{min-height:44px;min-width:0;display:flex;align-items:cente
 .step{display:flex;align-items:center;gap:8px}.step button{width:30px;height:30px;border:1px solid var(--line2);font-size:15px}.step button:hover{border-color:var(--accent);color:var(--accent-text)}.step b{font-size:18px;min-width:26px;text-align:center}
 .ckh{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:14px}
 .ckh h3{margin:0}
-.sec{font-size:10px;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;margin:12px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
+.sec{font-size:11px;color:var(--mu);margin:12px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
 .ing{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
 .ing label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}.ing input{accent-color:var(--g);margin-top:3px}
 .ing input:checked+span{color:var(--mu);text-decoration:line-through}
@@ -218,7 +218,7 @@ html body .qrec .chip{min-height:44px;min-width:0;display:flex;align-items:cente
 .stp>div{flex:1}
 .tmr{border:1px solid var(--line2);padding:3px 8px;font-size:11px;white-space:nowrap;align-self:flex-start;letter-spacing:.03em}
 .tmr:hover{border-color:var(--accent);color:var(--accent-text)}
-.ns{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--mu);letter-spacing:.03em;text-transform:uppercase;background:var(--bg);border:1px solid var(--line);padding:10px 12px}.ns b{color:var(--tx);display:block;font-size:13px;letter-spacing:0;text-transform:none}
+.ns{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--mu);background:var(--bg);border:1px solid var(--line);padding:10px 12px}.ns b{color:var(--tx);display:block;font-size:13px;letter-spacing:0;text-transform:none}
 .tip{color:var(--mu);border:1px solid var(--line);border-left:2px solid var(--info);padding:10px 12px;margin-top:14px;line-height:1.5}
 pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1px solid var(--line);padding:12px;margin-top:12px}
 /* daily review: a script to read top to bottom */
@@ -226,7 +226,7 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
 .rvh{display:flex;align-items:center;gap:8px;margin-bottom:6px}.rvh h3{margin:0;flex:1}
 .rvh .btn{min-width:33px;justify-content:center}.rvh .btn:disabled{opacity:.35;cursor:default;border-color:var(--line2);color:inherit}
 .rv{border-top:1px solid var(--line);padding:14px 0 4px;font-size:14px;line-height:1.7}
-.rv h4{margin:0 0 6px;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
+.rv h4{margin:0 0 6px;font-size:12px;font-weight:500;color:var(--mu)}
 .rv p{margin:0 0 8px}.rv b{font-weight:600}.rv q{color:var(--mu);font-style:italic}
 .rv ol,.rv ul{margin:0 0 8px;padding-left:22px}.rv li{margin:0 0 6px}.rv li::marker{color:var(--mu)}
 .rv .tr{display:block;color:var(--mu);font-size:12px}
@@ -279,7 +279,7 @@ pre.gl{white-space:pre-wrap;font:12px/1.6 var(--f);background:var(--bg);border:1
 .chart .off,.cell.off{opacity:.25}.chart .hit{fill:transparent}.chart .hit.pick:hover{fill:var(--accent-soft)}.chart .hit.on{fill:var(--accent-soft)}
 .radar text.pick:hover,.radar text.on{fill:var(--accent)}.radar text.off{opacity:.4}
 .xf{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 12px}
-.xf span{color:var(--mu);font-size:11px;letter-spacing:.05em;text-transform:uppercase;margin-right:2px}
+.xf span{color:var(--mu);font-size:12px;margin-right:2px}
 .xf button{border:1px solid var(--accent);color:var(--accent-text);padding:5px 8px;font-size:12px}.xf button b{font-weight:600}.xf .clr{border-color:var(--line2);color:var(--mu)}
 h1.brand{margin:0}
 .cell span{color:var(--text-secondary)}
@@ -435,7 +435,7 @@ const SV='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.
 const I={
   info:`<svg ${SV}><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>`,
   note:`<svg ${SV}><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>`};
-$('#barBtns').innerHTML=`<button class="btn go" data-act="cook">&#9654; COOK</button><button class="btn" data-act="addbowl">+ BOWL</button><button class="btn" data-act="quick">+ FOOD</button><button class="btn" data-act="review" data-more>REVIEW</button><button class="btn" data-act="grocery" data-more>GROCERY</button><button class="btn" data-act="data" data-more>SETTINGS</button>`;
+$('#barBtns').innerHTML=`<button class="btn go" data-act="cook">&#9654; Cook</button><button class="btn" data-act="addbowl">+ Bowl</button><button class="btn" data-act="quick">+ Food</button><button class="btn" data-act="review" data-more>Review</button><button class="btn" data-act="grocery" data-more>Grocery</button><button class="btn" data-act="data" data-more>Settings</button>`;
 
 /* ---------- nutrition math ---------- */
 const fk=k=>GRAIN[k]?k+(settings.riceAs==='cooked'?'_ckd':'_dry'):k==='seed'?settings.seed:k;
@@ -693,7 +693,7 @@ function nextMeal(at=new Date()){
   const cut=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s,nm=x=>x.kind==='bowl'?bn(x.protein):x.name+(x.n>1?' ×'+x.n:'');
   const join=(A,n)=>{const s=A.join(' + ');return s.length<=n||A.length<2?cut(s,n):cut(A[0],n-9)+` + ${A.length-1} more`};
   // with no foods logged there's nothing to suggest for the protein yet: say how to change that
-  const nofood=N.foods?'none of your foods fits':'log snacks with + FOOD',howto='Log the snacks you eat with + FOOD and they\'ll be suggested here.';
+  const nofood=N.foods?'none of your foods fits':'log snacks with + Food',howto='Log the snacks you eat with + Food and they\'ll be suggested here.';
   const nobowl=N.late?'it\'s late for a bowl':N.bowls?`a bowl won't fit the ${fi(Math.max(0,N.left))} kcal left`:'you\'ve had tonight\'s bowl';
   if(N.state==='eat'&&a.kind==='bowl'){
     const g1=N.gap-a.p,gEnd=gap,rn=rest.map(x=>x.kind==='bowl'?nm(x).toLowerCase()+' tonight':nm(x));
@@ -761,7 +761,7 @@ function nextForm(){
   openModal(`<div class="ckh"><h3 style="margin:0">Next meal</h3><button class="btn" data-act="close">Close</button></div>
     <div class="ns"><div>${N.night?'Since yesterday':'Eaten today'}<b>${fi(N.kc)} kcal</b></div><div>Left<b>${fi(Math.max(0,N.left))} kcal</b></div><div>Protein<b>${fi(N.p)} / ${fi(tp)} g</b></div></div>
     <p class="nxs" style="margin-top:14px">${N.say}</p>${nextRows(N)}${N.items.length?`<p class="mu" style="margin:10px 0 0;font-size:12px">${nextAfter(N)}</p>`:''}
-    <div class="tip">Picked from what's left of ${N.night?'the day':'today'}'s ${fi(tg)} kcal and ${fi(tp)} g protein, the time of day and the rotation: a bowl when one fits, then the fewest calories of your own foods that close the protein gap. Calories can land up to 10% over, which still counts as on target. ${N.foods?`Snacks come from the ${N.foods} food${N.foods>1?'s':''} you've logged.`:'Log the foods you snack on with + FOOD and they\'ll be suggested here.'}</div>`);
+    <div class="tip">Picked from what's left of ${N.night?'the day':'today'}'s ${fi(tg)} kcal and ${fi(tp)} g protein, the time of day and the rotation: a bowl when one fits, then the fewest calories of your own foods that close the protein gap. Calories can land up to 10% over, which still counts as on target. ${N.foods?`Snacks come from the ${N.foods} food${N.foods>1?'s':''} you've logged.`:'Log the foods you snack on with + Food and they\'ll be suggested here.'}</div>`);
   $('#mbox').classList.add('nxd');
 }
 
@@ -781,7 +781,7 @@ function weightHTML(){
   const say=rate==null?'Weigh in on TODAY for two weeks to see your trend.':Math.abs(rate)<(U==='kg'?.1:.2)?'Holding steady':`${rate<0?'Losing':'Gaining'} about ${fnum(r1(Math.abs(rate)))} ${U} / week`;
   return`<div class="grid gm">
   <div class="card"><div class="bd"><div class="eqh"><div><h3>Body weight</h3><div class="big" style="font-size:20px">${fnum(r1(last.w))} <span class="mu" style="font-size:12px;font-weight:500">${U} · ${fdate(last.d)}</span></div><div class="lbl" style="margin-top:4px">From your morning check-in · last 30 days</div></div>
-    <div class="ks"><div>7-DAY AVG<b>${w7!=null?fnum(r1(w7)):'—'}</b></div><div>WEEK CHANGE<b class="${rate==null?'':rate<0?'grn':''}">${rate==null?'—':(rate>0?'+':'')+fnum(r1(rate))}</b></div><div>WEIGH-INS<b>${W30.length}</b></div></div></div>
+    <div class="ks"><div>7-day avg<b>${w7!=null?fnum(r1(w7)):'—'}</b></div><div>Week change<b class="${rate==null?'':rate<0?'grn':''}">${rate==null?'—':(rate>0?'+':'')+fnum(r1(rate))}</b></div><div>Weigh-ins<b>${W30.length}</b></div></div></div>
     ${W30.length>1?area(W30.map(w=>r1(w-lo)),'var(--info)',0,(i0,i1)=>{const P=W.filter(x=>x.d>since(30)).slice(i0,i1);return{title:P.length>1?`${fmd(P[0].d)} – ${fmd(P.at(-1).d)}`:`${fmd(P[0].d)}: ${fnum(r1(P[0].w))} ${U}`}}):'<div class="empty">Add your weight at check-in on TODAY</div>'}</div></div>
   <div class="card"><div class="bd"><h3>Weight vs calories</h3><div class="lbl">Last 2 weeks</div><div class="big" style="font-size:20px">${say}</div>
     ${lr(ACC,'Average intake',k14!=null?`${fi(k14)} kcal`:'—')}${lr('var(--secondary)','Your target',`${fi(settings.kcal)} kcal`)}${lr('var(--b)','Days with meals logged',`${kv.length} / 14`)}
@@ -842,9 +842,9 @@ function coverageHTML(st){
   const grp=keys=>NUT.filter(n=>keys.includes(n[0])).map(row).join('');
   const e=st.epa7,ec=e>=EPA_WK?'grn':e>=EPA_WK/2?'amb':'red';
   return`<div class="card"><div class="bd ev"><h3>Nutrient coverage</h3><div class="lbl" style="margin-top:-12px">Avg per logged day vs daily value</div>
-    <h4>MINERALS</h4>${grp(['k','ca','fe','mg','zn','na'])}
-    <h4>VITAMINS</h4>${grp(['fol','vc','vd','vk','b12'])}
-    <h4>FIBER &amp; FATS</h4>${grp(['fib','ala'])}
+    <h4>Minerals</h4>${grp(['k','ca','fe','mg','zn','na'])}
+    <h4>Vitamins</h4>${grp(['fol','vc','vd','vk','b12'])}
+    <h4>Fiber &amp; fats</h4>${grp(['fib','ala'])}
     ${er(CV[ec],'EPA + DHA (7 days)',`${fnum(r1(e))} g · <span class="${ec}">${Math.round(e/EPA_WK*100)}%</span>`,`Target ~${EPA_WK} g/week (≈500 mg/day). Only fish provides meaningful amounts.`,`EPA + DHA: ${fnum(r1(e))} g over the last 7 days, ${Math.round(e/EPA_WK*100)}% of ${EPA_WK} g`)}
   </div></div>`;
 }
@@ -857,7 +857,7 @@ function chartsHTML(st,F,stD,stR){
   const ks=(f,label,v,cls='',tip)=>`<div${pk(f,tip)}>${label}<b class="${cls}">${v}</b></div>`;
   return`<div class="grid gm">
     <div class="card"><div class="bd"><div class="eqh"><div><h3>Calories trend</h3><div class="big" style="font-size:20px">${fi(st.av('kcal'))} <span class="mu" style="font-size:12px;font-weight:500">/ ${fi(settings.kcal)} target</span></div><div class="lbl" style="margin-top:4px">${rt}</div></div>
-      <div class="ks">${ks('kind:bowl','BOWLS',fnum(st.bowls),'','Click to show only bowls')}<div>AVG PROTEIN<b>${fi(st.av('p'))} g</b></div><div>FIBER<b class="${st.av('fib')>=28?'grn':''}">${fi(st.av('fib'))} g</b></div>${ks('fish:1','FISH MEALS',st.fish,st.fish?'grn':'','Salmon and sardine bowls — click to show only these')}${ks('milk:1','WITH MILK',st.milk,'','Bowls with a glass of milk — click to show only these')}</div></div>
+      <div class="ks">${ks('kind:bowl','Bowls',fnum(st.bowls),'','Click to show only bowls')}<div>Avg protein<b>${fi(st.av('p'))} g</b></div><div>Fiber<b class="${st.av('fib')>=28?'grn':''}">${fi(st.av('fib'))} g</b></div>${ks('fish:1','Fish meals',st.fish,st.fish?'grn':'','Salmon and sardine bowls — click to show only these')}${ks('milk:1','With milk',st.milk,'','Bowls with a glass of milk — click to show only these')}</div></div>
       ${(kc.length>1?area:(v,c,t,at)=>bars(v,{tgt:t,at}))(kc,'var(--accent)',settings.kcal,dayAt(stD.ds,kc,v=>`${fi(v)} kcal · ${res[kres(v)]}`))}</div>${F}</div>
     <div class="card"><div class="bd"><h3>Protein</h3><div class="lbl">Grams / day</div><div class="big">${fi(st.av('p'))} g</div>${bars(pr,{tgt:settings.protein,at:dayAt(stD.ds,pr,v=>`${fi(v)} g protein`)})}</div>${F}</div>
   </div>
@@ -1001,9 +1001,9 @@ function drawCook(){
     <div><div class="lbl" style="margin-bottom:6px">Vegetables</div><div class="vl">${Object.keys(VEG).map(k=>`<button class="chip${k===V?' on':''}" data-act="ckv" data-v="${k}">${VEG[k].n}${tag(k)}</button>`).join('')}</div></div>
     <div><div class="lbl" style="margin-bottom:6px">Side</div><div class="vl multi"><button class="chip${CK.milk?' on':''}" data-act="ckm">Glass of milk<em>calcium · vitamin D</em></button></div></div></div>
     <div class="ns"><div>Per bowl<b>${fi(t.kcal)} kcal</b></div><div>Protein<b>${fi(t.p)} g</b></div><div>Carbs<b>${fi(t.c)} g</b></div><div>Fat<b>${fi(t.f)} g</b></div><div>Fiber<b>${fi(t.fib)} g</b></div><div>EPA+DHA<b class="${t.epa>=.5?'grn':''}">${fi(t.epa*1000)} mg</b></div></div>
-    <div class="sec">INGREDIENTS · ${s} SERVING${s>1?'S':''}</div>
+    <div class="sec">Ingredients · ${s} serving${s>1?'s':''}</div>
     <div class="ing">${ings.map(x=>`<label><input type="checkbox"><span>${x}</span></label>`).join('')}</div>
-    <div class="sec">STEPS</div>
+    <div class="sec">Steps</div>
     ${steps.map(([txt,sec],i)=>`<div class="stp"><b>${i+1}</b><div>${txt}</div>${sec?`<button class="tmr" data-act="tmr" data-v="${i}|${sec}" data-tmr="${i}">${CT[i]?'⏱ '+mmss((CT[i].end-Date.now())/1000):'⏱ '+mmss(sec)}</button>`:''}</div>`).join('')}
     <div class="tip"><b>Rotation tip:</b> 2–3× a week swap eggs for salmon or sardines for EPA/DHA. Chicken and steak add protein, iron and zinc but almost no omega-3. The carb and vegetables change each day, the ones you've cooked least recently first.</div>
     <div class="mact"><div class="sp"></div><button class="btn go" data-act="cklog">Log my bowl (${PROT[p].n}${CK.milk?' + milk':''})</button></div>`,true);
@@ -1089,7 +1089,7 @@ function nmRing(t,size=20,big){
   const kp=(t.p||0)*4,kc=(t.c||0)*4,kf=(t.f||0)*9,T=kp+kc+kf,r=15.9155,sw=big?3.4:5.6;let o=25;
   const seg=(k,c)=>{const L=T?k/T*100:0,g=L>3?1.2:0,s=`<circle r="${r}" cx="21" cy="21" fill="none" class="${c}" stroke-width="${sw}" stroke-dasharray="${Math.max(0,L-g).toFixed(2)} ${(100-Math.max(0,L-g)).toFixed(2)}" stroke-dashoffset="${o.toFixed(2)}"/>`;o-=L;return s};
   return `<svg class="nm-ring" viewBox="0 0 42 42" width="${size}" height="${size}" aria-hidden="true"><circle r="${r}" cx="21" cy="21" fill="none" class="nm-rt" stroke-width="${sw}"/>${T?seg(kp,'nm-rp')+seg(kc,'nm-rc')+seg(kf,'nm-rf'):''}${
-    big?`<text x="21" y="20.5" class="nm-k">${fi(t.kcal||0)}</text><text x="21" y="27" class="nm-u">KCAL</text>`:''}</svg>`;
+    big?`<text x="21" y="20.5" class="nm-k">${fi(t.kcal||0)}</text><text x="21" y="27" class="nm-u">kcal</text>`:''}</svg>`;
 }
   // TODAY's plan art (isionxxx ARCHITECTURE.md, 2h): a picture as a small SVG in the shared plan-art classes (pa-*), which
 // TODAY colours with the palette, light or dark, so it shows without this app's CSS. M: class here → [pa classes, attributes]
@@ -1123,7 +1123,7 @@ function nmapHTML(m){
 // over the bowl form: the map of the bowl as it stands, before it is saved
 function nmapForm(){
   const d=$('#gd'),m=readBowl();if(!d)return;
-  d.innerHTML=`<h3 id="gdt">${esc(PROT[m.protein].n).toUpperCase()} BOWL${m.servings!==1?` · ${fnum(m.servings)} SERVINGS`:''}</h3>${nmapHTML(m)}<div class="mact"><button type="button" class="btn pri" data-gx style="flex:1">Done</button></div>`;
+  d.innerHTML=`<h3 id="gdt">${esc(PROT[m.protein].n)} bowl${m.servings!==1?` · ${fnum(m.servings)} servings`:''}</h3>${nmapHTML(m)}<div class="mact"><button type="button" class="btn pri" data-gx style="flex:1">Done</button></div>`;
   d.onclick=e=>{if(e.target===d||e.target.closest('[data-gx]'))d.close()};d.showModal();d.querySelector('[data-gx]').focus();
 }
 function info(id){
@@ -1150,13 +1150,13 @@ function groceryText(nd,per){
   const beans=b('beans'),spin=b('spinach'),garl=b('garlic'),milk=n,day=i=>fmd(addDays(start,i));
   const L=[`Grocery list · ${nd} day${nd>1?'s':''} · ${n} bowl${n>1?'s':''}`,
     ...spans.length>1?['CARB & VEGETABLES (cooked fresh each day)',...spans.map(s=>`• ${day(s.a)}${s.b>s.a?'–'+day(s.b):''}: ${s.nm}`)]:[`Carb & vegetables: ${spans[0].nm}`],'',
-    'PANTRY',
+    'Pantry',
     b('rice')&&`• Rice: ${fq(dry('rice'))} cups dry (~${(dry('rice')/2.25).toFixed(1)} lb)`,
     b('quinoa')&&`• Quinoa: ${fq(dry('quinoa'))} cups dry (~${(dry('quinoa')*170/453.6).toFixed(1)} lb)`,
     `• Black beans: ${fq(beans)} cups drained → ${Math.ceil(beans/1.5)} × 15 oz can${Math.ceil(beans/1.5)>1?'s':''}`,
     `• ${settings.seed==='chia'?'Chia seeds':'Ground flaxseed'}: ${fq(b('seed'))} tbsp (~${Math.round(b('seed')*(settings.seed==='chia'?12:7))} g)`,
     `• Olive oil: ${fq(b('oil'))} tsp`,`• Salt & black pepper (pantry)`,'',
-    'PRODUCE',
+    'Produce',
     `• Avocados: ${Math.ceil(b('avocado'))} — buy at mixed ripeness so they don't all ripen at once`,
     b('sweet')&&`• Sweet potatoes: ${Math.ceil(b('sweet'))} medium (~${fq(b('sweet'))} cups cubed)`,
     spin&&`• Spinach: ${fq(spin)} cups (~${Math.ceil(spin)} oz → ${Math.ceil(spin/5)} × 5 oz clamshell${Math.ceil(spin/5)>1?'s':''})`,
@@ -1168,7 +1168,7 @@ function groceryText(nd,per){
     b('carrot')&&`• Carrots: ${Math.ceil(b('carrot'))}`,
     b('mushroom')&&`• White mushrooms: ${fq(b('mushroom'))} cups sliced (~${oz('mushroom',70)} oz)`,
     `• Limes: ${Math.ceil(b('lime'))}`,`• Garlic: ${Math.ceil(garl)} cloves (~${Math.max(1,Math.ceil(garl/10))} head${Math.ceil(garl/10)>1?'s':''})`,'',
-    'PROTEIN & DAIRY'].filter(x=>x!==0);
+    'Protein & dairy'].filter(x=>x!==0);
   if(pc.egg)L.push(`• Eggs: ${pc.egg*2} → ${Math.ceil(pc.egg*2/12)} dozen`);
   if(pc.salmon)L.push(`• Salmon: ${pc.salmon} meal${pc.salmon>1?'s':''} → ~${raw(pc.salmon*settings.portion)} oz raw (${lb(raw(pc.salmon*settings.portion))} lb)`);
   if(pc.sardines)L.push(`• Sardines: ${pc.sardines} × 3.75 oz can${pc.sardines>1?'s':''}`);
@@ -1187,7 +1187,7 @@ function groceryForm(nd=7,per=1){
 }
 function dataForm(){
   const s=settings,o=(v,l,c)=>`<option value="${v}"${c===v?' selected':''}>${l}</option>`,row=(l,h,c)=>`<div><span><b>${l}</b><small>${h}</small></span>${c}</div>`;
-  openModal(`<h3>SETTINGS</h3>
+  openModal(`<h3>Settings</h3>
   <div class="ui-set">
     ${row('Calorie target','kcal a day',`<input id="s_kcal" type="number" min="800" step="50" value="${s.kcal}" aria-label="Calorie target">`)}
     ${row('Protein target','Grams a day',`<input id="s_protein" type="number" min="20" step="5" value="${s.protein}" aria-label="Protein target">`)}
@@ -1197,13 +1197,13 @@ function dataForm(){
     ${row('Portion','Salmon, chicken, steak · oz cooked',`<input id="s_portion" type="number" min="2" max="12" step="0.5" value="${s.portion}" aria-label="Portion">`)}
     ${row('Fish meals target','Per week',`<input id="s_fish" type="number" min="0" max="7" value="${s.fishTarget}" aria-label="Fish meals target">`)}
     ${UI.appearance()}
-    ${row('Sync',window.ISXSync?.state==='ok'?'On · this app syncs across your devices':'Keep every app the same on all your devices','<span class="ui-set-btns"><button type="button" class="btn" data-act="sync">SYNC…</button></span>')}
-    ${row('CSV','Import this app\'s export, or export the current filter','<span class="ui-set-btns"><button type="button" class="btn" data-act="icsv">IMPORT CSV</button><button type="button" class="btn" data-act="export">EXPORT CSV</button></span><input id="i_file" type="file" accept=".csv,text/csv" hidden>')}
-    ${row('Sample data','A year of example meals to explore','<span class="ui-set-btns"><button type="button" class="btn" data-act="demo">LOAD SAMPLE</button></span>')}
-    ${row('Delete everything','Removes all meals on this device.','<span class="ui-set-btns"><button type="button" class="btn ui-danger" data-act="clear">CLEAR ALL</button></span>')}
+    ${row('Sync',window.ISXSync?.state==='ok'?'On · this app syncs across your devices':'Keep every app the same on all your devices','<span class="ui-set-btns"><button type="button" class="btn" data-act="sync">Sync…</button></span>')}
+    ${row('CSV','Import this app\'s export, or export the current filter','<span class="ui-set-btns"><button type="button" class="btn" data-act="icsv">Import CSV</button><button type="button" class="btn" data-act="export">Export CSV</button></span><input id="i_file" type="file" accept=".csv,text/csv" hidden>')}
+    ${row('Sample data','A year of example meals to explore','<span class="ui-set-btns"><button type="button" class="btn" data-act="demo">Load sample</button></span>')}
+    ${row('Delete everything','Removes all meals on this device.','<span class="ui-set-btns"><button type="button" class="btn ui-danger" data-act="clear">Clear all</button></span>')}
   </div>
   <p class="mu" style="font-size:11px;margin:8px 0 0">Changing rice, seed, milk or portion recalculates all past bowls.</p>
-  <div class="mact"><button class="btn pri" data-act="savedata">SAVE</button></div>`);
+  <div class="mact"><button class="btn pri" data-act="savedata">Save</button></div>`);
 }
 
 /* ---------- csv ---------- */
