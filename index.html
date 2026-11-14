@@ -731,7 +731,7 @@ function nextMeal(at=new Date()){
   return N;
 }
 // the suggestion's rows: each opens its form already filled in (NX keeps them for the buttons)
-let NX=null;
+let NX=null,NXD;   // NXD: whether the day was on target at the last draw, so the bloom marks the log that gets it there
 function nextRows(N){
   return N.items.length?`<ol class="nxl">${N.items.map((x,i)=>`<li><span class="nxw">${!i?cap1(N.when.replace('at ','')):x.kind==='bowl'?'Tonight':'Then'}</span>
     <div class="nxm"><b>${esc(x.kind==='bowl'?bn(x.protein):x.name+(x.n>1?' ×'+x.n:''))}</b><small>${esc(x.detail)}</small></div><span class="nxv">${fi(x.kcal)} kcal · ${fi(x.p)} g protein</span>
@@ -752,6 +752,8 @@ function logNext(i){
 function nextCard(){
   if(!meals.length)return'';   // an empty device has the banner's first steps instead
   const N=NX=nextMeal();
+  // the day's food on target (calories and protein): light rises from this card (UI.bloom, ARCHITECTURE.md 2m)
+  if(NXD===false&&N.done)setTimeout(()=>window.UI?.bloom?.(document.querySelector('.card.nx')),400);NXD=!!N.done;
   return`<div class="card nx${N.done?' ok':''}"><div class="bd"><h3>Next meal</h3><p class="nxs">${N.say}</p>${nextRows(N)}</div>
     <div class="ft"><span>${nextAfter(N)||'&nbsp;'}</span><button class="btn" data-act="next">Why this?</button></div></div>`;
 }
@@ -1459,6 +1461,7 @@ document.addEventListener('click',e=>{
 });
 
 render();
+window.UI?.backdrop?.({tint:['--success','--warning','--info']});   // ARCHITECTURE.md 2m
 // another ISIONXXX app can send you straight to an action here (REWIRE's LOG buttons): #do=<action> or a message
 // 'today' (from TODAY's rings and timeline): drop any card filters and show just today, as a chip you can clear
 function doAct(a){if(!/^\w+$/.test(a||''))return;if(a==='next')return nextForm();if(a==='eatnext')return logNext(0);if(a==='today'){const t=new Date();S.x={};S.sel=today();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.page=1;render();return}const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
