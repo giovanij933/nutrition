@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem('isx.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script><!-- Settings › Appearance, before the first paint (ui.js keeps it in step) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="NUTRITION">
@@ -1195,6 +1196,7 @@ function dataForm(){
     ${row('Milk','The glass on the side',`<select id="s_milk" aria-label="Milk">${o('whole','Whole',s.milk)}${o('2','2%',s.milk)}${o('skim','Skim',s.milk)}</select>`)}
     ${row('Portion','Salmon, chicken, steak · oz cooked',`<input id="s_portion" type="number" min="2" max="12" step="0.5" value="${s.portion}" aria-label="Portion">`)}
     ${row('Fish meals target','Per week',`<input id="s_fish" type="number" min="0" max="7" value="${s.fishTarget}" aria-label="Fish meals target">`)}
+    ${UI.appearance()}
     ${row('Sync',window.ISXSync?.state==='ok'?'On · this app syncs across your devices':'Keep every app the same on all your devices','<span class="ui-set-btns"><button type="button" class="btn" data-act="sync">SYNC…</button></span>')}
     ${row('CSV','Import this app\'s export, or export the current filter','<span class="ui-set-btns"><button type="button" class="btn" data-act="icsv">IMPORT CSV</button><button type="button" class="btn" data-act="export">EXPORT CSV</button></span><input id="i_file" type="file" accept=".csv,text/csv" hidden>')}
     ${row('Sample data','A year of example meals to explore','<span class="ui-set-btns"><button type="button" class="btn" data-act="demo">LOAD SAMPLE</button></span>')}
