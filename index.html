@@ -85,9 +85,9 @@ body ::selection{background:var(--accent);color:var(--on-accent)}
 .pst{font-size:10px;min-height:12px;display:flex;gap:3px;align-items:center}.pst i{width:7px;height:7px;display:inline-block}
 
 /* next meal: what to eat next, under the Today card */
-.nx{margin-bottom:12px}.nx h3{margin-bottom:8px}
+.nxf{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--mu)}
+.nxf b{color:var(--text-primary);font-weight:600}.nxf b.grn{color:var(--success-text)}.nxb{display:flex;gap:6px;margin-left:auto}.nx h3{margin-bottom:8px}
 .nxs{font-size:14px;line-height:1.55;margin:0}
-.nx.ok .nxs::before{content:'✓ ';color:var(--success-text)}
 .nxl{list-style:none;margin:10px 0 0;padding:0;border-top:1px solid var(--line)}
 .nxl li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:10px 0;border-bottom:1px solid var(--line)}
 .nxl li:last-child{border-bottom:0;padding-bottom:0}
@@ -749,13 +749,16 @@ function logNext(i){
   meals.push(...add);save();render();
   UI.undo(`${x.kind==='bowl'?bn(x.protein):y.name+(x.n>1?' ×'+x.n:'')} logged`,()=>{add.forEach(a=>{const j=meals.findIndex(m=>m.id===a.id);if(j>=0)meals.splice(j,1)});save();render()});
 }
+// the next meal is Up next, the same card under Today in every app (UI.upNext): the plan's row (its Log it logs the
+// first suggestion, like TODAY's), then what the day looks like after it, Cook for a bowl, and Why this? (the full
+// suggestion, every item and how it was picked)
 function nextCard(){
   if(!meals.length)return'';   // an empty device has the banner's first steps instead
   const N=NX=nextMeal();
   // the day's food on target (calories and protein): light rises from this card (UI.bloom, ARCHITECTURE.md 2m)
-  if(NXD===false&&N.done)setTimeout(()=>window.UI?.bloom?.(document.querySelector('.card.nx')),400);NXD=!!N.done;
-  return`<div class="card nx${N.done?' ok':''}"><div class="bd"><h3>Next meal</h3><p class="nxs">${N.say}</p>${nextRows(N)}</div>
-    <div class="ft"><span>${nextAfter(N)||'&nbsp;'}</span><button class="btn" data-act="next">Why this?</button></div></div>`;
+  if(NXD===false&&N.done)setTimeout(()=>window.UI?.bloom?.(document.querySelector('.card.ui-nx')),400);NXD=!!N.done;
+  const bowl=N.items[0]?.kind==='bowl';
+  return UI.upNext({app:'nutrition',extra:`<div class="nxf"><span>${nextAfter(N)||N.say}</span><span class="nxb">${bowl?'<button class="btn" data-act="nxcook" data-v="0">Cook</button>':''}<button class="btn" data-act="next">Why this?</button></span></div>`});
 }
 // the 'next' action (TODAY's plan card starts here): the same suggestion as a sheet, with how it was picked
 function nextForm(){
@@ -912,9 +915,10 @@ function render(){
   $('#ctx').textContent=`Statistics for ${S.kind==='all'?'All Meals':S.kind==='bowl'?'Bowls':'Other Foods'} — ${S.sel?fdate(S.sel):RL[S.range]} · ${fdate(st.from)} → ${fdate(st.to)}`;
   const ban=meals.length?'':`<div class="card ban"><div><h2 style="margin:0 0 4px">No meals logged yet</h2><div class="mu" style="font-size:12px">Open Cook mode for today's bowl, log one directly, or load sample data to explore.</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn go" data-act="cook">&#9654; Cook today's bowl</button><button class="btn" data-act="addbowl">Log bowl</button><button class="btn" data-act="demo">Load sample</button></div></div>`;
-  // today and this week's plan don't depend on the filters, so they sit above them
-  UI.paint($('#top'),ban+heroToday()+nextCard()+`<div class="grid">${planHTML()}</div>`,{now:true});
-  UI.paint($('#app'),topCards(st,F,stats(view(true,'kind milk'),rg))+weightHTML()+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F,S.sel?stats(view(true,'day'),range(null)):st,stats(view(true,'prot fish'),rg))+`<div class="card">${tableHTML(f)}</div>`);
+  // the same order as every app: Today, Up next, (filters), four numbers, calendar + what stands out, trends,
+  // breakdowns, more (the week's rotation, body weight), Log
+  UI.paint($('#top'),ban+heroToday()+nextCard(),{now:true});
+  UI.paint($('#app'),topCards(st,F,stats(view(true,'kind milk'),rg))+`<div class="grid gm">${calendarHTML()}${coverageHTML(st)}</div>`+chartsHTML(st,F,S.sel?stats(view(true,'day'),range(null)):st,stats(view(true,'prot fish'),rg))+`<div class="grid">${planHTML()}</div>`+weightHTML()+`<div class="card">${tableHTML(f)}</div>`);
   publish();
 }
 // daily totals for ISIONXXX's TODAY tab, which can't work out bowl nutrition itself.
