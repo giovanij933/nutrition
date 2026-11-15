@@ -1,5 +1,6 @@
 # Release check (ISIONXXX/test/README.md): this app and the TODAY shell in Chromium, on an empty device and with
 # sample data, offline and with corrupted saved data, plus the shared files against the other six apps.
+# Then this app and TODAY on an iPhone-sized screen in WebKit, Safari's engine (ISIONXXX/test/webkit.test.js).
 # Any high-severity issue fails the run.
 name: Release check
 on:
