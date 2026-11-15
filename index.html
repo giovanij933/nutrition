@@ -819,6 +819,38 @@ function topCards(st,F,stK){
   </div>`;
 }
 
+/* ---------- weekly review (UI.weekReview: the same sheet, in the same order, in every app; ARCHITECTURE.md 2p) ----------
+   A week of eating: calories and protein a logged day against the targets, days on target, fish meals, what I ate most, against the last 8 weeks. A day row shows that day in the page. TODAY's Your week opens it (act 'week'), and so does
+   the Week button under the calendar. */
+function weekRev(){
+  const W=UI.weekReview,{pl,n0,avg,wd,and}=W.t,M=(meals||[]).filter(Boolean),name=m=>m.kind==='bowl'?`${PROT[m.protein]?.n||'Bowl'} bowl`:m.name||'Food';
+  W({weeks:M.map(dayOf),onDay:k=>{S.x={};S.sel=k;const d=pd(k);S.month=new Date(d.getFullYear(),d.getMonth(),1);S.page=1;render()},build:ws=>{
+    const ks=Array.from({length:7},(_,i)=>W.add(ws,i)),T=M.filter(m=>ks.includes(dayOf(m)));
+    if(!T.length)return {days:ks.map(k=>({k}))};
+    const D={};T.forEach(m=>{const k=dayOf(m),t=NM(m).t,o=D[k]??={kc:0,p:0,n:0,fish:0};o.kc+=t.kcal||0;o.p+=t.p||0;o.n++;if(m.kind==='bowl'&&PROT[m.protein]?.fish)o.fish++});
+    const L=Object.keys(D).sort(),kT=settings.kcal,pT=settings.protein,ak=avg(L.map(k=>D[k].kc)),ap=avg(L.map(k=>D[k].p)),R={ok:0,over:0,under:0};L.forEach(k=>R[kres(D[k].kc)]++);
+    const pHit=L.filter(k=>D[k].p>=pT*.9),fish=L.reduce((a,k)=>a+D[k].fish,0),over=L.filter(k=>kres(D[k].kc)==='over');
+    // the 8 weeks before: calories and protein a logged day
+    const all={};M.forEach(m=>{const k=dayOf(m);if(k<ws){const t=NM(m).t,o=all[k]??={kc:0,p:0};o.kc+=t.kcal||0;o.p+=t.p||0}});
+    const wk={};Object.keys(all).forEach(k=>(wk[W.mon(k)]??=[]).push(all[k]));const pw=Object.keys(wk).sort().slice(-8),pk=avg(pw.flatMap(w=>wk[w].map(o=>o.kc))),pp=avg(pw.flatMap(w=>wk[w].map(o=>o.p)));
+    const days=ks.map(k=>{const o=D[k];if(!o)return {k};const r=kres(o.kc);return {k,n:`${pl(o.n,'meal')} · ${n0(o.p)} g protein${o.fish?' · fish':''}`,v:`${n0(o.kc)} kcal`,bar:Math.min(1,o.kc/(kT*1.3)),cls:r==='ok'?'pos':r==='over'?'neg':''}});
+    const top={};T.forEach(m=>{const n=name(m);top[n]=(top[n]||0)+1});const tops=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,4);
+    const miss=ks.filter(k=>k<=today()&&!D[k]),good=[],look=[],q=['What is my one focus for next week?'];
+    if(R.ok)good.push(`${pl(R.ok,'day')} on my calorie target.`);
+    if(pHit.length)good.push(`Protein target met on ${pl(pHit.length,'day')}: <b>${n0(ap)} g</b> a day against ${n0(pT)} g.`);
+    if(fish>=2)good.push(`${fish} fish meals: enough for the week's omega-3.`);
+    if(over.length)look.push(`Over my calorie target on ${and(over.map(wd))}.`);
+    if(pHit.length<L.length)look.push(`Short of protein on ${pl(L.length-pHit.length,'day')}.`);
+    if(fish<2)look.push(`${fish?'Only one fish meal':'No fish meals'}; two a week keeps omega-3 up.`);
+    if(miss.length&&miss.length<7)look.push(`Nothing logged on ${and(miss.map(wd))}.`);
+    if(over.length)q.push(`What happened on ${wd(over[0])}, and what would I change?`);
+    if(pHit.length<L.length)q.push('Which meal could carry more protein next week?');
+    q.push('One thing to repeat next week. One thing to cut.');
+    return {week:`I logged <b>${pl(L.length,'day')}</b>: <b>${n0(ak)} kcal</b> and <b>${n0(ap)} g protein</b> a day against ${n0(kT)} and ${n0(pT)}. ${R.ok} on target, ${R.over} over, ${R.under} under. ${pl(fish,'fish meal')}.`,
+      context:pk!=null?`Over my last ${pl(pw.length,'week')} I averaged ${n0(pk)} kcal and ${n0(pp)} g protein a logged day, so this week I ate ${ak>pk*1.05?'<b>more</b>':ak<pk*.95?'<b>less</b>':'<b>about the same</b>'}, with ${ap>pp*1.05?'<b>more</b>':ap<pp*.95?'<b>less</b>':'<b>about the same</b>'} protein.`:'',
+      days,good,look,more:tops.length?[['What I ate most',`<p>${tops.map(([n,c])=>`${esc(n)} <b>×${c}</b>`).join(' · ')}.</p>`]]:[],questions:q};
+  }});
+}
 function calendarHTML(){
   // same rule as the calories ring and the Today number: on target (within 10%) green, more than 10% over red,
   // under target: a faint warning tint
@@ -845,7 +877,7 @@ function calendarHTML(){
   return`<div class="card"><div class="bd"><div class="rowh"><div><h3>Meal calendar</h3><div class="lbl">Avg calories / logged day</div><div class="big">${md?fi(mk/md):'—'}</div></div>
     <div class="wl"><span${pk('cres:ok','Days within 10% of your calorie target — click to show only these')}>On target: <b class="${nr.ok?'grn':''}">${nr.ok}</b></span> &nbsp; <span${pk('cres:over','Days more than 10% over target — click to show only these')}>Over: <b class="${nr.over?'red':''}">${nr.over}</b></span></div></div>
     <div class="cal">${h}</div>
-    <div class="calf"><div><button class="btn" data-act="mprev" aria-label="Previous month">&lt;</button> <b>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</b> <button class="btn" data-act="mnext" aria-label="Next month">&gt;</button> <button class="btn" data-act="mtoday">Today</button></div>
+    <div class="calf"><div><button class="btn" data-act="mprev" aria-label="Previous month">&lt;</button> <b>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</b> <button class="btn" data-act="mnext" aria-label="Next month">&gt;</button> <button class="btn" data-act="mtoday">Today</button> <button class="btn" data-act="week">Week</button></div>
     <span class="lbl">${md} logged day${md===1?'':'s'} · ${nr.under} under · ${mf} fish meal${mf===1?'':'s'} · ${mb} meals</span></div></div></div>`;
 }
 
@@ -1435,6 +1467,7 @@ document.addEventListener('click',e=>{
   if(e.target.id==='modal')return closeModal();
   const b=e.target.closest('[data-act]');if(!b)return;const id=b.dataset.id,v=b.dataset.v;
   const A={
+    week:()=>weekRev(),
     mprev:()=>{S.month=new Date(S.month.getFullYear(),S.month.getMonth()-1,1);render()},
     mnext:()=>{S.month=new Date(S.month.getFullYear(),S.month.getMonth()+1,1);render()},
     mtoday:()=>{const t=new Date();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.sel=null;render()},
