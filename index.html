@@ -119,6 +119,12 @@ body ::selection{background:var(--accent);color:var(--on-accent)}
 .cell.wk b{font-size:11px}
 .cdots{display:flex;gap:2px}.cdots i{width:5px;height:5px}
 .calft{padding:10px 16px}
+/* the calendar card's frame, the same as JOURNAL's, MIND's, TRAINING's and REWIRE's (ARCHITECTURE.md 2n): counts on the
+   title line, the month's buttons and a summary line under the grid, a blank dashed box for a week with nothing in it */
+.rowh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.rowh .wl{padding-top:2px;font-size:13px;column-gap:4px}
+.calf{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.calf>div{display:flex;align-items:center;gap:8px}.calf b{font-weight:600;font-size:14px}
 .nav{display:flex;gap:8px;align-items:center}
 .nav button{border:1px solid var(--line2);min-width:33px;height:33px;padding:0 10px;font-size:12px}
 .nav button:hover{border-color:var(--accent);color:var(--accent-text)}
@@ -832,13 +838,15 @@ function calendarHTML(){
       h+=`<div class="cell${v?' on '+kc(v.kcal):''}${v&&cr&&kc(v.kcal)!==cr?' off':''}${k>tk?' fut':''}${S.sel===k?' sel':''}" role="button" tabindex="0" aria-pressed="${S.sel===k}" data-act="day" data-v="${k}"${v?` title="${esc(`${fmd(k)}: ${fi(v.kcal)} kcal · ${fi(v.p)} g protein — click to show this day`)}"`:''}>
         <span>${d.getDate()}</span>${v?`<b>${fi(v.kcal)}</b><small>${fi(v.p)}g P</small><div class="cdots">${v.dots.slice(0,5).map(c=>`<i style="background:${c}"></i>`).join('')}</div>`:''}</div>`;
     }
-    h+=`<div class="cell wk">${wd?`<b class="${{ok:'grn',over:'red'}[kc(wk/wd)]||''}">${fi(wk/wd)}</b><small>avg · <span class="${wf?'grn':''}">${wf} fish</span></small>`:'—'}</div>`;
+    h+=`<div class="cell wk">${wd?`<b class="${{ok:'grn',over:'red'}[kc(wk/wd)]||''}">${fi(wk/wd)}</b><small>avg · <span class="${wf?'grn':''}">${wf} fish</span></small>`:''}</div>`;
   }
-  return`<div class="card"><div class="bd"><h3 style="margin-bottom:10px">Meal calendar</h3><div class="lbl">Avg calories / logged day</div>
-    <div class="calhd"><div class="big">${md?fi(mk/md):'—'}</div><div class="wl"><span>Logged days: <b style="font-weight:500;color:var(--tx)">${md}</b></span><span${pk('cres:ok','Days within 10% of your calorie target — click to show only these')}>On target: <b class="${nr.ok?'grn':''}" style="font-weight:500">${nr.ok}</b></span><span${pk('cres:over','Days more than 10% over target — click to show only these')}>Over: <b class="${nr.over?'red':''}" style="font-weight:500">${nr.over}</b></span><span${pk('cres:under','Days more than 10% under target — click to show only these')}>Under: <b style="font-weight:500">${nr.under}</b></span><span>Fish meals: <b class="${mf?'grn':''}" style="font-weight:500">${mf}</b></span></div></div>
-    <div class="cal">${h}</div></div>
-    <div class="ft calft"><div class="nav"><button data-act="mprev" aria-label="Previous month">‹</button><span>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span><button data-act="mnext" aria-label="Next month">›</button><button class="tb" data-act="mtoday">Today</button></div>
-    <span>${md} days &nbsp;&nbsp; ${mb} meals</span></div></div>`;
+  // the frame every app's calendar shares: on target and over at the right of the title (each one a filter), the rest in
+  // the line under the month's buttons
+  return`<div class="card"><div class="bd"><div class="rowh"><div><h3>Meal calendar</h3><div class="lbl">Avg calories / logged day</div><div class="big">${md?fi(mk/md):'—'}</div></div>
+    <div class="wl"><span${pk('cres:ok','Days within 10% of your calorie target — click to show only these')}>On target: <b class="${nr.ok?'grn':''}">${nr.ok}</b></span> &nbsp; <span${pk('cres:over','Days more than 10% over target — click to show only these')}>Over: <b class="${nr.over?'red':''}">${nr.over}</b></span></div></div>
+    <div class="cal">${h}</div>
+    <div class="calf"><div><button class="btn" data-act="mprev" aria-label="Previous month">&lt;</button> <b>${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</b> <button class="btn" data-act="mnext" aria-label="Next month">&gt;</button> <button class="btn" data-act="mtoday">Today</button></div>
+    <span class="lbl">${md} logged day${md===1?'':'s'} · ${nr.under} under · ${mf} fish meal${mf===1?'':'s'} · ${mb} meals</span></div></div></div>`;
 }
 
 function coverageHTML(st){
