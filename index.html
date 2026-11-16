@@ -1506,7 +1506,6 @@ document.addEventListener('click',e=>{
 });
 
 render();
-window.UI?.backdrop?.({tint:['--success','--warning','--info']});   // ARCHITECTURE.md 2m
 // another ISIONXXX app can send you straight to an action here (REWIRE's LOG buttons): #do=<action> or a message
 // 'today' (from TODAY's rings and timeline): drop any card filters and show just today, as a chip you can clear
 function doAct(a){if(!/^\w+$/.test(a||''))return;if(a==='next')return nextForm();if(a==='eatnext')return logNext(0);if(a==='today'){const t=new Date();S.x={};S.sel=today();S.month=new Date(t.getFullYear(),t.getMonth(),1);S.page=1;render();return}const b=document.querySelector(`[data-a="${a}"],[data-act="${a}"]`);if(b)b.click()}
