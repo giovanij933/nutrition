@@ -66,9 +66,9 @@ body ::selection{background:var(--accent);color:var(--on-accent)}
    /* the empty device's banner is the page's first section: h2 */
 .lbl{font-size:12px;color:var(--mu)}
 .big{font-size:22px;font-weight:600;margin:2px 0 8px}
-.gauge{display:block;width:150px;max-width:100%;margin:6px auto 10px}
-.gauge path{fill:none;stroke-width:9}
-.gauge text{fill:var(--tx);font:600 17px var(--f)}
+.gauge{display:block;width:120px;max-width:100%;margin:8px auto 12px;overflow:visible}
+.gauge path{fill:none;stroke-width:11;stroke-linecap:round}
+.gauge text{fill:var(--tx);font:700 22px var(--f);letter-spacing:-.02em}.gauge text.sm{font-size:16px}
 .lr{display:grid;grid-template-columns:14px 1fr auto 46px;align-items:center;padding:2px 0}
 .lr span{min-width:0}.lr b{text-align:right}.lr em{font-style:normal;text-align:right;color:var(--mu)}
 .dot{width:7px;height:7px;margin-right:7px;display:inline-block;flex:none}
@@ -521,13 +521,13 @@ function stats1(ms,rg){
 }
 
 /* ---------- svg charts ---------- */
-const ARC='M12 62A50 50 0 0 1 112 62';
+const ARC='M60 10a50 50 0 1 1 0 100a50 50 0 1 1 0-100';
 // tip: the ring's tooltip (the rings here are ratios to a target, so they explain themselves rather than filter)
 function gauge(segs,text,tip){
   const col={g:'var(--accent)',r:'var(--error)',a:'var(--warning)',b:'var(--info)',n:'var(--secondary)',v:'var(--success)'};
   let off=0;
   const arcs=segs.filter(([f])=>f>0).map(([f,c])=>{f=Math.min(f,1-off);const a=`<path d="${ARC}" style="stroke:${col[c]}" pathLength="100" stroke-dasharray="${(f*100).toFixed(2)} 100" stroke-dashoffset="${(-off*100).toFixed(2)}"/>`;off+=f;return a}).join('');
-  return`<svg class="gauge" viewBox="0 0 124 70">${tip?`<title>${esc(tip)}</title>`:''}<path d="${ARC}" style="stroke:var(--track)"/>${arcs}<text x="62" y="60" text-anchor="middle">${text}</text></svg>`;
+  return`<svg class="gauge" viewBox="0 0 120 120">${tip?`<title>${esc(tip)}</title>`:''}<path d="${ARC}" style="stroke:var(--track)"/>${arcs}<text x="60" y="68" text-anchor="middle"${String(text).length>6?' class="sm"':''}>${text}</text></svg>`;
 }
 // same colours as the other apps: progress toward a target fills green. A cap (calories) shows what runs more
 // than 10% over in red; a minimum (protein) just stays full
