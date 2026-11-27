@@ -779,8 +779,7 @@ function nextForm(){
 /* body weight from ISIONXXX's morning check-in (logged on TODAY; read-only here), next to what you ate:
    the weekly rate of change at your average intake, the way MacroFactor-style apps judge a calorie target */
 function weightHTML(){
-  let C=[];try{C=JSON.parse(localStorage.getItem('isx.checkin.v1'))?.log}catch(e){}
-  if(!Array.isArray(C))return'';
+  const C=UI.checkins().log;
   const U=(()=>{try{return JSON.parse(localStorage.getItem('isx.training.v1'))?.wu}catch(e){}})()||(/-US$/.test(navigator.language||'')?'lb':'kg');
   const W=C.filter(e=>e?.w>0&&typeof e.day==='string').sort((a,b)=>a.day<b.day?-1:1).map(e=>({d:e.day,w:!e.u||e.u===U?e.w:U==='kg'?e.w/2.20462:e.w*2.20462}));
   if(!W.length)return'';
@@ -1350,8 +1349,7 @@ function review(day){
   out+=sec('What went well',good.length?ul(good):'<p>Nothing stands out in the numbers, so I\'ll look at how the meals felt instead.</p>');
   out+=sec('What to look at',look.length?ul(look):'<p>No warning signs in the numbers.</p>');
   // the morning check-in from TODAY, when there is one for this date
-  let C=[];try{C=JSON.parse(localStorage.getItem('isx.checkin.v1'))?.log||[]}catch(e){}
-  const ci=Array.isArray(C)?C.find(e=>e?.day===day):null;
+  const C=UI.checkins().log,ci=C.find(e=>e.day===day)||null;
   if(ci){const SQ=['','poor','restless','OK','good','great'],EN=['','drained','low','steady','good','charged'],u=ci.u||'kg';
     const pw=ci.w>0&&C.filter(e=>e?.w>0&&e.day<day).sort((a,b)=>a.day<b.day?-1:1).at(-1),pwv=pw&&((pw.u||'kg')===u?pw.w:u==='kg'?pw.w/2.20462:pw.w*2.20462),wd=pw?r1(ci.w-pwv):0;
     const st=[];if(ci.sleep)st.push(`I slept <b>${fnum(ci.sleep)} h</b>${SQ[ci.q]?` (${SQ[ci.q]} sleep)`:''}`);if(EN[ci.energy])st.push(`my energy was <b>${EN[ci.energy]}</b>`);
