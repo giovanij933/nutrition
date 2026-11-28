@@ -400,6 +400,10 @@ function loadAll(){
   if(!Array.isArray(s.plan)||s.plan.length!==7||!s.plan.every(p=>PROT[p]))s.plan=[...DEF.plan];
   delete s.batch;delete s.past;
   ['kcal','protein','portion'].forEach(k=>{s[k]=+s[k]>0?+s[k]:DEF[k]});
+  // the choices are only ever one of the Settings options and the fish target a number, and the pages put them into
+  // markup as they are: a synced copy holding anything else (HTML, say) gets the default instead
+  [['riceAs',['dry','cooked']],['seed',['flax','chia']],['milk',['whole','2','skim']]].forEach(([k,ok])=>{if(!ok.includes(s[k]))s[k]=DEF[k]});
+  const ft=+s.fishTarget;s.fishTarget=Number.isFinite(ft)&&ft>=0?ft:DEF.fishTarget;
 }
 loadAll();
 
