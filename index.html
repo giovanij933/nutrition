@@ -191,6 +191,9 @@ html body .qrec .chip{min-height:44px;min-width:0;display:flex;align-items:cente
 .full{grid-column:1/-1}
 .mact{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
 .box .ui-set input,.box .ui-set select{flex:none;width:110px;background:var(--bg);border:1px solid var(--line2);padding:7px 10px;font-size:13px;color:var(--tx)}
+/* a choice is as wide as its longest option (the sheets' 16 px text and the arrow's room cut "Uncooked" to "Uncooke" at 110 px),
+   and every field in the column at least that wide, so the column keeps one edge */
+.box .ui-set select{width:auto}.box .ui-set input,.box .ui-set select{min-width:124px}
 .box .ui-set input:focus,.box .ui-set select:focus{border-color:var(--accent);outline:0}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px}.kv span{color:var(--mu)}
 /* a food's nutrient map: a ring of protein, carbs and fat by calories beside each food, and in its ⓘ the ring with
